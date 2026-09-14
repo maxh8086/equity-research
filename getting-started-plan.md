@@ -47,7 +47,7 @@ Session 2 — architecture tests
 > Write `tests/test_architecture.py` using Python's ast module. Assert: only `extract/` and `narrate/` import the LLM gateway; no float annotations on monetary fields; every SQLAlchemy model has as_of, content_hash, source_url; `core/compute/` imports nothing with I/O. Wire it into CI.
 
 Session 3 — price ingestion
-> Build the Upstox v3 historical ingester. Instrument keyed by ISIN, not ticker. Daily candles from Jan 2000. Store raw prices plus corporate-action adjustment factors separately.
+> Build the Upstox v3 historical ingester. Instrument keyed by ISIN, not ticker. Daily candles from Jan 2000. Store raw prices plus corporate-action adjustment factors separately. Also load `index_membership` for Nifty 50 and Nifty Next 50 as dated intervals. Upstox has no index-constituents API, so use NSE Indices sources: current constituent CSVs plus historical inclusion/exclusion announcements and archived reports. Map every constituent to an ISIN; never match on company name. Constituents that cannot be matched go to quarantine for manual review.
 
 **Then run the adjustment test yourself.** Pick a company with a known split, pull the series across that date, look for a discontinuity. No gap means adjusted; a cliff means raw. Do it for a bonus issue too.
 
