@@ -83,5 +83,5 @@ state at `t` is the latest row with `as_of <= t`.
 | Append-only triggers and `as_of` sanity checks per store | Done for `financial_facts` |
 | One point-in-time read function per store, `t` required (`core/db/pit.py`) | Done for `financial_facts` |
 | Naive datetimes rejected before reaching the DB (`core/timezones.py`) | Done |
-| Architecture test: no direct queries against store tables outside PIT functions | Planned, Session 2 |
+| Architecture test: no direct queries against store tables outside PIT functions (`tests/test_architecture.py`) | Done |
 | Derived stores add `rule_version`, evidence links, `recorded_at` | Added as each store is built |

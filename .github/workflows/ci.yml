@@ -1,0 +1,31 @@
+# CI runs the same image and compose services as local and cloud (CLAUDE.md:
+# one image for every environment). Moving to another CI provider means
+# copying the three docker compose commands below.
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker compose --profile test build test
+
+      # Fails fast on rule violations before paying for Postgres startup.
+      - name: Architecture and pure tests (no database)
+        run: >
+          docker compose --profile test run --rm --no-deps test
+          python -m pytest -m "not db" --tb=short -p no:cacheprovider
+
+      - name: Full test suite against Postgres 16 + pgvector
+        run: docker compose --profile test run --rm test
+
+      - name: Tear down
+        if: always()
+        run: docker compose --profile test down -v
