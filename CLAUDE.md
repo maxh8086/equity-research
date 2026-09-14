@@ -45,6 +45,13 @@ its own conditions after the fact.
   measurements justify it). No TimescaleDB: it is unavailable on AWS RDS and
   Cloud SQL, and plain Postgres handles the price volumes in scope. Revisit
   only with a measured need.
+- Object storage for raw source files (XBRL, concall transcripts, rating
+  PDFs): cloud blob storage when deployed, MinIO on the laptop. This is the one
+  approved exception to "no new services": containers have no durable disk,
+  and a parser fix must re-parse stored bytes without re-downloading. Objects
+  are keyed by `content_hash` and write-once (bucket immutability on). Postgres
+  records each file's `source_url`, `as_of` and fetch time. Access goes through
+  one small interface, because Azure Blob is not S3-compatible.
 - Upstox API v3 for OHLCV (daily/weekly/monthly from Jan 2000; instrument
   keyed by ISIN, e.g. `NSE_EQ|INE848E01016`)
 - BSE/NSE XBRL for financial facts — the source of truth
@@ -73,6 +80,18 @@ Entity key is **ISIN**, not ticker. Tickers change; store the mapping
 history. ISIN itself changes on demergers and amalgamations — handle via a
 corporate-action-driven entity table, never by string matching.
 
+### Universe
+MVP universe: **Nifty 50 + Nifty Next 50**, 100 companies (the two indices do
+not overlap). Membership is stored as dated intervals in `index_membership`
+(ISIN, index, `valid_from`, `valid_to`, `as_of`, `source_url`), loaded from
+NSE's published constituent lists and rebalancing announcements. Both indices
+rebalance in March and September. Never use today's constituent list for a
+past date: that is survivorship bias, which is look-ahead (R2).
+
+Considered and rejected for the MVP: Nifty 200; Nifty 500 and Nifty500
+Multicap 50:25:25; Nifty 50 + Midcap 50 + Smallcap 50; factor and thematic
+indices. Nifty500 Multicap 50:25:25 may still serve as a portfolio benchmark.
+
 ### Knowledge stores
 1. `financial_facts` — XBRL line items + computed ratios + durability metrics
 2. `guidance_claim` — management commitments with `hedge_strength`
@@ -99,7 +118,12 @@ corporate-action-driven entity table, never by string matching.
   writes to
 - LLM calls only in `extract/` and `narrate/` — nowhere else
 - All LLM calls go through the gateway wrapper; never call a provider SDK
-  directly
+  directly. The gateway is its own top-level package, `gateway/`, outside
+  `core/`. It is the only code that imports provider SDKs, and only
+  `extract/` and `narrate/` import it.
+- Store tables are read only through point-in-time functions in
+  `core/db/pit.py`. `tests/test_architecture.py` enforces this and the rules
+  above.
 - Money as `Decimal`, never float
 - All timestamps timezone-aware, IST for market data
 - Migrations via Alembic; every schema change is a migration
@@ -119,7 +143,17 @@ corporate-action-driven entity table, never by string matching.
 
 ## Current phase
 
-MVP: guidance credibility ledger for 20 companies.
+MVP: guidance credibility ledger for the Nifty 50 + Next 50 universe (see
+Universe).
+
+Screener validation and the first extraction run use a 20-company sample: 10
+from Nifty 50 and 10 from Next 50. The sample is drawn with a fixed random seed
+from membership as of a fixed date. Companies may be swapped in to make sure the
+sample covers banks, NBFCs, insurers, a capital-heavy manufacturer, a group with
+many subsidiaries, and any restatement or demerger case; each swap is
+recorded with its reason. A sample definition is never edited: a change is a
+new version. Extraction expands to all 100 only after the sample passes.
+
 1. Postgres + XBRL parser → `financial_facts` ✅ when it matches Screener
 2. CWIP → gross block step-function detector (pure arithmetic, no LLM)
 3. Guidance extraction from concall transcripts → `guidance_claim`
@@ -135,5 +169,6 @@ If I ask for any of these, say no and explain:
 - "Backfill the force timeline so we have history" — violates R2
 - "Let the model pick the peer set / sector mapping" — violates R1
 - Adding a service (Kafka, separate vector DB, Redis) before measurements
-  show the single Postgres is inadequate
+  show the single Postgres is inadequate. Object storage for raw source files
+  is already approved (see Stack).
 - Building the swarm before the stores have data

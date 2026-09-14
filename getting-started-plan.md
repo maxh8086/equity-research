@@ -51,7 +51,7 @@ Session 3 — price ingestion
 
 **Then run the adjustment test yourself.** Pick a company with a known split, pull the series across that date, look for a discontinuity. No gap means adjusted; a cliff means raw. Do it for a bonus issue too.
 
-**Week 1 exit criteria:** architecture tests pass, 20 companies of price history loaded, entity table keyed by ISIN.
+**Week 1 exit criteria:** architecture tests pass, price history loaded for the Nifty 50 + Nifty Next 50 universe (100 companies), entity table keyed by ISIN, index membership stored as dated history.
 
 ---
 
@@ -64,9 +64,9 @@ Session 5 — ratios
 > Implement ratio computation in `core/compute/ratios.py`. Pure functions, Decimal throughout, property tests. ROCE, margins, debt ratios, incremental ROCE.
 
 Session 6 — validation
-> Build a validation script comparing our computed ratios against Screener for 20 companies. Report divergences with the underlying line items.
+> Build a validation script comparing our computed ratios against Screener for the 20-company validation sample (10 Nifty 50 + 10 Next 50, fixed seed, required company types swapped in; see CLAUDE.md "Current phase"). Report divergences with the underlying line items.
 
-**Week 2 exit criteria — the real gate.** Your numbers match Screener for 20 companies. If they don't, stop and fix. Everything downstream inherits these errors.
+**Week 2 exit criteria — the real gate.** Your numbers match Screener for the 20-company validation sample. If they don't, stop and fix. Everything downstream inherits these errors.
 
 ---
 
