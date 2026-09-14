@@ -64,6 +64,11 @@ Keep the code portable to that from day one:
 
 ## Data model
 
+Time semantics (event time vs `as_of` vs `recorded_at`, lifecycles,
+intervals, replay isolation) are defined in
+[docs/temporal-model.md](docs/temporal-model.md). Read it before building
+or changing any store.
+
 Entity key is **ISIN**, not ticker. Tickers change; store the mapping
 history. ISIN itself changes on demergers and amalgamations — handle via a
 corporate-action-driven entity table, never by string matching.
