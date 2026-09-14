@@ -1,0 +1,9 @@
+.venv/
+.git/
+**/__pycache__/
+.pytest_cache/
+.hypothesis/
+*.egg-info/
+.env
+Dockerfile
+.dockerignore

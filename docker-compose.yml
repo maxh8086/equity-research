@@ -1,0 +1,51 @@
+# Single Postgres instance: Postgres 16 + pgvector (what every managed
+# Postgres offers). Do not add services
+# until measurements show this is inadequate (CLAUDE.md).
+#
+# Shape mirrors the later cloud/Kubernetes deployment:
+#   db      -> managed Postgres
+#   migrate -> one-shot Job / init container (`alembic upgrade head`)
+#   test    -> CI job
+# The app image only ever sees EQUITY_* env vars (Secrets/ConfigMaps later).
+
+x-app: &app
+  build: .
+  image: equity-knowledge:dev
+  environment:
+    EQUITY_DATABASE_URL: postgresql+psycopg://equity:equity_local_dev@db:5432/equity
+    EQUITY_TEST_DATABASE_URL: postgresql+psycopg://equity:equity_local_dev@db:5432/equity_test
+  depends_on:
+    db:
+      condition: service_healthy
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: equity
+      POSTGRES_PASSWORD: equity_local_dev  # local-only; port is bound to 127.0.0.1
+      POSTGRES_DB: equity
+      TZ: Asia/Kolkata
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U equity -d equity"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    <<: *app
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+
+  test:
+    <<: *app
+    profiles: ["test"]
+    command: ["python", "-m", "pytest", "-x", "--tb=short", "-p", "no:cacheprovider"]
+    restart: "no"
+
+volumes:
+  pgdata:
