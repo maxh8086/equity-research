@@ -84,7 +84,8 @@ class Web:
         if request.url.path == "/cdx/search/cdx":
             return httpx.Response(200, content=json.dumps(self.cdx.get(request.url.params["url"], [])).encode())
         status, content, headers = self.pages.get(str(request.url), page(status=404))
-        return httpx.Response(status, content=content, headers=headers)
+        # stream=, not content=: a network response arrives unread, so get_with_raw can read it raw.
+        return httpx.Response(status, stream=httpx.ByteStream(content), headers=headers)
 
     def transport(self) -> httpx.MockTransport:
         return httpx.MockTransport(self)

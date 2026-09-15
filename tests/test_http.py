@@ -167,14 +167,16 @@ def test_get_with_raw_returns_bytes_as_transferred_and_decoded_content(encoding)
     body = b"Company Name,Industry,Symbol,Series,ISIN Code\n"
     sent = gzip.compress(body) if encoding else body
     headers = {"content-encoding": encoding} if encoding else {}
-    client, _ = _client({"/a.csv": httpx.Response(200, headers=headers, content=sent)}, respect_robots=False)
+    # stream=, not content=: a network response arrives unread, as here.
+    route = httpx.Response(200, headers=headers, stream=httpx.ByteStream(sent))
+    client, _ = _client({"/a.csv": route}, respect_robots=False)
     response, raw = client.get_with_raw("https://example.in/a.csv")
     assert (raw, response.content, response.status_code) == (sent, body, 200)
     assert str(response.url) == "https://example.in/a.csv"
 
 
 def test_get_with_raw_still_stops_on_a_block():
-    client, _ = _client({"/a.csv": httpx.Response(403)}, respect_robots=False)
+    client, _ = _client({"/a.csv": httpx.Response(403, stream=httpx.ByteStream(b""))}, respect_robots=False)
     with pytest.raises(AccessBlocked):
         client.get_with_raw("https://example.in/a.csv")
 
