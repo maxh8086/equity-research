@@ -145,8 +145,9 @@ All of it is worthless on empty stores, and LangGraph will be rewritten twice be
 6. `ADD_REVIEW` positive triggers (two-stage expansion, fundamental upgrade, rating upgrade, tailwind) and their four gates, validated by replay on a separate period
 7. Session 7d: monthly mutual fund holdings (`mf_holding`), MSCI and other index review announcements, and `index_event` impact analysis (days of volume)
 8. Relationship graph ④, events ⑤
-9. Read-only MCP server over the point-in-time functions; broker holdings adapter (read-only) for `portfolio_risk_snapshot`, which switches on critical ownership alerts and action-required corporate-action alerts for holdings
-10. Then, and only then, the swarm. No agent gets an order-capable tool.
+9. Session 7e: news, brokerage calls and scuttlebutt (see CLAUDE.md "News, brokerage calls and scuttlebutt"). Publisher RSS adapter (`web_scrape`) into `news_item`; mention extraction by the model, ISIN resolution by code through a dated alias table, with quarantine; `brokerage_call` with target prices parsed by code from quoted text; management interviews routed to `guidance_claim`; `industry_metric` from DGCA, FADA, TRAI and NPCI monthly data; a CLI timeline report. No X.
+10. Read-only MCP server over the point-in-time functions; broker holdings adapter (read-only) for `portfolio_risk_snapshot`, which switches on critical ownership alerts and action-required corporate-action alerts for holdings
+11. Then, and only then, the swarm. No agent gets an order-capable tool.
 
 ---
 

@@ -98,8 +98,8 @@ indices. Nifty500 Multicap 50:25:25 may still serve as a portfolio benchmark.
 2. `guidance_claim` — management commitments with `hedge_strength`
    (will > expect > aim to > working towards), auto-resolved against ①.
    Status includes `SILENT` for claims that stop being mentioned.
-   Each claim also records its section (prepared remarks | Q&A), speaker
-   role, and the quote's location in the transcript. Whether guidance was
+   Each claim also records its section (prepared remarks | Q&A | media
+   interview), speaker role, and the quote's location in the source. Whether guidance was
    raised, lowered, maintained or withdrawn is computed by code, by comparing
    structured claims for the same metric and period.
 3. `force` / `force_intensity` / `force_exposure` — macro headwinds and
@@ -154,6 +154,15 @@ indices. Nifty500 Multicap 50:25:25 may still serve as a portfolio benchmark.
     announcement time, never earlier.
 20. `market_flow` — daily market-wide FII/DII net flows. Provisional and final
     figures are separate rows with their own `as_of`. Feeds `force`.
+21. `news_item` / `news_mention` — headlines from publisher feeds as point
+    events: `as_of` is the publication time, the article URL is the evidence.
+    A model extracts each company mention as its verbatim words plus a
+    subject from a fixed enum; code resolves it to an ISIN (see News below).
+22. `brokerage_call` — broker ratings and target prices as reported in the
+    media. Labelled media-reported, never consensus.
+23. `industry_metric` — official monthly industry data (airline complaints,
+    vehicle retail sales, telecom subscribers, UPI statistics): scuttlebutt
+    computed by code, no model.
 
 ## Decision support (after the MVP)
 
@@ -253,6 +262,53 @@ independent category for the `ADD_REVIEW` gates.
 - **Alert delivery** (email, Telegram, push) is a later decision. Until then,
   alerts lead the report.
 
+### News, brokerage calls and scuttlebutt
+
+- **Source:** publisher RSS feeds and article pages (Moneycontrol, CNBC-TV18,
+  Zee Business, ET Now, NDTV Profit). Class `web_scrape`, so `commercial`
+  mode turns them off: news content is copyrighted.
+- **X (Twitter) is out of scope.** Scraping X, or automating a logged-in
+  session to read posts, breaks X's terms and is the escalation "Breakage"
+  forbids. X's paid API requires deleting stored posts that are deleted on
+  X, which conflicts with append-only stores. Revisit only as a paid API
+  with a recorded storage exception.
+- **Mentions: the model extracts, code resolves.** Headlines use loose names
+  ("Tata Motors launches a new car variant" is about Tata Motors Passenger
+  Vehicles, while the legal name Tata Motors Ltd now belongs to the
+  commercial-vehicle company). The model returns the verbatim mention and a
+  subject from a fixed enum (e.g. `passenger_vehicles`,
+  `commercial_vehicles`, `corporate`). Code resolves (mention, subject, date)
+  through a human-curated alias table with dated validity. Ambiguous or
+  unmatched mentions go to quarantine; reviewing them grows the alias table.
+  The model never outputs an ISIN.
+- **Same story across outlets** is clustered by code (ISIN, event type, date
+  window, embedding similarity threshold), with `rule_version`.
+- **Impact, two scores:** severity computed by code from the event type at
+  publication, with `rule_version`; and the later price and volume reaction,
+  computed by code. The reaction is outcome data: it may be displayed, never
+  passed to a prompt that makes a forward-looking judgement (R2).
+- **Sentiment** is a model hypothesis stored with `model_version`. It
+  triggers nothing until replay on a separate, later period shows it predicts
+  something.
+- **Routing into existing stores:** management TV interviews →
+  `guidance_claim` (section media interview); raids, regulator orders and
+  plant incidents → `company_event`; reported rating actions and order wins
+  are leads, counted only once confirmed against `rating_action` or an
+  exchange filing.
+- **Brokerage calls:** ratings map to a common scale through a hardcoded
+  per-broker table. The model returns only the quoted text of a target
+  price; code parses the number from that quote and checks it appears in the
+  source, otherwise quarantine (R1). `as_of` is the media publication time.
+  Net upgrades over time may become an independent `ADD_REVIEW` category only
+  after replay validation.
+- **Scuttlebutt** comes from official monthly data (DGCA complaints per
+  airline, FADA retail sales, TRAI subscribers, NPCI UPI statistics
+  including bank-wise technical declines), read as change against each
+  company's own baseline. No model is involved.
+- **Timeline:** a point-in-time read merging news, filings, rating actions
+  and technical signals in `as_of` order. A CLI report until a frontend is in
+  scope.
+
 ## Integrations: brokers and MCP
 
 - Broker MCP servers are read-only aids: interactive questions about
@@ -279,6 +335,8 @@ independent category for the `ADD_REVIEW` gates.
 | Announcements, corporate actions, insider and large-stake disclosures, bulk/block deals | NSE/BSE websites, unless a published archive exists | `web_scrape` |
 | Monthly mutual fund holdings | Fund house disclosures / AMFI (confirm when built) | confirm when built |
 | Daily FII/DII market flows | NSE provisional figures; NSDL FPI data (confirm when built) | `web_scrape` / confirm |
+| News headlines, media-reported brokerage calls | Publisher RSS feeds and article pages (confirm per publisher when built) | `web_scrape` |
+| Monthly industry data (scuttlebutt) | DGCA, FADA, TRAI, NPCI publications (confirm when built) | `official_archive` / confirm |
 
 **Source classes:** `official_api`, `official_archive`, `web_scrape`,
 `manual_drop`. Every adapter declares its source class and target store.
@@ -412,7 +470,8 @@ If I ask for any of these, say no and explain:
 - "Just have the LLM calculate it" — violates R1
 - "Backfill the force timeline so we have history" — violates R2
 - "Let the model pick the peer set / sector mapping" — violates R1
-- Adding a service (Kafka, separate vector DB, Redis) before measurements
+- Adding a service (Kafka, separate vector DB, NoSQL or document store,
+  Redis) before measurements
   show the single Postgres is inadequate. Object storage for raw source files
   is already approved (see Stack).
 - Building the swarm before the stores have data
@@ -423,3 +482,5 @@ If I ask for any of these, say no and explain:
 - Escalating against NSE/BSE anti-bot measures: impersonation, headless
   browsers, rotating proxies, CAPTCHA work-arounds
 - Running any `web_scrape` adapter in `commercial` mode
+- Scraping X (Twitter) or automating a logged-in social-media session
+- Letting a model assign a company or ISIN to a news mention — violates R1
