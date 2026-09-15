@@ -8,8 +8,10 @@ from sqlalchemy import (
     Date,
     DateTime,
     Enum,
+    ForeignKey,
     Identity,
     Index,
+    Integer,
     Numeric,
     Text,
     UniqueConstraint,
@@ -135,3 +137,172 @@ class RawSourceFile(ProvenanceMixin, Base):
     @validates("fetched_at")
     def _validate_fetched_at(self, key: str, value: datetime) -> datetime:
         return require_aware(value, key)
+
+
+# --------------------------------------------------------------------------- #
+# Entities and index membership evidence
+# --------------------------------------------------------------------------- #
+
+
+class IndexCode(StrEnum):
+    NIFTY_50 = "nifty_50"
+    NIFTY_NEXT_50 = "nifty_next_50"
+
+
+class EntityLinkBasis(StrEnum):
+    FIRST_SEEN = "first_seen"  # ISIN listed by an official source; corporate actions add more
+
+
+class QuarantineReason(StrEnum):
+    # Whole file: nothing from it enters a store
+    UNKNOWN_FILE = "unknown_file"
+    SHAPE_CHANGED = "shape_changed"
+    ROW_COUNT = "row_count"
+    DUPLICATE_ISIN = "duplicate_isin"
+    DIGEST_MISMATCH = "digest_mismatch"
+    # One row: the rest of the file is stored and the snapshot marked incomplete
+    MALFORMED_ROW = "malformed_row"
+    INVALID_ISIN = "invalid_isin"
+    NON_EQUITY_SERIES = "non_equity_series"
+
+
+INDEX_CODE = _pg_enum(IndexCode, "index_code")
+
+
+class Entity(ProvenanceMixin, Base):
+    """A security's identity across ISIN changes (splits, demergers, amalgamations).
+
+    Until corporate actions are loaded (Session 3e) every ISIN has its own
+    entity. Provenance is the evidence that created the row; what was known
+    when is read through `entity_isin` (core.db.pit). Append-only.
+    """
+
+    __tablename__ = "entity"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+
+    __table_args__ = (
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_entity_content_hash_sha256"),
+        CheckConstraint("model_version IS NULL", name="ck_entity_no_model"),
+    )
+
+
+class EntityIsin(ProvenanceMixin, Base):
+    """An ISIN belongs to an entity, known from `as_of`. Append-only.
+
+    Evidence for an earlier time found later (a 2016 archive capture loaded
+    after today's list) appends a row with the earlier `as_of`. A DB trigger
+    rejects linking one ISIN to two entities.
+    """
+
+    __tablename__ = "entity_isin"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    entity_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("entity.id"), nullable=False)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    basis: Mapped[EntityLinkBasis] = mapped_column(
+        _pg_enum(EntityLinkBasis, "entity_link_basis"), nullable=False
+    )
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_entity_isin_isin_format"),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_entity_isin_content_hash_sha256"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_entity_isin_no_model"),
+        UniqueConstraint("isin", "as_of", name="uq_entity_isin_version"),
+    )
+
+
+class IndexSnapshot(ProvenanceMixin, Base):
+    """One published constituent list for one index, known from `as_of`.
+
+    Membership intervals are computed from snapshots (core.compute.membership),
+    never stored. `quarantined_rows > 0` makes the snapshot incomplete: it
+    confirms presence but not absence. Append-only.
+    """
+
+    __tablename__ = "index_snapshot"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    index_code: Mapped[IndexCode] = mapped_column(INDEX_CODE, nullable=False)
+    constituent_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    quarantined_rows: Mapped[int] = mapped_column(Integer, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "constituent_count >= 0 AND quarantined_rows >= 0", name="ck_index_snapshot_counts"
+        ),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_index_snapshot_content_hash_sha256"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_index_snapshot_no_model"),
+        UniqueConstraint("index_code", "source_url", "as_of", name="uq_index_snapshot_publication"),
+        Index("ix_index_snapshot_pit", "index_code", "as_of"),
+    )
+
+
+class IndexSnapshotConstituent(ProvenanceMixin, Base):
+    """One row of a constituent list, exactly as published. Append-only."""
+
+    __tablename__ = "index_snapshot_constituent"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    snapshot_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("index_snapshot.id"), nullable=False
+    )
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    symbol: Mapped[str] = mapped_column(Text, nullable=False)
+    series: Mapped[str] = mapped_column(Text, nullable=False)
+    company_name: Mapped[str] = mapped_column(Text, nullable=False)
+    industry: Mapped[str] = mapped_column(Text, nullable=False)
+    row_number: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_index_snapshot_constituent_isin_format"
+        ),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'",
+            name="ck_index_snapshot_constituent_content_hash_sha256",
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_index_snapshot_constituent_no_model"),
+        UniqueConstraint("snapshot_id", "isin", name="uq_index_snapshot_constituent_isin"),
+    )
+
+
+class IndexSnapshotQuarantine(ProvenanceMixin, Base):
+    """A constituent list or row held back for manual review. Never guessed.
+
+    A whole-file entry has no snapshot; a row entry belongs to the snapshot
+    that was stored without it. Append-only.
+    """
+
+    __tablename__ = "index_snapshot_quarantine"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    snapshot_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("index_snapshot.id"), nullable=True
+    )
+    index_code: Mapped[IndexCode | None] = mapped_column(INDEX_CODE, nullable=True)
+    row_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    raw_row: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reason: Mapped[QuarantineReason] = mapped_column(
+        _pg_enum(QuarantineReason, "index_quarantine_reason"), nullable=False
+    )
+    detail: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "(row_number IS NULL) = (snapshot_id IS NULL)",
+            name="ck_index_snapshot_quarantine_row_iff_snapshot",
+        ),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'",
+            name="ck_index_snapshot_quarantine_content_hash_sha256",
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_index_snapshot_quarantine_no_model"),
+        Index("ix_index_snapshot_quarantine_pit", "as_of"),
+    )

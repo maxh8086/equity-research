@@ -83,11 +83,17 @@ never by string matching.
 
 ### Universe
 MVP universe: **Nifty 50 + Nifty Next 50**, 100 companies (the two indices do
-not overlap). Membership is stored as dated intervals in `index_membership`
-(ISIN, index, `valid_from`, `valid_to`, `as_of`, `source_url`), loaded from
-NSE's published constituent lists and rebalancing announcements. Both indices
-rebalance in March and September. Never use today's constituent list for a
-past date: that is survivorship bias, which is look-ahead (R2).
+not overlap). Membership evidence is stored as dated constituent lists
+(`index_snapshot`, `index_snapshot_constituent`), each with `as_of` = when that
+list was public: fetch time for a live list, capture time for a Wayback Machine
+copy. Membership intervals are computed from the lists known at `t`
+(`core/compute/membership.py`), never stored, so evidence loaded out of order
+never rewrites history. Between lists that disagree, membership is *uncertain*,
+never guessed; a list with quarantined rows confirms presence but not absence.
+Rebalancing announcements add exact effective dates once the dated
+symbol → ISIN map exists (press releases name symbols, not ISINs). Both
+indices rebalance in March and September. Never use today's constituent list
+for a past date: that is survivorship bias, which is look-ahead (R2).
 
 Considered and rejected for the MVP: Nifty 200; Nifty 500 and Nifty500
 Multicap 50:25:25; Nifty 50 + Midcap 50 + Smallcap 50; factor and thematic
@@ -150,7 +156,7 @@ indices. Nifty500 Multicap 50:25:25 may still serve as a portfolio benchmark.
     houses: the DII trend between quarterly filings.
 19. `index_event` — lifecycle `ANNOUNCED → EFFECTIVE | REVISED | CANCELLED`
     for NSE Indices, MSCI, FTSE and BSE reviews, and NSE F&O eligibility.
-    An announced inclusion creates the future `index_membership` interval at
+    An announced inclusion creates the future membership interval at
     announcement time, never earlier.
 20. `market_flow` — daily market-wide FII/DII net flows. Provisional and final
     figures are separate rows with their own `as_of`. Feeds `force`.
@@ -330,7 +336,8 @@ independent category for the `ADD_REVIEW` gates.
 | Daily prices | Upstox API v3 | `official_api` |
 | Price cross-check, dated ticker → ISIN map | NSE bhavcopy archives | `official_archive` |
 | Financial facts, shareholding pattern | BSE/NSE XBRL filings | `official_archive` |
-| Index membership, NSE index changes | NSE Indices (CSV downloads; internal endpoints are scraping) | `official_archive` / `web_scrape` |
+| Index membership, NSE index changes | NSE Indices constituent CSVs from NSE's archive host (niftyindices.com refuses automated clients: drop folder); internal endpoints are scraping | `official_archive` / `web_scrape` |
+| Past index constituent lists | Internet Archive Wayback Machine captures of the same CSVs: `as_of` is the capture time, bytes checked against the archive's digest | `web_scrape` |
 | MSCI index reviews | MSCI press releases (constituent data is proprietary) | `web_scrape` |
 | Announcements, corporate actions, insider and large-stake disclosures, bulk/block deals | NSE/BSE websites, unless a published archive exists | `web_scrape` |
 | Monthly mutual fund holdings | Fund house disclosures / AMFI (confirm when built) | confirm when built |

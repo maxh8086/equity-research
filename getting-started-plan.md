@@ -51,7 +51,7 @@ Session 3 — price ingestion
 
 Session 3 is built in slices, one session each:
 - **3a — adapter foundation** ✅ adapter base class, source switches and startup checks, blob storage (MinIO) and `raw_source_file`, drop folder, polite HTTP client, canary command, `mcp` import rule
-- **3b — entity table and `index_membership`** from NSE Indices, with quarantine
+- **3b — entity table and index membership** ✅ `entity` / `entity_isin`; dated constituent lists (`index_snapshot`) from NSE's archive, the drop folder and Wayback Machine captures; membership computed at read time as member / uncertain; quarantine. Press-release effective dates wait for 3c's symbol → ISIN map
 - **3c — NSE bhavcopy** adapter: price cross-check and dated ticker → ISIN map
 - **3d — Upstox v3 daily candles** (built against the documented response shape until an API app exists)
 - **3e — `corporate_action` core** and adjustment factors known at `t`

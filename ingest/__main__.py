@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from core.blob import s3_blob_store
 from core.config import get_settings
 from core.timezones import IST
-from ingest.base import AdapterContext
+from ingest.base import AdapterContext, RunStatus
 from ingest.registry import StartupRefused, check_startup, discover
 
 
@@ -56,6 +56,7 @@ def main(argv: list[str] | None = None) -> int:
             ctx = AdapterContext(session, blob, settings, now=lambda: datetime.now(IST))
             try:
                 result = adapter.run(ctx) if args.command == "run" else adapter.canary(ctx)
+                # A failed run still commits: its raw files and quarantine rows are the evidence.
                 session.commit()
             except Exception:
                 session.rollback()
@@ -64,6 +65,8 @@ def main(argv: list[str] | None = None) -> int:
                 exit_code = 1
                 continue
         print(f"{name}\t{result.status}\t{result.detail}")
+        if result.status == RunStatus.FAILED:
+            exit_code = 1
     return exit_code
 
 

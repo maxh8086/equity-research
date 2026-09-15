@@ -188,3 +188,22 @@ def test_cli_refuses_commercial_mode_with_scraping(monkeypatch, tmp_path, capsys
     monkeypatch.setenv("EQUITY_WEB_SCRAPING_ENABLED", "true")
     assert cli.main(["list"]) == 2
     assert "refusing to start" in capsys.readouterr().err
+
+
+class FakeFailing(_Recording):
+    name = "fake_failing"
+    source_class = SourceClass.OFFICIAL_ARCHIVE
+    target_stores = ("index_snapshot",)
+
+    def ingest(self, ctx):
+        return RunResult(self.name, RunStatus.FAILED, "file quarantined")
+
+
+def test_cli_exits_1_when_an_adapter_reports_failure(monkeypatch, tmp_path, capsys):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("EQUITY_SOURCE_FAKE_FAILING_ENABLED", "true")
+    monkeypatch.setattr(cli, "discover", lambda: {"fake_failing": FakeFailing})
+    monkeypatch.setattr(cli, "create_engine", lambda url: None)
+    monkeypatch.setattr(cli, "s3_blob_store", lambda settings: MemoryBlobStore())
+    assert cli.main(["run", "fake_failing"]) == 1
+    assert "fake_failing\tfailed\tfile quarantined" in capsys.readouterr().out

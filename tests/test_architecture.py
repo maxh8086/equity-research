@@ -597,9 +597,13 @@ def test_scan_is_not_vacuous():
     } <= rels  # fmt: skip
     assert not any(r.startswith((".venv/", "equity_knowledge.egg-info/")) for r in rels)
 
+    stores = (
+        "FinancialFact", "RawSourceFile", "Entity", "EntityIsin",
+        "IndexSnapshot", "IndexSnapshotConstituent", "IndexSnapshotQuarantine",
+    )  # fmt: skip
     models = {cls.name: fields for _, cls, fields, _ in table_models(repo_files())}
-    assert {"FinancialFact", "RawSourceFile"} <= set(models)
-    for name in ("FinancialFact", "RawSourceFile"):
+    assert set(stores) <= set(models)
+    for name in stores:
         assert PROVENANCE_COLUMNS <= models[name]  # inherited via ProvenanceMixin
 
 

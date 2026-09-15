@@ -42,13 +42,21 @@ each with a `<file>.meta.json` sidecar:
 {"source_url": "https://…", "published_at": "2024-03-01T23:59:59+05:30", "media_type": "text/csv"}
 ```
 
+Index constituent lists (`nse_indices_constituents_drop`): the index comes from
+the file name in `source_url` (`ind_nifty50list.csv`, `ind_niftynext50list.csv`).
+For a Wayback copy, `source_url` is the capture URL and `published_at` its
+capture time. Rows that fail checks land in `index_snapshot_quarantine`; read
+them with `core.db.pit.index_snapshot_quarantine_as_of`.
+
 ## Layout
 
 | Path | What |
 |---|---|
 | `core/compute/` | Pure functions. No I/O. Property-tested. |
+| `core/compute/membership.py` | Index membership intervals (member / uncertain) from dated constituent lists |
 | `core/db/base.py` | Provenance mixin: `as_of`, `content_hash`, `source_url`, `extracted_by`, `model_version`, `ingested_at` |
-| `core/db/models.py` | Store ① `financial_facts`; `raw_source_file` |
+| `core/db/models.py` | Store ① `financial_facts`; `raw_source_file`; `entity` / `entity_isin`; `index_snapshot`, its constituents and quarantine |
+| `ingest/nse_indices/` | Nifty 50 / Next 50 constituent lists: NSE archive, drop folder, Wayback captures; one parser |
 | `core/db/pit.py` | Point-in-time reads — `as_of` is a required argument |
 | `core/blob.py` | The one blob-storage interface (S3-compatible now; Azure later) |
 | `core/sources.py` | Source classes and deployment modes |

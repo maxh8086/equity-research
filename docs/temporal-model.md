@@ -55,6 +55,12 @@ state at `t` is the latest row with `as_of <= t`.
   `as_of`. A read at `t` sees the interval as it was understood at `t`.
 - `first_detected_on` is the real wall-clock time of live detection. It is
   never set earlier.
+- **Index membership is computed, not stored.** Evidence arrives out of order
+  (a 2016 archive capture loaded after today's list), so the stored rows are
+  dated constituent lists (`index_snapshot`), and intervals are derived from
+  the lists with `as_of <= t` at read time (`core/compute/membership.py`).
+  A read answers member, not a member, or *uncertain*: between two lists that
+  disagree, and after the latest list, nothing is guessed.
 
 ## Hypotheses (R3)
 
@@ -80,8 +86,8 @@ state at `t` is the latest row with `as_of <= t`.
 
 | Mechanism | State |
 |---|---|
-| Append-only triggers and `as_of` sanity checks per store | Done for `financial_facts`; `raw_source_file` (`as_of <= fetched_at`) |
-| One point-in-time read function per store, `t` required (`core/db/pit.py`) | Done for `financial_facts`, `raw_source_file` |
+| Append-only triggers and `as_of` sanity checks per store | Done for `financial_facts`; `raw_source_file` (`as_of <= fetched_at`); `entity`, `entity_isin` (one ISIN, one entity); `index_snapshot`, `index_snapshot_constituent`, `index_snapshot_quarantine` |
+| One point-in-time read function per store, `t` required (`core/db/pit.py`) | Done for `financial_facts`, `raw_source_file`, entity links, index snapshots and membership (`index_members_on` takes both the date and `as_of`) |
 | Adapters record publication time, not fetch time; drop-folder files need a sidecar with an aware `published_at` (`ingest/base.py`) | Done |
 | Naive datetimes rejected before reaching the DB (`core/timezones.py`) | Done |
 | Architecture test: no direct queries against store tables outside PIT functions (`tests/test_architecture.py`) | Done |

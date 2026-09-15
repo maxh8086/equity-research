@@ -43,6 +43,24 @@ class Settings(BaseSettings):
     # Every request identifies the client (CLAUDE.md "Code conventions": scraping).
     http_user_agent: str = "equity-knowledge/0.1 (private family research)"
 
+    # NSE Indices constituent lists (ingest/nse_indices). niftyindices.com refuses
+    # automated clients; NSE's archive host serves the same files.
+    nse_indices_archive_base_url: str = "https://archives.nseindia.com/content/indices"
+    nse_indices_min_interval_seconds: float = 3.0
+
+    # Wayback Machine captures of those lists: one CDX query per location and file.
+    wayback_cdx_url: str = "https://web.archive.org/cdx/search/cdx"
+    wayback_capture_url: str = "https://web.archive.org/web/{timestamp}id_/{original}"
+    wayback_min_interval_seconds: float = 10.0
+    wayback_list_locations: list[str] = Field(
+        default_factory=lambda: [
+            "niftyindices.com/IndexConstituent",
+            "nseindia.com/content/indices",
+            "archives.nseindia.com/content/indices",
+            "nsearchives.nseindia.com/content/indices",
+        ]
+    )
+
 
 def parse_source_switches(environ: Mapping[str, str]) -> dict[str, bool]:
     """EQUITY_SOURCE_<NAME>_ENABLED → {name: bool}. A value that is not a boolean raises."""
