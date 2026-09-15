@@ -1,6 +1,7 @@
 """Point-in-time reads. Every read takes an explicit `as_of`; there is no default."""
 
 from collections.abc import Collection, Sequence
+from dataclasses import dataclass
 from datetime import datetime
 
 from sqlalchemy import select
@@ -183,3 +184,40 @@ def index_snapshot_quarantine_as_of(
     require_aware(as_of, "as_of")
     q = IndexSnapshotQuarantine
     return list(session.scalars(select(q).where(q.as_of <= as_of).order_by(q.as_of, q.id)))
+
+
+@dataclass(frozen=True)
+class QuarantineEntry:
+    row: IndexSnapshotQuarantine
+    # A snapshot later loaded from the same file (same source URL and publication time).
+    superseded_by: int | None
+
+    @property
+    def needs_review(self) -> bool:
+        return self.superseded_by is None
+
+
+def index_quarantine_review_as_of(session: Session, *, as_of: datetime) -> list[QuarantineEntry]:
+    """Every quarantine row for files published by `as_of`, marked when it no longer needs review.
+
+    A whole-file entry is superseded once the same file has been loaded as a
+    snapshot, e.g. after a rule fix. The quarantine row itself is never
+    deleted (append-only). A row-level entry belongs to a stored, incomplete
+    snapshot and always needs review.
+    """
+    rows = index_snapshot_quarantine_as_of(session, as_of=as_of)
+    whole_file_urls = {q.source_url for q in rows if q.snapshot_id is None}
+    loaded: dict[tuple[str, datetime], int] = {}
+    if whole_file_urls:
+        s = IndexSnapshot
+        stmt = (
+            select(s.source_url, s.as_of, s.id)
+            .where(s.source_url.in_(whole_file_urls), s.as_of <= as_of)
+            .order_by(s.id)
+        )
+        for source_url, published, snapshot_id in session.execute(stmt):
+            loaded.setdefault((source_url, published), snapshot_id)
+    return [
+        QuarantineEntry(q, loaded.get((q.source_url, q.as_of)) if q.snapshot_id is None else None)
+        for q in rows
+    ]

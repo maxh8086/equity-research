@@ -45,8 +45,9 @@ each with a `<file>.meta.json` sidecar:
 Index constituent lists (`nse_indices_constituents_drop`): the index comes from
 the file name in `source_url` (`ind_nifty50list.csv`, `ind_niftynext50list.csv`).
 For a Wayback copy, `source_url` is the capture URL and `published_at` its
-capture time. Rows that fail checks land in `index_snapshot_quarantine`; read
-them with `core.db.pit.index_snapshot_quarantine_as_of`.
+capture time. Rows that fail checks land in `index_snapshot_quarantine`; review
+them with `core.db.pit.index_quarantine_review_as_of`, which marks a rejected
+file superseded once the same file has been loaded (e.g. after a rule fix).
 
 ## Layout
 

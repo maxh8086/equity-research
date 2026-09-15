@@ -23,7 +23,12 @@ from core.db.models import (
     QuarantineReason,
     RawSourceFile,
 )
-from core.db.pit import index_members_on, index_snapshot_quarantine_as_of, index_snapshots_as_of
+from core.db.pit import (
+    index_members_on,
+    index_quarantine_review_as_of,
+    index_snapshot_quarantine_as_of,
+    index_snapshots_as_of,
+)
 from core.timezones import IST
 from ingest.base import AdapterContext, CanaryStatus, RunStatus
 from ingest.nse_indices import adapters
@@ -264,12 +269,28 @@ def test_whole_file_quarantine_is_examined_again_only_after_a_rule_change(sessio
     WaybackIndexConstituents(same_rule.transport()).run(_ctx(session, now=FETCHED + timedelta(hours=1)))
     assert same_rule.captures_fetched() == []
 
+    [before] = index_quarantine_review_as_of(session, as_of=FETCHED)
+    assert (before.row.reason, before.needs_review) == (QuarantineReason.DIGEST_MISMATCH, True)
+
     monkeypatch.setattr(adapters, "RULE_VERSION", "nse_indices_constituents/next")
     new_rule = _wayback()
     result = WaybackIndexConstituents(new_rule.transport()).run(_ctx(session, now=FETCHED + timedelta(hours=2)))
     assert result.status is RunStatus.SUCCEEDED, result.detail
     assert new_rule.captures_fetched() == [str(httpx.URL(capture_url(LAST)))]
     assert len(index_snapshots_as_of(session, index_code=N50, as_of=FETCHED)) == 2
+
+    # The quarantine row stays (append-only) but no longer needs review.
+    [after] = index_quarantine_review_as_of(session, as_of=FETCHED)
+    loaded = session.scalars(select(IndexSnapshot).where(IndexSnapshot.source_url == capture_url(LAST))).one()
+    assert (after.row.id, after.superseded_by, after.needs_review) == (before.row.id, loaded.id, False)
+
+
+def test_row_quarantine_is_never_superseded(session):
+    isin = sorted(_isins(NIFTY_50_NOW, N50))[0]
+    bad = NIFTY_50_NOW.replace(isin.encode(), (isin[:-1] + str((int(isin[-1]) + 1) % 10)).encode())
+    NseIndicesConstituents(_live(nifty=bad).transport()).run(_ctx(session))
+    [entry] = index_quarantine_review_as_of(session, as_of=FETCHED)
+    assert entry.row.snapshot_id is not None and entry.needs_review
 
 
 def test_redirect_to_another_capture_is_not_stored_under_the_requested_time(session):
