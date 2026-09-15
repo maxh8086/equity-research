@@ -10,14 +10,37 @@ live in [CLAUDE.md](CLAUDE.md); build order in
 py -3.13 -m venv .venv          # CLAUDE.md targets 3.12; any >=3.12 works
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt   # exact pinned rebuild
 .\.venv\Scripts\python.exe -m pip install -e . --no-deps
-docker compose up -d --wait db   # Postgres 16 + pgvector on 127.0.0.1:5433
+docker compose up -d --wait db blob   # Postgres 16 + pgvector on :5433, MinIO on :9000
+docker compose run --rm blob-init     # write-once buckets (object lock); safe to re-run
 .\.venv\Scripts\alembic.exe upgrade head
 .\.venv\Scripts\python.exe -m pytest -x --tb=short
 ```
 
 Tests recreate the `equity_test` database from scratch and run migrations
-up → down → up on every run. Pure tests (`core/compute`) need no database:
-`pytest -m "not db"`.
+up → down → up on every run. Tests that need no services:
+`pytest -m "not db and not blob"`.
+
+## Ingest adapters
+
+```powershell
+.\.venv\Scripts\python.exe -m ingest list            # adapters, source class, stores, switch state
+.\.venv\Scripts\python.exe -m ingest run NAME        # exit 0 = succeeded or disabled
+.\.venv\Scripts\python.exe -m ingest canary          # daily shape check; disabled adapters skipped
+```
+
+Every adapter is off until `EQUITY_SOURCE_<NAME>_ENABLED=true`; `web_scrape`
+adapters also need `EQUITY_WEB_SCRAPING_ENABLED=true`. With
+`EQUITY_DEPLOYMENT_MODE=commercial`, any scraping switch refuses startup, and
+so does a switch that names no adapter.
+
+Raw bytes go to blob storage (keyed by SHA-256, write-once) before parsing;
+`raw_source_file` records source URL, publication time (`as_of`) and fetch
+time. Files downloaded by hand go in `EQUITY_DROP_FOLDER/<adapter name>/`,
+each with a `<file>.meta.json` sidecar:
+
+```json
+{"source_url": "https://…", "published_at": "2024-03-01T23:59:59+05:30", "media_type": "text/csv"}
+```
 
 ## Layout
 
@@ -25,8 +48,13 @@ up → down → up on every run. Pure tests (`core/compute`) need no database:
 |---|---|
 | `core/compute/` | Pure functions. No I/O. Property-tested. |
 | `core/db/base.py` | Provenance mixin: `as_of`, `content_hash`, `source_url`, `extracted_by`, `model_version`, `ingested_at` |
-| `core/db/models.py` | Store ① `financial_facts` |
+| `core/db/models.py` | Store ① `financial_facts`; `raw_source_file` |
 | `core/db/pit.py` | Point-in-time reads — `as_of` is a required argument |
+| `core/blob.py` | The one blob-storage interface (S3-compatible now; Azure later) |
+| `core/sources.py` | Source classes and deployment modes |
+| `ingest/base.py` | Adapter base: declarations, switches, `store_raw`, drop folder |
+| `ingest/http.py` | Throttled, identified HTTP; stops on a block, never escalates |
+| `ingest/registry.py` | Adapter discovery, `extracted_by` → source class, startup checks |
 | `migrations/` | Alembic. Every schema change is a migration; a test fails if models and migrations drift. |
 
 ## Invariants enforced by the database, not by convention

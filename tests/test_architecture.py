@@ -43,6 +43,18 @@ PROVIDER_SDKS = (
     "llama_index",
 )
 
+# MCP client packages: only ingest/ adapters (plain code, no model) and the gateway.
+MCP_PACKAGES = ("mcp", "fastmcp")
+MCP_CALLERS = ("ingest", GATEWAY_PATH)
+
+# Every ingest/ module or subpackage is a source adapter, except shared machinery.
+# Mirrors ingest.registry.INFRA_MODULES (checked below).
+INGEST_INFRA = frozenset(
+    {"ingest/__init__.py", "ingest/__main__.py", "ingest/base.py", "ingest/http.py",
+     "ingest/registry.py", "ingest/schema.py"}
+)  # fmt: skip
+ADAPTER_DECLARATIONS = frozenset({"name", "source_class", "target_stores"})
+
 # R2 provenance columns.
 PROVENANCE_COLUMNS = frozenset(
     {"as_of", "content_hash", "source_url", "extracted_by", "model_version"}
@@ -499,6 +511,63 @@ def check_reads_go_through_pit(files: tuple[SourceFile, ...]) -> list[str]:
 
 
 # --------------------------------------------------------------------------- #
+# Rule 6: only ingest/ and gateway/ import the MCP client
+# --------------------------------------------------------------------------- #
+
+
+def check_mcp_imports(files: tuple[SourceFile, ...]) -> list[str]:
+    violations = []
+    for sf in files:
+        if sf.under("tests", *MCP_CALLERS):
+            continue
+        for imp in imports(sf):
+            if any(_matches(imp.module, pkg) for pkg in MCP_PACKAGES):
+                violations.append(
+                    f"{sf.rel}:{imp.line}: imports MCP client {imp.module}; "
+                    f"only {'/, '.join(MCP_CALLERS)}/ may"
+                )
+    return violations
+
+
+# --------------------------------------------------------------------------- #
+# Rule 7: every ingest/ module declares its source class and target stores
+# --------------------------------------------------------------------------- #
+
+
+def _valued_fields(index, key: ClassKey, seen: frozenset[ClassKey] = frozenset()) -> set[str]:
+    """Names assigned a value on a class or its resolvable bases; bare annotations don't count."""
+    sf, cls = index[key]
+    fields = {name for name, value in _body_assigns(cls).items() if value is not None}
+    for base in cls.bases:
+        base_key = _resolve_class(index, sf, base)
+        if base_key is not None and base_key not in seen | {key}:
+            fields |= _valued_fields(index, base_key, seen | {key})
+    return fields
+
+
+def check_ingest_modules_declare(files: tuple[SourceFile, ...]) -> list[str]:
+    index = _class_index(files)
+    units: dict[str, list[SourceFile]] = {}
+    for sf in files:
+        if sf.under("ingest") and str(sf.rel) not in INGEST_INFRA:
+            units.setdefault("/".join(sf.rel.parts[:2]), []).append(sf)
+
+    violations = []
+    for unit, sfs in sorted(units.items()):
+        declared = any(
+            ADAPTER_DECLARATIONS <= _valued_fields(index, (sf.module, node.name))
+            for sf in sfs
+            for node in sf.tree.body
+            if isinstance(node, ast.ClassDef)
+        )
+        if not declared:
+            violations.append(
+                f"{sfs[0].rel}:1: {unit} has no adapter assigning {sorted(ADAPTER_DECLARATIONS)}"
+            )
+    return violations
+
+
+# --------------------------------------------------------------------------- #
 # Tests against the repo
 # --------------------------------------------------------------------------- #
 
@@ -509,6 +578,8 @@ RULES: dict[str, Callable[[tuple[SourceFile, ...]], list[str]]] = {
     "provenance": check_provenance_columns,
     "compute_pure": check_compute_is_pure,
     "pit_reads": check_reads_go_through_pit,
+    "mcp_client": check_mcp_imports,
+    "adapter_declares": check_ingest_modules_declare,
 }
 
 
@@ -520,12 +591,22 @@ def test_repo_obeys_rule(rule):
 
 def test_scan_is_not_vacuous():
     rels = {str(sf.rel) for sf in repo_files()}
-    assert {"core/db/models.py", "core/db/base.py", "core/db/pit.py", "core/compute/isin.py"} <= rels
+    assert {
+        "core/db/models.py", "core/db/base.py", "core/db/pit.py", "core/compute/isin.py",
+        "core/blob.py", "ingest/base.py", "ingest/registry.py",
+    } <= rels  # fmt: skip
     assert not any(r.startswith((".venv/", "equity_knowledge.egg-info/")) for r in rels)
 
     models = {cls.name: fields for _, cls, fields, _ in table_models(repo_files())}
-    assert "FinancialFact" in models
-    assert PROVENANCE_COLUMNS <= models["FinancialFact"]  # inherited via ProvenanceMixin
+    assert {"FinancialFact", "RawSourceFile"} <= set(models)
+    for name in ("FinancialFact", "RawSourceFile"):
+        assert PROVENANCE_COLUMNS <= models[name]  # inherited via ProvenanceMixin
+
+
+def test_ingest_infra_list_matches_registry():
+    from ingest.registry import INFRA_MODULES
+
+    assert {m.replace(".", "/") + ".py" for m in INFRA_MODULES} | {"ingest/__init__.py"} == INGEST_INFRA
 
 
 def test_orm_metadata_has_provenance_columns():
@@ -607,6 +688,22 @@ CASES = [
     ("pit_reads", "ingest/x.py", STORE + '"""Loads rows from facts files."""', 0),
     ("pit_reads", "core/db/pit.py", STORE + "stmt = select(Fact)", 0),
     ("pit_reads", "migrations/versions/0002_x.py", STORE + "op.execute('SELECT 1 FROM facts')", 0),
+    ("mcp_client", "extract/x.py", "from mcp import ClientSession", 1),
+    ("mcp_client", "core/db/x.py", "import mcp.client.stdio", 1),
+    ("mcp_client", "narrate/x.py", "from fastmcp import Client", 1),
+    ("mcp_client", "core/x.py", "import importlib\nimportlib.import_module('mcp')", 1),
+    ("mcp_client", "ingest/broker_holdings.py", "from mcp import ClientSession", 0),
+    ("mcp_client", "gateway/tools.py", "from mcp.client.session import ClientSession", 0),
+    ("mcp_client", "tests/test_x.py", "import mcp", 0),
+    ("mcp_client", "core/x.py", "from core import mcp_notes\nimport mcpx", 0),
+    ("adapter_declares", "ingest/nse.py", "class A(Adapter):\n    name = 'nse'\n    source_class = S.WEB_SCRAPE\n    target_stores = ('t',)", 0),
+    ("adapter_declares", "ingest/nse.py", "class A(Adapter):\n    name = 'nse'\n    source_class = S.WEB_SCRAPE", 1),
+    ("adapter_declares", "ingest/nse.py", "class A(Adapter):\n    name: ClassVar[str]\n    source_class: ClassVar[S]\n    target_stores: ClassVar[tuple]", 1),
+    ("adapter_declares", "ingest/helpers.py", "def parse(): ...", 1),
+    ("adapter_declares", "ingest/nse/parser.py", "def parse(): ...", 1),
+    ("adapter_declares", "ingest/drop.py", "class D(Adapter):\n    source_class = S.MANUAL_DROP\nclass X(D):\n    name = 'x'\n    target_stores = ('t',)", 0),
+    ("adapter_declares", "ingest/base.py", "class Adapter(ABC):\n    name: ClassVar[str]", 0),
+    ("adapter_declares", "core/db/x.py", "def f(): ...", 0),
 ]  # fmt: skip
 
 

@@ -6,7 +6,7 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from core.db.models import Consolidation, FinancialFact
+from core.db.models import Consolidation, FinancialFact, RawSourceFile
 from core.timezones import require_aware
 
 
@@ -33,4 +33,21 @@ def facts_as_of(
     )
     if line_items is not None:
         stmt = stmt.where(f.line_item.in_(line_items))
+    return list(session.scalars(stmt))
+
+
+def raw_source_files_as_of(
+    session: Session, *, extracted_by: str, as_of: datetime
+) -> list[RawSourceFile]:
+    """Raw files an adapter stored whose content was public at `as_of`, oldest first.
+
+    A parser fix re-parses these from blob storage instead of re-downloading.
+    """
+    require_aware(as_of, "as_of")
+    r = RawSourceFile
+    stmt = (
+        select(r)
+        .where(r.extracted_by == extracted_by, r.as_of <= as_of)
+        .order_by(r.as_of, r.id)
+    )
     return list(session.scalars(stmt))

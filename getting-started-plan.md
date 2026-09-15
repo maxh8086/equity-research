@@ -49,6 +49,13 @@ Session 2 — architecture tests
 Session 3 — price ingestion
 > Build the Upstox v3 historical ingester. Instrument keyed by ISIN, not ticker. Daily candles from Jan 2000. Store raw prices plus corporate-action adjustment factors separately. Also load `index_membership` for Nifty 50 and Nifty Next 50 as dated intervals. Upstox has no index-constituents API, so use NSE Indices sources: current constituent CSVs plus historical inclusion/exclusion announcements and archived reports. Map every constituent to an ISIN; never match on company name. Constituents that cannot be matched go to quarantine for manual review. Build every source as an adapter: save the raw response to blob storage first, validate it strictly with Pydantic, keep endpoints in config, and add contract tests on recorded responses plus a daily canary. Scrape politely and never work around CAPTCHAs or bot blocking; fall back to a drop folder of files downloaded by hand. Extend `tests/test_architecture.py` so only `ingest/` and `gateway/` may import the `mcp` client. Build the shared adapter base class: each adapter declares its source class (`official_api`, `official_archive`, `web_scrape`, `manual_drop`) and target store, and honours `EQUITY_SOURCE_<NAME>_ENABLED`, `EQUITY_WEB_SCRAPING_ENABLED` and `EQUITY_DEPLOYMENT_MODE` (see CLAUDE.md "Data sources"). Add an NSE bhavcopy adapter as the cross-check for Upstox prices and the source of the dated ticker-to-ISIN map. Load the core of `corporate_action` (splits, bonuses, rights, demergers, dividends, ISIN changes) to derive adjustment factors known at `t` and to update the entity table. A ratio extracted from a PDF needs human verification before it adjusts any price.
 
+Session 3 is built in slices, one session each:
+- **3a — adapter foundation** ✅ adapter base class, source switches and startup checks, blob storage (MinIO) and `raw_source_file`, drop folder, polite HTTP client, canary command, `mcp` import rule
+- **3b — entity table and `index_membership`** from NSE Indices, with quarantine
+- **3c — NSE bhavcopy** adapter: price cross-check and dated ticker → ISIN map
+- **3d — Upstox v3 daily candles** (built against the documented response shape until an API app exists)
+- **3e — `corporate_action` core** and adjustment factors known at `t`
+
 **Then run the adjustment test yourself.** Pick a company with a known split, pull the series across that date, look for a discontinuity. No gap means adjusted; a cliff means raw. Do it for a bonus issue too.
 
 **Week 1 exit criteria:** architecture tests pass, price history loaded for the Nifty 50 + Nifty Next 50 universe (100 companies), entity table keyed by ISIN, index membership stored as dated history.

@@ -1,11 +1,14 @@
 # Single Postgres instance: Postgres 16 + pgvector (what every managed
-# Postgres offers). Do not add services
-# until measurements show this is inadequate (CLAUDE.md).
+# Postgres offers), plus object storage for raw source files, the one approved
+# exception to "no new services" (CLAUDE.md Stack). Do not add services
+# until measurements show this is inadequate.
 #
 # Shape mirrors the later cloud/Kubernetes deployment:
-#   db      -> managed Postgres
-#   migrate -> one-shot Job / init container (`alembic upgrade head`)
-#   test    -> CI job
+#   db        -> managed Postgres
+#   blob      -> cloud blob storage (S3-compatible, or Azure behind core/blob.py)
+#   migrate   -> one-shot Job / init container (`alembic upgrade head`)
+#   blob-init -> one-shot bucket provisioning (done by infra-as-code in the cloud)
+#   test      -> CI job
 # The app image only ever sees EQUITY_* env vars (Secrets/ConfigMaps later).
 
 x-app: &app
@@ -14,9 +17,12 @@ x-app: &app
   environment:
     EQUITY_DATABASE_URL: postgresql+psycopg://equity:equity_local_dev@db:5432/equity
     EQUITY_TEST_DATABASE_URL: postgresql+psycopg://equity:equity_local_dev@db:5432/equity_test
+    EQUITY_BLOB_ENDPOINT_URL: http://blob:9000
   depends_on:
     db:
       condition: service_healthy
+    blob-init:
+      condition: service_completed_successfully
 
 services:
   db:
@@ -36,6 +42,42 @@ services:
       timeout: 5s
       retries: 20
 
+  # MinIO no longer publishes images to Docker Hub; quay.io still hosts them.
+  # Pinned by digest (RELEASE.2025-09-07T16-13-09Z).
+  blob:
+    image: quay.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
+    command: ["server", "/data"]
+    environment:
+      MINIO_ROOT_USER: equity
+      MINIO_ROOT_PASSWORD: equity_local_dev  # local-only; port is bound to 127.0.0.1
+    ports:
+      - "127.0.0.1:9000:9000"
+    volumes:
+      - blobdata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Buckets are write-once: object lock (which implies versioning) plus a
+  # default GOVERNANCE retention, so stored source bytes cannot be deleted.
+  # Wiping local blobs means removing the blobdata volume.
+  blob-init:
+    image: quay.io/minio/mc@sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727
+    depends_on:
+      blob:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >
+        mc alias set local http://blob:9000 equity equity_local_dev &&
+        for b in equity-raw equity-raw-test; do
+          mc mb --ignore-existing --with-lock local/$$b &&
+          mc retention set --default GOVERNANCE 36500d local/$$b || exit 1;
+        done
+    restart: "no"
+
   migrate:
     <<: *app
     command: ["alembic", "upgrade", "head"]
@@ -49,3 +91,4 @@ services:
 
 volumes:
   pgdata:
+  blobdata:

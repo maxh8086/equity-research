@@ -17,13 +17,13 @@ jobs:
       - name: Build image
         run: docker compose --profile test build test
 
-      # Fails fast on rule violations before paying for Postgres startup.
-      - name: Architecture and pure tests (no database)
+      # Fails fast on rule violations before paying for Postgres/MinIO startup.
+      - name: Architecture and pure tests (no services)
         run: >
           docker compose --profile test run --rm --no-deps test
-          python -m pytest -m "not db" --tb=short -p no:cacheprovider
+          python -m pytest -m "not db and not blob" --tb=short -p no:cacheprovider
 
-      - name: Full test suite against Postgres 16 + pgvector
+      - name: Full test suite against Postgres 16 + pgvector and MinIO
         run: docker compose --profile test run --rm test
 
       - name: Tear down

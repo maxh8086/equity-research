@@ -3,11 +3,13 @@ from pathlib import Path
 import pytest
 from alembic import command
 from alembic.config import Config
+from botocore.exceptions import BotoCoreError, ClientError
 from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.engine import make_url
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
+from core.blob import S3BlobStore, s3_blob_store
 from core.config import get_settings
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -49,6 +51,21 @@ def engine() -> Engine:
     eng = create_engine(url)
     yield eng
     eng.dispose()
+
+
+@pytest.fixture(scope="session")
+def s3_store() -> S3BlobStore:
+    """The object store's test bucket. Objects are write-once, so tests use distinct bytes."""
+    settings = get_settings()
+    store = s3_blob_store(settings, bucket=settings.test_blob_bucket)
+    try:
+        store.client.head_bucket(Bucket=store.bucket)
+    except (BotoCoreError, ClientError) as exc:
+        pytest.fail(
+            "Object store unreachable. Run `docker compose up -d --wait blob` and "
+            f"`docker compose run --rm blob-init`.\n{exc}"
+        )
+    return store
 
 
 @pytest.fixture

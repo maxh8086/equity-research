@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from enum import StrEnum
 
@@ -6,6 +6,7 @@ from sqlalchemy import (
     BigInteger,
     CheckConstraint,
     Date,
+    DateTime,
     Enum,
     Identity,
     Index,
@@ -14,9 +15,10 @@ from sqlalchemy import (
     UniqueConstraint,
     CHAR,
 )
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from core.db.base import Base, ProvenanceMixin
+from core.timezones import require_aware
 
 
 class Consolidation(StrEnum):
@@ -98,3 +100,38 @@ class FinancialFact(ProvenanceMixin, Base):
             "as_of",
         ),
     )
+
+
+class RawSourceFile(ProvenanceMixin, Base):
+    """A raw source file as fetched or dropped, recorded before anything parses it.
+
+    The bytes live in blob storage under `content_hash`. This row records where
+    they came from, when the source published them (`as_of`) and when this
+    system received them (`fetched_at`). After a parser fix, the parser re-reads
+    stored bytes instead of downloading them again. Append-only.
+    """
+
+    __tablename__ = "raw_source_file"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    byte_size: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    media_type: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_raw_source_file_content_hash_sha256"
+        ),
+        # Nothing can have been published after we already held it.
+        CheckConstraint("as_of <= fetched_at", name="ck_raw_source_file_as_of_not_after_fetch"),
+        CheckConstraint("byte_size >= 0", name="ck_raw_source_file_byte_size"),
+        CheckConstraint("model_version IS NULL", name="ck_raw_source_file_no_model"),
+        UniqueConstraint(
+            "content_hash", "source_url", "fetched_at", name="uq_raw_source_file_fetch"
+        ),
+        Index("ix_raw_source_file_pit", "extracted_by", "as_of"),
+    )
+
+    @validates("fetched_at")
+    def _validate_fetched_at(self, key: str, value: datetime) -> datetime:
+        return require_aware(value, key)
