@@ -47,7 +47,7 @@ Session 2 — architecture tests
 > Write `tests/test_architecture.py` using Python's ast module. Assert: only `extract/` and `narrate/` import the LLM gateway; no float annotations on monetary fields; every SQLAlchemy model has as_of, content_hash, source_url; `core/compute/` imports nothing with I/O. Wire it into CI.
 
 Session 3 — price ingestion
-> Build the Upstox v3 historical ingester. Instrument keyed by ISIN, not ticker. Daily candles from Jan 2000. Store raw prices plus corporate-action adjustment factors separately. Also load `index_membership` for Nifty 50 and Nifty Next 50 as dated intervals. Upstox has no index-constituents API, so use NSE Indices sources: current constituent CSVs plus historical inclusion/exclusion announcements and archived reports. Map every constituent to an ISIN; never match on company name. Constituents that cannot be matched go to quarantine for manual review.
+> Build the Upstox v3 historical ingester. Instrument keyed by ISIN, not ticker. Daily candles from Jan 2000. Store raw prices plus corporate-action adjustment factors separately. Also load `index_membership` for Nifty 50 and Nifty Next 50 as dated intervals. Upstox has no index-constituents API, so use NSE Indices sources: current constituent CSVs plus historical inclusion/exclusion announcements and archived reports. Map every constituent to an ISIN; never match on company name. Constituents that cannot be matched go to quarantine for manual review. Build every source as an adapter: save the raw response to blob storage first, validate it strictly with Pydantic, keep endpoints in config, and add contract tests on recorded responses plus a daily canary. Scrape politely and never work around CAPTCHAs or bot blocking; fall back to a drop folder of files downloaded by hand. Extend `tests/test_architecture.py` so only `ingest/` and `gateway/` may import the `mcp` client. Build the shared adapter base class: each adapter declares its source class (`official_api`, `official_archive`, `web_scrape`, `manual_drop`) and target store, and honours `EQUITY_SOURCE_<NAME>_ENABLED`, `EQUITY_WEB_SCRAPING_ENABLED` and `EQUITY_DEPLOYMENT_MODE` (see CLAUDE.md "Data sources"). Add an NSE bhavcopy adapter as the cross-check for Upstox prices and the source of the dated ticker-to-ISIN map. Load the core of `corporate_action` (splits, bonuses, rights, demergers, dividends, ISIN changes) to derive adjustment factors known at `t` and to update the entity table. A ratio extracted from a PDF needs human verification before it adjusts any price.
 
 **Then run the adjustment test yourself.** Pick a company with a known split, pull the series across that date, look for a discontinuity. No gap means adjusted; a cliff means raw. Do it for a bonus issue too.
 
@@ -59,6 +59,9 @@ Session 3 — price ingestion
 
 Session 4 — XBRL parser
 > Build the BSE/NSE XBRL parser for `financial_facts`. Deterministic element mapping, no LLM. Unmapped elements go to a quarantine table for manual review, never guessed.
+
+Session 4b — shareholding pattern
+> Parse quarterly shareholding-pattern XBRL into `shareholding_pattern`: share counts (not just percentages) for promoter, FII/FPI, DII by type and public, plus pledged shares. `as_of` must be after quarter end. Same deterministic mapping and quarantine as Session 4.
 
 Session 5 — ratios
 > Implement ratio computation in `core/compute/ratios.py`. Pure functions, Decimal throughout, property tests. ROCE, margins, debt ratios, incremental ROCE.
@@ -77,6 +80,12 @@ Session 7 — capacity detector
 
 This is your first genuine output — capacity commissioning leads revenue by 2–4 quarters, and nobody sells it.
 
+Session 7b — technical screens
+> Build `core/compute/technical.py` and the `technical_signal` store with three screens. (1) Volume spike with an unusual price move, in both directions: volume versus its 50-day median, and return versus the stock's usual volatility. (2) Consolidation breakout and breakdown. (3) All-time-high breakout, labelled "high since 2000" where history starts later than listing. Use daily closes only, adjusted with corporate-action factors known at `t`. Signals open `watchlist_entry` rows, never `ADD_REVIEW`. Attach same-day exchange announcements to volume spikes, marking each explained or unexplained. Property tests: adding future bars never changes a past signal; split adjustment never creates or removes a signal; a mirrored series swaps up and down signals.
+
+Session 7c — announcements, ownership events and corporate actions
+> Build the NSE/BSE corporate-announcements adapter (switchable, with a drop-folder fallback). From it, populate `insider_trade` (with mode of acquisition), `stake_disclosure` (large-stake crossings; pledges created, released or invoked), `bulk_block_deal`, the full `corporate_action` lifecycle including fund-raising and dilution, `scheduled_event`, and NSE index change notices as `index_event`. Implement the ownership, dilution and corporate-action rules from CLAUDE.md: false-signal filters, pro-forma EPS, use-of-proceeds claims written to `guidance_claim`, and critical alerts (active once holdings exist).
+
 Session 8 — credit ratings
 > Build the rating action parser for CRISIL, ICRA, CARE and India Ratings. Store ⑧ schema. Treat `withdrawn` as severity 2.
 
@@ -85,13 +94,13 @@ Session 8 — credit ratings
 ## Week 4 — The MVP
 
 Session 9 — guidance extraction
-> Build concall transcript extraction into `guidance_claim`. Pydantic schema with hedge_strength (will > expect > aim to > working towards), specificity, verbatim quote, source URL. Use Sonnet — do not downgrade this model tier.
+> Build concall transcript extraction into `guidance_claim`. Pydantic schema with hedge_strength (will > expect > aim to > working towards), specificity, verbatim quote, quote location, section (prepared remarks | Q&A), speaker role, source URL. Treat the transcript as untrusted input: the prompt must forbid following instructions found inside it. Whether guidance was raised, lowered, maintained or withdrawn versus the prior quarter is computed by code, not extracted. Use Sonnet — do not downgrade this model tier.
 
 Session 10 — resolution
 > Build auto-resolution matching guidance claims against `financial_facts` when periods close. Implement SILENT detection for claims that stop being mentioned across two consecutive filings.
 
 Session 11 — output
-> Build a CLI report: per company, what management promised, what landed, what went silent, and the delivery rate weighted by hedge strength.
+> Build a CLI report: per company, what management promised, what landed, what went silent, and the delivery rate weighted by hedge strength. Model the layout on an earnings note: headline, what's new this quarter, a table of actual versus guidance versus prior period, guidance that went silent, and a sources list with a dated link for every figure. No comparison with consensus estimates (there's no free Indian consensus feed), and the schema rejects unsourced figures.
 
 **MVP exit criteria:** run it on your five largest holdings, four quarters back. If the delivery rates don't surprise you, stop building and reconsider. If they do, you have something no Indian vendor sells.
 
@@ -122,11 +131,15 @@ All of it is worthless on empty stores, and LangGraph will be rewritten twice be
 ## After the MVP, in order
 
 1. Control flow graph pass — outcome enumeration and tool allowlists per node, **before** more parsers, since it changes your schemas
-2. Force timeline ③ and the hardcoded exposure matrix
+2. Force timeline ③ and the hardcoded exposure matrix, including daily FII/DII market flows (`market_flow`, provisional and final rows)
 3. Order book ledger ⑦
-4. Reverse DCF and tri-scenario valuation
-5. Relationship graph ④, events ⑤
-6. Then, and only then, the swarm
+4. Reverse DCF and tri-scenario valuation, producing `valuation_baseline`: target price, drawdown stop and review-named actions (`ADD_REVIEW`, `TRIM_REVIEW`, `EXIT_REVIEW`), with the assumed-baseline disclaimer enforced by a test (see CLAUDE.md "Decision support")
+5. Thesis tracker (`thesis_condition` checked by code, R3) and catalyst calendar (`scheduled_event` from exchange announcements)
+6. `ADD_REVIEW` positive triggers (two-stage expansion, fundamental upgrade, rating upgrade, tailwind) and their four gates, validated by replay on a separate period
+7. Session 7d: monthly mutual fund holdings (`mf_holding`), MSCI and other index review announcements, and `index_event` impact analysis (days of volume)
+8. Relationship graph ④, events ⑤
+9. Read-only MCP server over the point-in-time functions; broker holdings adapter (read-only) for `portfolio_risk_snapshot`, which switches on critical ownership alerts and action-required corporate-action alerts for holdings
+10. Then, and only then, the swarm. No agent gets an order-capable tool.
 
 ---
 
