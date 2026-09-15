@@ -365,6 +365,7 @@ class WaybackIndexConstituents(Adapter):
             user_agent=ctx.settings.http_user_agent,
             min_interval_seconds=ctx.settings.wayback_min_interval_seconds,
             respect_robots=True,
+            timeout_seconds=ctx.settings.wayback_timeout_seconds,
             transport=self._transport,
         )
 

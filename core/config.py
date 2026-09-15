@@ -52,6 +52,8 @@ class Settings(BaseSettings):
     wayback_cdx_url: str = "https://web.archive.org/cdx/search/cdx"
     wayback_capture_url: str = "https://web.archive.org/web/{timestamp}id_/{original}"
     wayback_min_interval_seconds: float = 10.0
+    # CDX queries over broad locations (www/www1 variants) can take over a minute.
+    wayback_timeout_seconds: float = 120.0
     wayback_list_locations: list[str] = Field(
         default_factory=lambda: [
             "niftyindices.com/IndexConstituent",
