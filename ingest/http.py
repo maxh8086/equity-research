@@ -10,8 +10,10 @@ of retries on 502/503/504 and timeouts, waiting longer each time and at least
 as long as a `Retry-After` header asks. A block is never retried.
 """
 
+import gzip
 import time
 import urllib.robotparser
+import zlib
 from collections.abc import Callable, Mapping
 from urllib.parse import urlsplit
 
@@ -19,6 +21,7 @@ import httpx
 
 BLOCK_STATUSES = frozenset({401, 403, 429, 451})
 OVERLOAD_STATUSES = frozenset({502, 503, 504})
+_TRANSFER_HEADERS = frozenset({"content-encoding", "content-length", "transfer-encoding"})
 
 
 class AccessBlocked(Exception):
@@ -76,12 +79,40 @@ class PoliteClient:
         params: Mapping[str, str] | None = None,
         headers: Mapping[str, str] | None = None,
     ) -> httpx.Response:
+        return self._get(url, params=params, headers=headers, keep_raw=False)[0]
+
+    def get_with_raw(
+        self,
+        url: str,
+        *,
+        params: Mapping[str, str] | None = None,
+        headers: Mapping[str, str] | None = None,
+    ) -> tuple[httpx.Response, bytes]:
+        """The response (content decoded) and its body exactly as transferred.
+
+        For checking a digest an archive computed over the stored payload,
+        which may be gzip-encoded.
+        """
+        response, raw = self._get(url, params=params, headers=headers, keep_raw=True)
+        assert raw is not None
+        return response, raw
+
+    def _get(
+        self,
+        url: str,
+        *,
+        params: Mapping[str, str] | None,
+        headers: Mapping[str, str] | None,
+        keep_raw: bool,
+    ) -> tuple[httpx.Response, bytes | None]:
         if self._respect_robots and not self._robots_for(url).can_fetch(self._user_agent, url):
             raise AccessBlocked(f"robots.txt disallows {url}")
         for attempt in range(1, self._retries + 2):
             last = attempt > self._retries
             try:
-                response = self._throttled_get(url, params=params, headers=headers)
+                response, raw = self._throttled_get(
+                    url, params=params, headers=headers, keep_raw=keep_raw
+                )
             except httpx.TimeoutException:
                 if last:
                     raise
@@ -93,17 +124,35 @@ class PoliteClient:
                 self._sleep(max(self._backoff * attempt, _retry_after(response)))
                 continue
             response.raise_for_status()
-            return response
+            return response, raw
         raise AssertionError("unreachable")
 
-    def _throttled_get(self, url: str, **kwargs) -> httpx.Response:
+    def _throttled_get(
+        self, url: str, *, keep_raw: bool = False, **kwargs
+    ) -> tuple[httpx.Response, bytes | None]:
         host = urlsplit(url).netloc
         if (last := self._last_request.get(host)) is not None:
             wait = self._min_interval - (self._monotonic() - last)
             if wait > 0:
                 self._sleep(wait)
         try:
-            return self._http.get(url, **kwargs)
+            if not keep_raw:
+                return self._http.get(url, **kwargs), None
+            streamed = self._http.send(self._http.build_request("GET", url, **kwargs), stream=True)
+            try:
+                raw = b"".join(streamed.iter_raw())
+            finally:
+                streamed.close()
+            decoded = httpx.Response(
+                streamed.status_code,
+                headers=[
+                    (k, v) for k, v in streamed.headers.multi_items() if k.lower() not in _TRANSFER_HEADERS
+                ],
+                content=_decode(raw, streamed.headers.get("content-encoding", "")),
+                request=streamed.request,
+                history=streamed.history,
+            )
+            return decoded, raw
         finally:
             self._last_request[host] = self._monotonic()
 
@@ -112,7 +161,7 @@ class PoliteClient:
         origin = f"{parts.scheme}://{parts.netloc}"
         if origin not in self._robots:
             parser = urllib.robotparser.RobotFileParser(f"{origin}/robots.txt")
-            response = self._throttled_get(f"{origin}/robots.txt")
+            response, _ = self._throttled_get(f"{origin}/robots.txt")
             if response.status_code in BLOCK_STATUSES:
                 parser.disallow_all = True
             elif response.status_code >= 400:
@@ -127,3 +176,21 @@ def _retry_after(response: httpx.Response) -> float:
     """Seconds from a numeric Retry-After header; 0 when absent or given as a date."""
     value = response.headers.get("retry-after", "").strip()
     return float(value) if value.isdigit() else 0.0
+
+
+def _decode(raw: bytes, content_encoding: str) -> bytes:
+    """Undo Content-Encoding (gzip, deflate), applied in the order listed."""
+    data = raw
+    for coding in reversed([c.strip().lower() for c in content_encoding.split(",") if c.strip()]):
+        if coding == "identity":
+            continue
+        if coding in ("gzip", "x-gzip"):
+            data = gzip.decompress(data)
+        elif coding == "deflate":
+            try:
+                data = zlib.decompress(data)
+            except zlib.error:
+                data = zlib.decompress(data, -zlib.MAX_WBITS)
+        else:
+            raise ValueError(f"unsupported Content-Encoding {coding!r}")
+    return data

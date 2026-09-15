@@ -1,5 +1,6 @@
 """NSE Indices constituent adapters against recorded responses (tests/fixtures/nse_indices)."""
 
+import gzip
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -25,10 +26,12 @@ from core.db.models import (
 from core.db.pit import index_members_on, index_snapshot_quarantine_as_of, index_snapshots_as_of
 from core.timezones import IST
 from ingest.base import AdapterContext, CanaryStatus, RunStatus
+from ingest.nse_indices import adapters
 from ingest.nse_indices.adapters import (
     NseIndicesConstituents,
     NseIndicesConstituentsDrop,
     WaybackIndexConstituents,
+    wayback_digest,
 )
 from ingest.nse_indices.parser import ListRejected, parse_constituent_list
 from tests.fakes import MemoryBlobStore
@@ -238,6 +241,34 @@ def test_archive_overload_is_retried_a_bounded_number_of_times_then_stops_keepin
     assert result.status is RunStatus.FAILED and "503" in result.detail
     assert len(web.captures_fetched()) == 1 + 3  # first capture, then the last one tried three times
     assert [s.observed_at for s in index_snapshots_as_of(session, index_code=N50, as_of=FETCHED)] == [FIRST_AT]
+
+
+def test_gzip_archived_capture_is_checked_as_transferred_and_stored_decoded(session):
+    gz = gzip.compress(NIFTY_50_2017, mtime=0)
+    cdx = [CDX[0], [*FIRST[:4], wayback_digest(gz)]]
+    web = Web(
+        {capture_url(FIRST): page(gz, headers={"content-type": "text/csv", "content-encoding": "gzip"})},
+        cdx={"niftyindices.com/IndexConstituent/ind_nifty50list.csv": cdx},
+    )
+    result = WaybackIndexConstituents(web.transport()).run(_ctx(session))
+    assert result.status is RunStatus.SUCCEEDED, result.detail
+    [snapshot] = index_snapshots_as_of(session, index_code=N50, as_of=FETCHED)
+    assert snapshot.isins == _isins(NIFTY_50_2017, N50)
+    assert content_hash(NIFTY_50_2017) in {r.content_hash for r in _all(session, RawSourceFile)}
+
+
+def test_whole_file_quarantine_is_examined_again_only_after_a_rule_change(session, monkeypatch):
+    WaybackIndexConstituents(_wayback(last=NIFTY_50_2016).transport()).run(_ctx(session))
+    same_rule = _wayback()
+    WaybackIndexConstituents(same_rule.transport()).run(_ctx(session, now=FETCHED + timedelta(hours=1)))
+    assert same_rule.captures_fetched() == []
+
+    monkeypatch.setattr(adapters, "RULE_VERSION", "nse_indices_constituents/next")
+    new_rule = _wayback()
+    result = WaybackIndexConstituents(new_rule.transport()).run(_ctx(session, now=FETCHED + timedelta(hours=2)))
+    assert result.status is RunStatus.SUCCEEDED, result.detail
+    assert new_rule.captures_fetched() == [str(httpx.URL(capture_url(LAST)))]
+    assert len(index_snapshots_as_of(session, index_code=N50, as_of=FETCHED)) == 2
 
 
 def test_redirect_to_another_capture_is_not_stored_under_the_requested_time(session):

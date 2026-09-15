@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
 import httpx
-from pydantic import Field, ValidationError
+from pydantic import Field
 
 from core.db.models import (
     Entity,
@@ -32,8 +32,8 @@ from core.db.models import (
 )
 from core.db.pit import (
     entity_isin_earliest_links_as_of,
+    index_list_sources_settled_as_of,
     index_snapshot_keys_as_of,
-    raw_source_files_as_of,
 )
 from core.sources import SourceClass
 from ingest.base import (
@@ -119,15 +119,21 @@ def load_list(
     tally: Tally,
     *,
     expected_digest: str | None = None,
+    archived_payload: bytes | None = None,
 ) -> None:
-    """Parse one stored list into a snapshot, its constituents, quarantine rows and entities."""
+    """Parse one stored list into a snapshot, its constituents, quarantine rows and entities.
+
+    `expected_digest` is checked against `archived_payload` (the bytes as the
+    archive holds them, often gzip) when given, otherwise against the stored bytes.
+    """
     tally.raw_files += 1
     prov = _provenance(adapter, doc)
     index_code = index_for_url(doc.source_url)
     try:
         if index_code is None:
             raise ListRejected(QuarantineReason.UNKNOWN_FILE, f"no index list at {doc.source_url}")
-        if expected_digest is not None and wayback_digest(doc.data) != expected_digest:
+        payload = doc.data if archived_payload is None else archived_payload
+        if expected_digest is not None and wayback_digest(payload) != expected_digest:
             raise ListRejected(
                 QuarantineReason.DIGEST_MISMATCH, f"bytes do not match archive digest {expected_digest}"
             )
@@ -348,9 +354,14 @@ class WaybackIndexConstituents(Adapter):
 
     `as_of` is the capture time: the list was public at the latest then (R2).
     Captures are sparse, months or years apart, and the gaps stay uncertain
-    (core.compute.membership). Each capture is checked against the archive's
-    digest. A server error, a block or a redirect to another capture stops the
-    run and keeps what was loaded; nothing is retried.
+    (core.compute.membership). Each capture's bytes as transferred (often
+    gzip) are checked against the archive's digest; the decoded list is stored.
+    Overload (503/504, timeouts) is retried a bounded number of times; a block,
+    a redirect to another capture or retries running out stops the run and
+    keeps what was loaded.
+
+    A capture is skipped once it is a snapshot, or was quarantined whole under
+    the current rule version; a rule change examines older quarantine again.
     """
 
     name = "wayback_nse_indices_constituents"
@@ -378,21 +389,25 @@ class WaybackIndexConstituents(Adapter):
                     "filter": "statuscode:200", **params},
         )  # fmt: skip
 
-    def _fetch_capture(self, http: PoliteClient, ctx: AdapterContext, capture: CdxCapture) -> tuple[str, httpx.Response]:
-        url = ctx.settings.wayback_capture_url.format(
+    def _capture_url(self, ctx: AdapterContext, capture: CdxCapture) -> str:
+        return ctx.settings.wayback_capture_url.format(
             timestamp=capture.timestamp, original=capture.original
         )
-        response = http.get(url)
+
+    def _fetch_capture(
+        self, http: PoliteClient, ctx: AdapterContext, capture: CdxCapture
+    ) -> tuple[str, httpx.Response, bytes]:
+        url = self._capture_url(ctx, capture)
+        response, raw = http.get_with_raw(url)
         if response.url != httpx.URL(url):
             raise _RunStopped(f"{url} redirected to {response.url}")
-        return url, response
+        return url, response, raw
 
     def ingest(self, ctx: AdapterContext) -> RunResult:
         tally = Tally()
-        done = {
-            r.source_url
-            for r in raw_source_files_as_of(ctx.session, extracted_by=self.extracted_by(), as_of=ctx.now())
-        }
+        settled = index_list_sources_settled_as_of(
+            ctx.session, extracted_by=self.extracted_by(), rule_version=RULE_VERSION, as_of=ctx.now()
+        )
         with self._client(ctx) as http:
             try:
                 for filename in LIST_FILES:
@@ -405,19 +420,18 @@ class WaybackIndexConstituents(Adapter):
                         )  # fmt: skip
                         captures += parse_cdx(doc.data)
                     for capture in run_boundaries(captures):
-                        url = ctx.settings.wayback_capture_url.format(
-                            timestamp=capture.timestamp, original=capture.original
-                        )
-                        if url in done:
+                        if self._capture_url(ctx, capture) in settled:
                             tally.skipped += 1
                             continue
-                        url, response = self._fetch_capture(http, ctx, capture)
+                        url, response, raw = self._fetch_capture(http, ctx, capture)
                         doc = self.store_raw(
                             ctx, data=response.content, source_url=url,
                             as_of=capture.captured_at, media_type=_media_type(response),
                         )  # fmt: skip
-                        done.add(url)
-                        load_list(self, ctx, doc, tally, expected_digest=capture.digest)
+                        settled.add(url)
+                        load_list(
+                            self, ctx, doc, tally, expected_digest=capture.digest, archived_payload=raw
+                        )
             except (AccessBlocked, httpx.HTTPError, CdxShapeError, _RunStopped) as exc:
                 tally.problems.append(f"stopped: {exc}")
         return tally.result(self.name)
@@ -429,7 +443,7 @@ class WaybackIndexConstituents(Adapter):
             captures = parse_cdx(self._cdx(http, ctx, f"{location}/{filename}", limit="1").content)
             if not captures:
                 raise CdxShapeError(f"no captures listed for {location}/{filename}")
-            url, response = self._fetch_capture(http, ctx, captures[0])
-            if wayback_digest(response.content) != captures[0].digest:
+            url, response, raw = self._fetch_capture(http, ctx, captures[0])
+            if wayback_digest(raw) != captures[0].digest:
                 raise ListRejected(QuarantineReason.DIGEST_MISMATCH, url)
             parse_constituent_list(response.content, LIST_FILES[filename])

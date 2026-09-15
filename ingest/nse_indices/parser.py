@@ -23,7 +23,8 @@ from core.compute.isin import is_valid_isin
 from core.db.models import IndexCode, QuarantineReason
 from ingest.schema import StrictModel
 
-RULE_VERSION = "nse_indices_constituents/1"
+# /2: archive digests are checked against the bytes as transferred (gzip), not decoded.
+RULE_VERSION = "nse_indices_constituents/2"
 
 HEADER = ("Company Name", "Industry", "Symbol", "Series", "ISIN Code")
 FIELDS = ("company_name", "industry", "symbol", "series", "isin")

@@ -152,6 +152,30 @@ def index_snapshot_keys_as_of(
     return {(index_code, published) for index_code, published in rows}
 
 
+def index_list_sources_settled_as_of(
+    session: Session, *, extracted_by: str, rule_version: str, as_of: datetime
+) -> set[str]:
+    """Source URLs `extracted_by` turned into a snapshot, or quarantined whole under `rule_version`.
+
+    Adapters skip these. A whole-file quarantine under an older rule is
+    examined again after the rule changes.
+    """
+    require_aware(as_of, "as_of")
+    s, q = IndexSnapshot, IndexSnapshotQuarantine
+    snapshots = session.scalars(
+        select(s.source_url).where(s.extracted_by == extracted_by, s.as_of <= as_of)
+    )
+    quarantined = session.scalars(
+        select(q.source_url).where(
+            q.extracted_by == extracted_by,
+            q.rule_version == rule_version,
+            q.snapshot_id.is_(None),
+            q.as_of <= as_of,
+        )
+    )
+    return set(snapshots) | set(quarantined)
+
+
 def index_snapshot_quarantine_as_of(
     session: Session, *, as_of: datetime
 ) -> list[IndexSnapshotQuarantine]:

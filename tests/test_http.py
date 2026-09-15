@@ -1,3 +1,5 @@
+import gzip
+
 import httpx
 import pytest
 
@@ -158,6 +160,23 @@ def test_retry_after_longer_than_backoff_is_honoured():
     client, _, clock = _scripted([httpx.Response(503, headers={"Retry-After": "300"}), httpx.Response(200)], retries=1)
     client.get("https://example.in/a")
     assert clock.sleeps == [300]
+
+
+@pytest.mark.parametrize("encoding", ["gzip", None])
+def test_get_with_raw_returns_bytes_as_transferred_and_decoded_content(encoding):
+    body = b"Company Name,Industry,Symbol,Series,ISIN Code\n"
+    sent = gzip.compress(body) if encoding else body
+    headers = {"content-encoding": encoding} if encoding else {}
+    client, _ = _client({"/a.csv": httpx.Response(200, headers=headers, content=sent)}, respect_robots=False)
+    response, raw = client.get_with_raw("https://example.in/a.csv")
+    assert (raw, response.content, response.status_code) == (sent, body, 200)
+    assert str(response.url) == "https://example.in/a.csv"
+
+
+def test_get_with_raw_still_stops_on_a_block():
+    client, _ = _client({"/a.csv": httpx.Response(403)}, respect_robots=False)
+    with pytest.raises(AccessBlocked):
+        client.get_with_raw("https://example.in/a.csv")
 
 
 @pytest.mark.parametrize("status", [401, 403, 429, 451])
