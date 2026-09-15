@@ -54,6 +54,10 @@ class Settings(BaseSettings):
     wayback_min_interval_seconds: float = 10.0
     # CDX queries over broad locations (www/www1 variants) can take over a minute.
     wayback_timeout_seconds: float = 120.0
+    # The CDX service is often overloaded (503/504, slow queues) without blocking
+    # anyone: retry that a bounded number of times. A 429 or 403 still stops the run.
+    wayback_overload_retries: int = 2
+    wayback_retry_backoff_seconds: float = 60.0
     wayback_list_locations: list[str] = Field(
         default_factory=lambda: [
             "niftyindices.com/IndexConstituent",

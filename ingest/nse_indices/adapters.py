@@ -366,6 +366,8 @@ class WaybackIndexConstituents(Adapter):
             min_interval_seconds=ctx.settings.wayback_min_interval_seconds,
             respect_robots=True,
             timeout_seconds=ctx.settings.wayback_timeout_seconds,
+            overload_retries=ctx.settings.wayback_overload_retries,
+            retry_backoff_seconds=ctx.settings.wayback_retry_backoff_seconds,
             transport=self._transport,
         )
 

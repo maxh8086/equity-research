@@ -99,3 +99,70 @@ def test_apis_skip_robots():
     client, seen = _client({"/v3/candles": httpx.Response(200)}, respect_robots=False)
     client.get("https://api.example.in/v3/candles")
     assert [r.url.path for r in seen] == ["/v3/candles"]
+
+
+# --------------------------------------------------------------------------- #
+# Overload retries: opt-in, bounded, never for a block
+# --------------------------------------------------------------------------- #
+
+
+def _scripted(answers: list, *, retries: int):
+    """A client whose responses (or exceptions) come from `answers` in order."""
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        answer = answers[min(len(seen), len(answers)) - 1]
+        if isinstance(answer, Exception):
+            raise answer
+        return answer
+
+    clock = FakeClock()
+    client = PoliteClient(
+        user_agent=UA, min_interval_seconds=0, respect_robots=False, overload_retries=retries,
+        retry_backoff_seconds=60, transport=httpx.MockTransport(handler),
+        monotonic=clock.monotonic, sleep=clock.sleep,
+    )  # fmt: skip
+    return client, seen, clock
+
+
+def test_overload_not_retried_by_default():
+    client, seen, _ = _scripted([httpx.Response(503), httpx.Response(200)], retries=0)
+    with pytest.raises(httpx.HTTPStatusError):
+        client.get("https://example.in/a")
+    assert len(seen) == 1
+
+
+@pytest.mark.parametrize("status", [502, 503, 504])
+def test_overload_retried_with_growing_backoff(status):
+    client, seen, clock = _scripted([httpx.Response(status), httpx.Response(status), httpx.Response(200)], retries=2)
+    assert client.get("https://example.in/a").status_code == 200
+    assert (len(seen), clock.sleeps) == (3, [60, 120])
+
+
+def test_overload_retries_are_bounded():
+    client, seen, clock = _scripted([httpx.Response(504)], retries=2)
+    with pytest.raises(httpx.HTTPStatusError, match="504"):
+        client.get("https://example.in/a")
+    assert (len(seen), clock.sleeps) == (3, [60, 120])
+
+
+def test_timeout_retried_then_raised():
+    client, seen, _ = _scripted([httpx.ReadTimeout("slow")], retries=1)
+    with pytest.raises(httpx.ReadTimeout):
+        client.get("https://example.in/a")
+    assert len(seen) == 2
+
+
+def test_retry_after_longer_than_backoff_is_honoured():
+    client, _, clock = _scripted([httpx.Response(503, headers={"Retry-After": "300"}), httpx.Response(200)], retries=1)
+    client.get("https://example.in/a")
+    assert clock.sleeps == [300]
+
+
+@pytest.mark.parametrize("status", [401, 403, 429, 451])
+def test_block_never_retried_even_when_retries_enabled(status):
+    client, seen, clock = _scripted([httpx.Response(status), httpx.Response(200)], retries=3)
+    with pytest.raises(AccessBlocked):
+        client.get("https://example.in/a")
+    assert (len(seen), clock.sleeps) == (1, [])

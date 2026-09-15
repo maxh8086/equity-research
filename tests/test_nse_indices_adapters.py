@@ -230,12 +230,13 @@ def test_capture_that_differs_from_its_digest_is_quarantined(session):
     assert len(index_snapshots_as_of(session, index_code=N50, as_of=FETCHED)) == 1
 
 
-def test_archive_error_stops_the_run_and_keeps_what_loaded(session):
+def test_archive_overload_is_retried_a_bounded_number_of_times_then_stops_keeping_what_loaded(session):
     web = _wayback()
     web.set(capture_url(LAST), page(b"Temporarily Offline", status=503))
-    result = WaybackIndexConstituents(web.transport()).run(_ctx(session))
+    ctx = _ctx(session, wayback_overload_retries=2, wayback_retry_backoff_seconds=0)
+    result = WaybackIndexConstituents(web.transport()).run(ctx)
     assert result.status is RunStatus.FAILED and "503" in result.detail
-    assert len(web.captures_fetched()) == 2
+    assert len(web.captures_fetched()) == 1 + 3  # first capture, then the last one tried three times
     assert [s.observed_at for s in index_snapshots_as_of(session, index_code=N50, as_of=FETCHED)] == [FIRST_AT]
 
 
