@@ -24,7 +24,11 @@ from core.db.models import IndexCode, QuarantineReason
 from ingest.schema import StrictModel
 
 # /2: archive digests are checked against the bytes as transferred (gzip), not decoded.
-RULE_VERSION = "nse_indices_constituents/2"
+# /3: BE (trade-for-trade) accepted alongside EQ -- confirmed real constituents:
+#     Adani Transmission Ltd. (INE931S01010, Nifty Next 50, 2021-11-14, under exchange
+#     surveillance) and two Vedanta demerger entities (Nifty Next 50, 2026-06-21,
+#     newly listed, briefly in T2T settlement before their own EQ reclassification).
+RULE_VERSION = "nse_indices_constituents/3"
 
 HEADER = ("Company Name", "Industry", "Symbol", "Series", "ISIN Code")
 FIELDS = ("company_name", "industry", "symbol", "series", "isin")
@@ -38,7 +42,13 @@ LIST_FILES: dict[str, IndexCode] = {
 # not the list it claims to be. The slack allows a list published mid-replacement.
 MIN_CONSTITUENTS = 40
 MAX_CONSTITUENTS = 60
-EQUITY_SERIES = "EQ"
+
+# NSE trading-series codes confirmed to still be an ordinary equity constituent, not a
+# reason to exclude a row. Human-curated and grown only from confirmed evidence (never
+# guessed, R1): a series not on this list is quarantined for review, not assumed bad.
+# EQ: normal equity. BE: trade-for-trade / surveillance settlement -- a company under
+# ASM/GSM restrictions, or newly listed after a demerger, still belongs in the index.
+EQUITY_SERIES = frozenset({"EQ", "BE"})
 
 _INDIAN_ISIN = re.compile(r"^IN[A-Z0-9]{9}[0-9]$")
 
@@ -130,7 +140,7 @@ def parse_constituent_list(data: bytes, index_code: IndexCode) -> ParsedList:
                 RowIssue(number, line, QuarantineReason.INVALID_ISIN, f"{row.isin} is not a valid Indian ISIN")
             )
             continue
-        if row.series != EQUITY_SERIES:
+        if row.series not in EQUITY_SERIES:
             issues.append(
                 RowIssue(number, line, QuarantineReason.NON_EQUITY_SERIES, f"series {row.series}")
             )

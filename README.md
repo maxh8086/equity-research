@@ -26,6 +26,7 @@ up → down → up on every run. Tests that need no services:
 .\.venv\Scripts\python.exe -m ingest list            # adapters, source class, stores, switch state
 .\.venv\Scripts\python.exe -m ingest run NAME        # exit 0 = succeeded or disabled
 .\.venv\Scripts\python.exe -m ingest canary          # daily shape check; disabled adapters skipped
+.\.venv\Scripts\python.exe -m ingest reparse NAME    # re-derive from stored bytes; never re-fetches
 ```
 
 Every adapter is off until `EQUITY_SOURCE_<NAME>_ENABLED=true`; `web_scrape`
@@ -47,7 +48,10 @@ the file name in `source_url` (`ind_nifty50list.csv`, `ind_niftynext50list.csv`)
 For a Wayback copy, `source_url` is the capture URL and `published_at` its
 capture time. Rows that fail checks land in `index_snapshot_quarantine`; review
 them with `core.db.pit.index_quarantine_review_as_of`, which marks a rejected
-file superseded once the same file has been loaded (e.g. after a rule fix).
+file (or a row belonging to a since-superseded snapshot) superseded once the
+same file has been loaded again -- typically via `python -m ingest reparse`
+after a parser rule change, which re-derives from the bytes already in blob
+storage rather than re-fetching.
 
 ## Layout
 

@@ -110,6 +110,20 @@ class Adapter(ABC):
             return RunResult(self.name, RunStatus.DISABLED, reason)
         return self.ingest(ctx)
 
+    def reparse(self, ctx: AdapterContext) -> RunResult:
+        """Re-derive this adapter's stores from its own stored raw files, never re-fetching.
+
+        CLAUDE.md Stack: "a parser fix must re-parse stored bytes without
+        re-downloading." Override `_reparse` where that matters (see
+        ingest/nse_indices/adapters.py); most adapters have nothing to redo.
+        """
+        if reason := self.disabled_reason(ctx.settings):
+            return RunResult(self.name, RunStatus.DISABLED, reason)
+        return self._reparse(ctx)
+
+    def _reparse(self, ctx: AdapterContext) -> RunResult:
+        return RunResult(self.name, RunStatus.SUCCEEDED, "reparse not supported; nothing to do")
+
     def canary(self, ctx: AdapterContext) -> CanaryResult:
         if reason := self.disabled_reason(ctx.settings):
             return CanaryResult(self.name, CanaryStatus.SKIPPED, reason)

@@ -78,7 +78,9 @@ def test_whole_file_rejected(data, reason):
     [
         ({"isin": "INE002A01019"}, QuarantineReason.INVALID_ISIN),  # check digit
         ({"isin": "US0378331005"}, QuarantineReason.INVALID_ISIN),  # valid, not Indian
-        ({"series": "BE"}, QuarantineReason.NON_EQUITY_SERIES),
+        # BZ is a real NSE trade-for-trade series, distinct from BE, with no confirmed
+        # constituent yet (unlike BE -- see RULE_VERSION history) -- still quarantined.
+        ({"series": "BZ"}, QuarantineReason.NON_EQUITY_SERIES),
         ({"symbol": ""}, QuarantineReason.MALFORMED_ROW),
         ({"company_name": ""}, QuarantineReason.MALFORMED_ROW),
     ],
@@ -90,6 +92,13 @@ def test_bad_row_quarantined_and_the_rest_kept(fields, reason):
     assert (issue.row_number, issue.reason) == (7, reason)
     assert len(parsed.constituents) == 49
     assert 7 not in {c.row_number for c in parsed.constituents}
+
+
+def test_be_series_is_accepted_alongside_eq():
+    """Confirmed real constituents can trade in BE (trade-for-trade) -- see RULE_VERSION."""
+    parsed = parse_constituent_list(_data(_replace(_lines(), 7, series="BE")), IndexCode.NIFTY_50)
+    assert parsed.issues == () and len(parsed.constituents) == 50
+    assert parsed.constituents[6].row.series == "BE"
 
 
 def test_row_with_wrong_field_count_quarantined():

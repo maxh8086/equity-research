@@ -207,3 +207,38 @@ def test_cli_exits_1_when_an_adapter_reports_failure(monkeypatch, tmp_path, caps
     monkeypatch.setattr(cli, "s3_blob_store", lambda settings: MemoryBlobStore())
     assert cli.main(["run", "fake_failing"]) == 1
     assert "fake_failing\tfailed\tfile quarantined" in capsys.readouterr().out
+
+
+# --------------------------------------------------------------------------- #
+# Reparse: re-derive from stored bytes, never re-fetch (CLAUDE.md Stack)
+# --------------------------------------------------------------------------- #
+
+
+def test_default_reparse_is_a_no_op():
+    result = FakeApi().reparse(_ctx(source_switches={"fake_api": True}))
+    assert result.status is RunStatus.SUCCEEDED and "not supported" in result.detail
+
+
+def test_reparse_respects_the_disabled_switch():
+    assert FakeApi().reparse(_ctx()).status is RunStatus.DISABLED
+
+
+def test_cli_reparse_dispatches_to_adapter(monkeypatch, tmp_path, capsys):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("EQUITY_SOURCE_FAKE_API_ENABLED", "true")
+    monkeypatch.setattr(cli, "discover", lambda: {"fake_api": FakeApi})
+    monkeypatch.setattr(cli, "create_engine", lambda url: None)
+    monkeypatch.setattr(cli, "s3_blob_store", lambda settings: MemoryBlobStore())
+    assert cli.main(["reparse", "fake_api"]) == 0
+    assert "fake_api\tsucceeded\treparse not supported; nothing to do" in capsys.readouterr().out
+
+
+def test_cli_reparse_with_no_names_covers_every_adapter(monkeypatch, tmp_path, capsys):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("EQUITY_SOURCE_FAKE_API_ENABLED", "true")
+    monkeypatch.setattr(cli, "discover", lambda: {"fake_api": FakeApi, "fake_scrape": FakeScrape})
+    monkeypatch.setattr(cli, "create_engine", lambda url: None)
+    monkeypatch.setattr(cli, "s3_blob_store", lambda settings: MemoryBlobStore())
+    assert cli.main(["reparse"]) == 0
+    out = capsys.readouterr().out
+    assert "fake_api\tsucceeded" in out and "fake_scrape\tdisabled" in out

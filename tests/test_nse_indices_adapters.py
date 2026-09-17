@@ -38,6 +38,7 @@ from ingest.nse_indices.adapters import (
     WaybackIndexConstituents,
     wayback_digest,
 )
+from ingest.nse_indices import parser as parser_module
 from ingest.nse_indices.parser import ListRejected, parse_constituent_list
 from tests.fakes import MemoryBlobStore
 
@@ -99,7 +100,9 @@ class Web:
         return [str(r.url) for r in self.requests if "id_/" in str(r.url)]
 
 
-def _ctx(session, now: datetime = FETCHED, **settings) -> AdapterContext:
+def _ctx(
+    session, now: datetime = FETCHED, blob: MemoryBlobStore | None = None, **settings
+) -> AdapterContext:
     base = dict(
         web_scraping_enabled=True,
         nse_indices_min_interval_seconds=0,
@@ -110,7 +113,7 @@ def _ctx(session, now: datetime = FETCHED, **settings) -> AdapterContext:
             "wayback_nse_indices_constituents": True,
         },
     )
-    return AdapterContext(session, MemoryBlobStore(), Settings(**(base | settings)), now=lambda: now)
+    return AdapterContext(session, blob or MemoryBlobStore(), Settings(**(base | settings)), now=lambda: now)
 
 
 def _live(nifty: bytes = NIFTY_50_NOW, next50: bytes = NEXT_50_NOW) -> Web:
@@ -291,6 +294,86 @@ def test_row_quarantine_is_never_superseded(session):
     NseIndicesConstituents(_live(nifty=bad).transport()).run(_ctx(session))
     [entry] = index_quarantine_review_as_of(session, as_of=FETCHED)
     assert entry.row.snapshot_id is not None and entry.needs_review
+
+
+# --------------------------------------------------------------------------- #
+# Reparse: a corrected rule re-derives from stored bytes, never the network
+# --------------------------------------------------------------------------- #
+
+
+def _series_fix(monkeypatch, series: frozenset[str], rule_version: str) -> None:
+    """Simulate a parser at a given point in EQUITY_SERIES/RULE_VERSION history."""
+    monkeypatch.setattr(parser_module, "EQUITY_SERIES", series)
+    monkeypatch.setattr(adapters, "RULE_VERSION", rule_version)
+
+
+def test_reparse_supersedes_an_incomplete_snapshot_from_stored_bytes_only(session, monkeypatch):
+    isin = sorted(_isins(NIFTY_50_NOW, N50))[0]
+    be_bytes = NIFTY_50_NOW.replace(f",EQ,{isin}".encode(), f",BE,{isin}".encode())
+    assert be_bytes != NIFTY_50_NOW
+    blob = MemoryBlobStore()  # the same blob store the reparse call must read back from
+
+    # Before the fix: BE is not yet a known series, so the row is quarantined.
+    _series_fix(monkeypatch, frozenset({"EQ"}), "nse_indices_constituents/test-old")
+    NseIndicesConstituents(_live(nifty=be_bytes).transport()).run(_ctx(session, blob=blob))
+    [old] = index_snapshots_as_of(session, index_code=N50, as_of=FETCHED)
+    assert old.complete is False and isin not in old.isins
+
+    # The fix ships: BE becomes a confirmed equity series under a new rule version.
+    _series_fix(monkeypatch, frozenset({"EQ", "BE"}), "nse_indices_constituents/test-new")
+    web = Web()  # no pages configured: reparse must never touch the network
+    later = FETCHED + timedelta(hours=1)
+    result = NseIndicesConstituents(web.transport()).reparse(_ctx(session, now=later, blob=blob))
+    assert result.status is RunStatus.SUCCEEDED, result.detail
+    assert web.requests == []
+
+    [new] = index_snapshots_as_of(session, index_code=N50, as_of=later)
+    assert new.complete is True and isin in new.isins
+    assert new.observed_at == FETCHED  # true original as_of, never today's
+
+    # The old row is untouched (append-only), still directly queryable.
+    n50_rows = list(session.scalars(select(IndexSnapshot).where(IndexSnapshot.index_code == N50)))
+    assert len(n50_rows) == 2
+    assert {r.rule_version for r in n50_rows} == {
+        "nse_indices_constituents/test-old", "nse_indices_constituents/test-new"
+    }  # fmt: skip
+
+
+def test_reparse_of_an_already_current_file_changes_nothing(session):
+    blob = MemoryBlobStore()
+    NseIndicesConstituents(_live().transport()).run(_ctx(session, blob=blob))
+    web = Web()  # no pages configured: reparse must never touch the network
+    result = NseIndicesConstituents(web.transport()).reparse(
+        _ctx(session, now=FETCHED + timedelta(hours=1), blob=blob)
+    )
+    assert result.status is RunStatus.SUCCEEDED and "2 already loaded" in result.detail
+    assert web.requests == []
+    assert len(_all(session, IndexSnapshot)) == 2  # nothing duplicated
+
+
+def test_row_quarantine_is_superseded_once_a_newer_snapshot_replaces_its_file(session, monkeypatch):
+    isin = sorted(_isins(NIFTY_50_NOW, N50))[0]
+    be_bytes = NIFTY_50_NOW.replace(f",EQ,{isin}".encode(), f",BE,{isin}".encode())
+    blob = MemoryBlobStore()
+
+    _series_fix(monkeypatch, frozenset({"EQ"}), "nse_indices_constituents/test-old")
+    NseIndicesConstituents(_live(nifty=be_bytes).transport()).run(_ctx(session, blob=blob))
+    [before] = [
+        e for e in index_quarantine_review_as_of(session, as_of=FETCHED)
+        if e.row.reason is QuarantineReason.NON_EQUITY_SERIES
+    ]  # fmt: skip
+    assert before.needs_review and before.row.snapshot_id is not None
+
+    _series_fix(monkeypatch, frozenset({"EQ", "BE"}), "nse_indices_constituents/test-new")
+    later = FETCHED + timedelta(hours=1)
+    NseIndicesConstituents(Web().transport()).reparse(_ctx(session, now=later, blob=blob))
+
+    [new_snapshot] = [
+        s for s in _all(session, IndexSnapshot)
+        if s.index_code == N50 and s.rule_version == "nse_indices_constituents/test-new"
+    ]  # fmt: skip
+    [after] = [e for e in index_quarantine_review_as_of(session, as_of=later) if e.row.id == before.row.id]
+    assert (after.superseded_by, after.needs_review) == (new_snapshot.id, False)
 
 
 def test_redirect_to_another_capture_is_not_stored_under_the_requested_time(session):

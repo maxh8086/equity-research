@@ -1,8 +1,10 @@
-"""python -m ingest list | run NAME [NAME ...] | canary [NAME ...]
+"""python -m ingest list | run NAME [NAME ...] | canary [NAME ...] | reparse [NAME ...]
 
 Exit codes: 0 when every adapter succeeded, was disabled or was skipped;
 1 when any failed; 2 when startup was refused or a name is unknown.
-`canary` with no names checks every adapter; schedule it daily.
+`canary` with no names checks every adapter; schedule it daily. `reparse`
+re-derives an adapter's stores from its own already-stored raw files, never
+re-fetching (for after a parser fix); most adapters have nothing to redo.
 """
 
 import argparse
@@ -26,6 +28,7 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("list")
     sub.add_parser("run").add_argument("names", nargs="+")
     sub.add_parser("canary").add_argument("names", nargs="*")
+    sub.add_parser("reparse").add_argument("names", nargs="*")
     args = parser.parse_args(argv)
 
     settings = get_settings()
@@ -55,7 +58,12 @@ def main(argv: list[str] | None = None) -> int:
         with Session(engine) as session:
             ctx = AdapterContext(session, blob, settings, now=lambda: datetime.now(IST))
             try:
-                result = adapter.run(ctx) if args.command == "run" else adapter.canary(ctx)
+                if args.command == "run":
+                    result = adapter.run(ctx)
+                elif args.command == "canary":
+                    result = adapter.canary(ctx)
+                else:
+                    result = adapter.reparse(ctx)
                 # A failed run still commits: its raw files and quarantine rows are the evidence.
                 session.commit()
             except Exception:

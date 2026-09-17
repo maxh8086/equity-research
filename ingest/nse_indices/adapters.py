@@ -34,6 +34,7 @@ from core.db.pit import (
     entity_isin_earliest_links_as_of,
     index_list_sources_settled_as_of,
     index_snapshot_keys_as_of,
+    raw_source_files_as_of,
 )
 from core.sources import SourceClass
 from ingest.base import (
@@ -137,7 +138,9 @@ def load_list(
             raise ListRejected(
                 QuarantineReason.DIGEST_MISMATCH, f"bytes do not match archive digest {expected_digest}"
             )
-        known = index_snapshot_keys_as_of(ctx.session, source_url=doc.source_url, as_of=doc.as_of)
+        known = index_snapshot_keys_as_of(
+            ctx.session, source_url=doc.source_url, rule_version=RULE_VERSION, as_of=doc.as_of
+        )
         if (index_code, doc.as_of) in known:
             tally.skipped += 1
             return
@@ -215,6 +218,34 @@ def _link_entities(adapter: Adapter, ctx: AdapterContext, doc: RawDocument, isin
     ctx.session.flush()
 
 
+def reparse_stored_lists(adapter: Adapter, ctx: AdapterContext) -> RunResult:
+    """Re-parse `adapter`'s already-stored raw files under the current rule version.
+
+    Reads bytes back from blob storage; never re-fetches over the network
+    (CLAUDE.md Stack: "a parser fix must re-parse stored bytes without
+    re-downloading"). A file already parsed under RULE_VERSION is skipped
+    (load_list's own check via index_snapshot_keys_as_of); one that parses
+    differently now adds a new snapshot alongside the old one (append-only),
+    dated at the file's true, original as_of -- never today's -- so no
+    history is invented (R2). Bytes are trusted as already verified (stored
+    by a prior successful `ingest`), so no digest re-check is made here.
+    """
+    tally = Tally()
+    for raw in raw_source_files_as_of(ctx.session, extracted_by=adapter.extracted_by(), as_of=ctx.now()):
+        if index_for_url(raw.source_url) is None:
+            continue  # not a constituent list (e.g. a stored Wayback CDX query response)
+        doc = RawDocument(
+            data=ctx.blob.get(raw.content_hash),
+            content_hash=raw.content_hash,
+            source_url=raw.source_url,
+            as_of=raw.as_of,
+            fetched_at=raw.fetched_at,
+            media_type=raw.media_type,
+        )
+        load_list(adapter, ctx, doc, tally)
+    return tally.result(adapter.name)
+
+
 def _media_type(response: httpx.Response) -> str:
     return response.headers.get("content-type", "application/octet-stream").split(";")[0].strip()
 
@@ -275,6 +306,9 @@ class NseIndicesConstituents(Adapter):
             for url in self._urls(ctx):
                 parse_constituent_list(http.get(url).content, index_for_url(url))
 
+    def _reparse(self, ctx: AdapterContext) -> RunResult:
+        return reparse_stored_lists(self, ctx)
+
 
 class NseIndicesConstituentsDrop(DropFolderAdapter):
     """Lists downloaded by hand into <EQUITY_DROP_FOLDER>/nse_indices_constituents_drop/.
@@ -298,6 +332,9 @@ class NseIndicesConstituentsDrop(DropFolderAdapter):
             if (index_code := index_for_url(meta.source_url)) is None:
                 raise ListRejected(QuarantineReason.UNKNOWN_FILE, meta.source_url)
             parse_constituent_list(path.read_bytes(), index_code)
+
+    def _reparse(self, ctx: AdapterContext) -> RunResult:
+        return reparse_stored_lists(self, ctx)
 
 
 CDX_FIELDS = ("timestamp", "original", "mimetype", "statuscode", "digest")
@@ -447,3 +484,6 @@ class WaybackIndexConstituents(Adapter):
             if wayback_digest(raw) != captures[0].digest:
                 raise ListRejected(QuarantineReason.DIGEST_MISMATCH, url)
             parse_constituent_list(response.content, LIST_FILES[filename])
+
+    def _reparse(self, ctx: AdapterContext) -> RunResult:
+        return reparse_stored_lists(self, ctx)

@@ -238,7 +238,11 @@ class IndexSnapshot(ProvenanceMixin, Base):
             "content_hash ~ '^[0-9a-f]{64}$'", name="ck_index_snapshot_content_hash_sha256"
         ),
         CheckConstraint("model_version IS NULL", name="ck_index_snapshot_no_model"),
-        UniqueConstraint("index_code", "source_url", "as_of", name="uq_index_snapshot_publication"),
+        # A reparse under a corrected rule_version adds a row rather than editing the
+        # old one (append-only); core.db.pit reads pick the newest row per file.
+        UniqueConstraint(
+            "index_code", "source_url", "as_of", "rule_version", name="uq_index_snapshot_publication"
+        ),
         Index("ix_index_snapshot_pit", "index_code", "as_of"),
     )
 

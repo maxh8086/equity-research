@@ -62,6 +62,36 @@ state at `t` is the latest row with `as_of <= t`.
   A read answers member, not a member, or *uncertain*: between two lists that
   disagree, and after the latest list, nothing is guessed.
 
+## Reparsing under a corrected rule (not a restatement)
+
+A parser bug is not new information: the source bytes and their publication
+time never changed, only our ability to read them correctly did. Fixing that
+and re-deriving a more complete historical fact is not look-ahead -- R2
+forbids inventing knowledge that did not exist yet, not retrieving knowledge
+that already did (an analyst reading the same file by hand on the original
+date would have reached the same, corrected conclusion).
+
+The general shape, implemented for index snapshots
+(`ingest/nse_indices/adapters.py: reparse_stored_lists`,
+`python -m ingest reparse NAME`):
+- every store keyed partly by `rule_version` widens its uniqueness to include
+  it, so a corrected reparse *adds* a row instead of editing the old one
+  (append-only) -- `index_snapshot`'s key is (`index_code`, `source_url`,
+  `as_of`, `rule_version`)
+- the new row is dated at the file's true, original `as_of`, never today's
+- reads pick the newest row per file (highest `id`, i.e. most recently
+  produced, regardless of what the `rule_version` string says) --
+  `core/db/pit.py: index_snapshots_as_of`
+- reparsing reads bytes back from blob storage via `raw_source_file`; it
+  never re-fetches over the network (CLAUDE.md Stack)
+- the superseded row is never deleted; `index_quarantine_review_as_of` marks
+  quarantine entries tied to it as no longer needing review, pointing at
+  whatever replaced it
+
+This is distinct from a genuine restatement (a company revising 2019
+earnings in 2027), which *is* new information and must keep the later
+`as_of` precisely so a replay "as of 2019" cannot see it.
+
 ## Hypotheses (R3)
 
 - A counter-thesis is stored as a structured condition (metric, operator,
