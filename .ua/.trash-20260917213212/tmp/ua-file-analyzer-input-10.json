@@ -1,0 +1,19 @@
+{
+  "projectRoot": "C:/Users/vaibh/Downloads/Projects/Cluade Agent Swarm - Market Analyst",
+  "batchFiles": [
+    {"path": "tests/fixtures/nse_indices/SOURCES.md", "language": "markdown", "sizeLines": 16, "fileCategory": "docs"},
+    {"path": "tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json", "language": "json", "sizeLines": 18, "fileCategory": "config"},
+    {"path": "tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv", "language": "csv", "sizeLines": 51, "fileCategory": "data"},
+    {"path": "tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv", "language": "csv", "sizeLines": 51, "fileCategory": "data"},
+    {"path": "tests/fixtures/nse_indices/ind_nifty50list_20260915.csv", "language": "csv", "sizeLines": 51, "fileCategory": "data"},
+    {"path": "tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv", "language": "csv", "sizeLines": 51, "fileCategory": "data"}
+  ],
+  "batchImportData": {
+    "tests/fixtures/nse_indices/SOURCES.md": [],
+    "tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json": [],
+    "tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv": [],
+    "tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv": [],
+    "tests/fixtures/nse_indices/ind_nifty50list_20260915.csv": [],
+    "tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv": []
+  }
+}

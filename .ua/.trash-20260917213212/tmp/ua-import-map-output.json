@@ -1,0 +1,229 @@
+{
+  "scriptCompleted": true,
+  "stats": {
+    "filesScanned": 81,
+    "filesWithImports": 30,
+    "totalEdges": 107
+  },
+  "failures": [],
+  "importMap": {
+    ".dockerignore": [],
+    ".env.example": [],
+    ".gitattributes": [],
+    ".github/workflows/ci.yml": [],
+    ".obsidian/app.json": [],
+    ".obsidian/appearance.json": [],
+    ".obsidian/backlink.json": [],
+    ".obsidian/core-plugins.json": [],
+    ".obsidian/graph.json": [],
+    ".obsidian/workspace.json": [],
+    ".ua/intermediate/scan-result.json": [],
+    ".ua/intermediate/ua-import-map-output.json": [],
+    ".ua/intermediate/ua-scan-files.json": [],
+    "CLAUDE.md": [],
+    "Dockerfile": [],
+    "README.md": [],
+    "Welcome.md": [],
+    "alembic.ini": [],
+    "core/__init__.py": [],
+    "core/blob.py": [
+      "core/compute/hashing.py",
+      "core/config.py"
+    ],
+    "core/compute/__init__.py": [],
+    "core/compute/hashing.py": [],
+    "core/compute/isin.py": [],
+    "core/compute/membership.py": [],
+    "core/config.py": [
+      "core/sources.py"
+    ],
+    "core/db/__init__.py": [],
+    "core/db/base.py": [
+      "core/timezones.py"
+    ],
+    "core/db/models.py": [
+      "core/db/base.py",
+      "core/timezones.py"
+    ],
+    "core/db/pit.py": [
+      "core/compute/membership.py",
+      "core/db/models.py",
+      "core/timezones.py"
+    ],
+    "core/sources.py": [],
+    "core/timezones.py": [],
+    "docker-compose.yml": [],
+    "docs/temporal-model.md": [],
+    "getting-started-plan.md": [],
+    "ingest/__init__.py": [],
+    "ingest/__main__.py": [
+      "core/blob.py",
+      "core/config.py",
+      "core/timezones.py",
+      "ingest/base.py",
+      "ingest/registry.py"
+    ],
+    "ingest/base.py": [
+      "core/blob.py",
+      "core/config.py",
+      "core/db/models.py",
+      "core/sources.py",
+      "core/timezones.py",
+      "ingest/schema.py"
+    ],
+    "ingest/http.py": [],
+    "ingest/nse_bhavcopy/__init__.py": [],
+    "ingest/nse_bhavcopy/adapters.py": [
+      "core/db/models.py",
+      "core/db/pit.py",
+      "core/sources.py",
+      "core/timezones.py",
+      "ingest/base.py",
+      "ingest/http.py",
+      "ingest/nse_bhavcopy/parser.py"
+    ],
+    "ingest/nse_bhavcopy/parser.py": [
+      "core/compute/isin.py",
+      "core/db/models.py",
+      "ingest/schema.py"
+    ],
+    "ingest/nse_indices/__init__.py": [],
+    "ingest/nse_indices/adapters.py": [
+      "core/db/models.py",
+      "core/db/pit.py",
+      "core/sources.py",
+      "ingest/base.py",
+      "ingest/http.py",
+      "ingest/nse_indices/parser.py",
+      "ingest/schema.py"
+    ],
+    "ingest/nse_indices/parser.py": [
+      "core/compute/isin.py",
+      "core/db/models.py",
+      "ingest/schema.py"
+    ],
+    "ingest/registry.py": [
+      "core/config.py",
+      "core/sources.py",
+      "ingest/__init__.py",
+      "ingest/base.py"
+    ],
+    "ingest/schema.py": [],
+    "migrations/env.py": [
+      "core/config.py",
+      "core/db/base.py",
+      "core/db/models.py"
+    ],
+    "migrations/script.py.mako": [],
+    "migrations/versions/0001_financial_facts.py": [],
+    "migrations/versions/0002_raw_source_file.py": [],
+    "migrations/versions/0003_entity_and_index_snapshots.py": [],
+    "migrations/versions/0004_index_snapshot_rule_versioned.py": [],
+    "migrations/versions/0005_nse_bhavcopy.py": [],
+    "pyproject.toml": [],
+    "requirements.txt": [],
+    "tests/__init__.py": [],
+    "tests/conftest.py": [
+      "core/blob.py",
+      "core/config.py"
+    ],
+    "tests/factories.py": [
+      "core/compute/hashing.py",
+      "core/db/models.py",
+      "core/timezones.py"
+    ],
+    "tests/fakes.py": [
+      "core/compute/hashing.py"
+    ],
+    "tests/fixtures/nse_bhavcopy/SOURCES.md": [],
+    "tests/fixtures/nse_indices/SOURCES.md": [],
+    "tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json": [],
+    "tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv": [],
+    "tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv": [],
+    "tests/fixtures/nse_indices/ind_nifty50list_20260915.csv": [],
+    "tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv": [],
+    "tests/test_architecture.py": [],
+    "tests/test_blob_s3.py": [
+      "core/blob.py",
+      "core/compute/hashing.py"
+    ],
+    "tests/test_compute_isin.py": [
+      "core/compute/isin.py"
+    ],
+    "tests/test_compute_membership.py": [
+      "core/compute/membership.py"
+    ],
+    "tests/test_config.py": [
+      "core/config.py",
+      "core/sources.py"
+    ],
+    "tests/test_financial_facts_schema.py": [
+      "core/db/base.py",
+      "core/db/models.py",
+      "core/timezones.py",
+      "tests/factories.py"
+    ],
+    "tests/test_http.py": [
+      "ingest/http.py"
+    ],
+    "tests/test_ingest_base.py": [
+      "core/config.py",
+      "core/sources.py",
+      "ingest/__init__.py",
+      "ingest/base.py",
+      "ingest/registry.py",
+      "tests/fakes.py"
+    ],
+    "tests/test_nse_bhavcopy_adapters.py": [
+      "core/config.py",
+      "core/db/models.py",
+      "core/db/pit.py",
+      "core/timezones.py",
+      "ingest/base.py",
+      "ingest/nse_bhavcopy/__init__.py",
+      "ingest/nse_bhavcopy/adapters.py",
+      "tests/fakes.py"
+    ],
+    "tests/test_nse_bhavcopy_parser.py": [
+      "core/compute/isin.py",
+      "core/db/models.py",
+      "ingest/nse_bhavcopy/parser.py"
+    ],
+    "tests/test_nse_indices_adapters.py": [
+      "core/compute/hashing.py",
+      "core/compute/membership.py",
+      "core/config.py",
+      "core/db/models.py",
+      "core/db/pit.py",
+      "core/timezones.py",
+      "ingest/base.py",
+      "ingest/nse_indices/__init__.py",
+      "ingest/nse_indices/adapters.py",
+      "ingest/nse_indices/parser.py",
+      "tests/fakes.py"
+    ],
+    "tests/test_nse_indices_parser.py": [
+      "core/db/models.py",
+      "ingest/nse_indices/parser.py"
+    ],
+    "tests/test_pit.py": [
+      "core/db/models.py",
+      "core/db/pit.py",
+      "core/timezones.py",
+      "tests/factories.py"
+    ],
+    "tests/test_raw_source_file.py": [
+      "core/compute/hashing.py",
+      "core/config.py",
+      "core/db/models.py",
+      "core/db/pit.py",
+      "core/sources.py",
+      "core/timezones.py",
+      "ingest/base.py",
+      "tests/fakes.py"
+    ],
+    "tests/test_wayback_cdx.py": [
+      "ingest/nse_indices/adapters.py"
+    ]
+  }
+}

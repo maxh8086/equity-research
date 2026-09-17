@@ -1,0 +1,1168 @@
+{
+  "nodes": [
+    {
+      "id": "file:core/db/base.py",
+      "type": "file",
+      "name": "base.py",
+      "filePath": "core/db/base.py",
+      "summary": "Defines the SQLAlchemy declarative Base and the ProvenanceMixin that attaches as_of, content_hash, source_url, extracted_by, model_version, and ingested_at columns to every store table, enforcing timezone-aware as_of before flush.",
+      "tags": ["data-model", "utility", "validation"],
+      "complexity": "simple",
+      "languageNotes": "ProvenanceMixin uses a SQLAlchemy @validates event to reject naive datetimes before they reach the database, making the constraint ORM-level rather than DB-constraint-only."
+    },
+    {
+      "id": "file:core/db/models.py",
+      "type": "file",
+      "name": "models.py",
+      "filePath": "core/db/models.py",
+      "summary": "Central ORM model registry defining all store tables: financial facts, raw source files, entity/ISIN mapping, index snapshots and their quarantine, and NSE bhavcopy rows and quarantine, all inheriting ProvenanceMixin for append-only temporal semantics.",
+      "tags": ["data-model", "database", "schema-definition"],
+      "complexity": "complex",
+      "languageNotes": "Uses a _pg_enum helper to bind Python enums to named Postgres ENUM types, keeping SQL migrations deterministic."
+    },
+    {
+      "id": "file:core/db/pit.py",
+      "type": "file",
+      "name": "pit.py",
+      "filePath": "core/db/pit.py",
+      "summary": "Provides the complete set of point-in-time read functions for all stores; every function accepts an as_of parameter and enforces that only data visible at that wall-clock time is returned, preventing look-ahead bias.",
+      "tags": ["data-model", "service", "validation"],
+      "complexity": "complex",
+      "languageNotes": "All functions call require_aware on every datetime argument and use SQLAlchemy's .distinct().order_by() pattern to pick the latest-as-of version of each logical row without window functions."
+    },
+    {
+      "id": "file:core/timezones.py",
+      "type": "file",
+      "name": "timezones.py",
+      "filePath": "core/timezones.py",
+      "summary": "Exports require_aware, a one-function module that raises ValueError on any naive datetime, enforcing the system-wide rule that all timestamps must carry a timezone offset.",
+      "tags": ["utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:ingest/nse_bhavcopy/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "ingest/nse_bhavcopy/__init__.py",
+      "summary": "Empty package initializer that makes ingest/nse_bhavcopy a Python package; contains no public symbols.",
+      "tags": ["entry-point"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:ingest/nse_bhavcopy/adapters.py",
+      "type": "file",
+      "name": "adapters.py",
+      "filePath": "ingest/nse_bhavcopy/adapters.py",
+      "summary": "Implements the NseBhavcopy (HTTP) and NseBhavcopyDrop (drop-folder) adapters that fetch or read daily bhavcopy archive files, parse them, write accepted rows to NseBhavcopyRow, and route rejected rows to NseBhavcopyQuarantine.",
+      "tags": ["service", "api-handler", "data-pipeline"],
+      "complexity": "complex",
+      "languageNotes": "The Tally dataclass accumulates run statistics and converts them to a RunResult; the two adapter classes share load_bhavcopy and reparse_stored_bhavcopy as module-level helpers."
+    },
+    {
+      "id": "file:migrations/env.py",
+      "type": "file",
+      "name": "env.py",
+      "filePath": "migrations/env.py",
+      "summary": "Alembic migration environment that reads the database URL from application config and wires SQLAlchemy metadata so schema diffs detect changes to all ORM models.",
+      "tags": ["configuration", "database", "migration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/factories.py",
+      "type": "file",
+      "name": "factories.py",
+      "filePath": "tests/factories.py",
+      "summary": "Provides the make_fact factory function that constructs a FinancialFact instance with sensible defaults and allows field-level overrides, used across database schema tests.",
+      "tags": ["test", "factory", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_financial_facts_schema.py",
+      "type": "file",
+      "name": "test_financial_facts_schema.py",
+      "filePath": "tests/test_financial_facts_schema.py",
+      "summary": "Tests that the financial_facts table enforces all schema constraints: Decimal precision, timezone-aware as_of in IST, Indian ISIN format, period ordering, XBRL element rules, duplicate prevention, and append-only immutability.",
+      "tags": ["test", "validation", "database"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_nse_bhavcopy_adapters.py",
+      "type": "file",
+      "name": "test_nse_bhavcopy_adapters.py",
+      "filePath": "tests/test_nse_bhavcopy_adapters.py",
+      "summary": "Integration and unit tests for NseBhavcopy and NseBhavcopyDrop adapters, verifying correct row ingestion, quarantine routing, idempotency, and reparse behavior against fake HTTP responses and in-memory SQLite.",
+      "tags": ["test", "service", "api-handler"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/test_pit.py",
+      "type": "file",
+      "name": "test_pit.py",
+      "filePath": "tests/test_pit.py",
+      "summary": "Tests the point-in-time query functions in core/db/pit.py, verifying that as_of filtering correctly excludes future data and returns the right latest-version row for financial facts and entity ISIN links.",
+      "tags": ["test", "data-model", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:core/db/base.py:ProvenanceMixin",
+      "type": "class",
+      "name": "ProvenanceMixin",
+      "filePath": "core/db/base.py",
+      "lineRange": [26, 38],
+      "summary": "SQLAlchemy mixin that adds the six provenance columns (as_of, content_hash, source_url, extracted_by, model_version, ingested_at) to any table and validates that as_of is timezone-aware before each flush.",
+      "tags": ["data-model", "validation", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:core/db/models.py:FinancialFact",
+      "type": "class",
+      "name": "FinancialFact",
+      "filePath": "core/db/models.py",
+      "lineRange": [40, 104],
+      "summary": "ORM model for a single XBRL financial line-item value, keyed by ISIN, consolidation type, fact kind, XBRL element, and fiscal period; stores Decimal value and unit with full provenance columns.",
+      "tags": ["data-model", "database"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:core/db/models.py:RawSourceFile",
+      "type": "class",
+      "name": "RawSourceFile",
+      "filePath": "core/db/models.py",
+      "lineRange": [107, 139],
+      "summary": "ORM model tracking a raw source file saved to blob storage, keyed by content_hash; includes byte size, media type, fetch timestamp, and provenance columns enabling re-parse without re-download.",
+      "tags": ["data-model", "database"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:core/db/models.py:EntityIsin",
+      "type": "class",
+      "name": "EntityIsin",
+      "filePath": "core/db/models.py",
+      "lineRange": [190, 214],
+      "summary": "ORM model representing a dated link between an internal entity ID and an ISIN, recording the basis of the link (official filing, demerger, etc.) so ISIN-to-entity resolution is queryable at any past as_of.",
+      "tags": ["data-model", "database"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:core/db/models.py:IndexSnapshot",
+      "type": "class",
+      "name": "IndexSnapshot",
+      "filePath": "core/db/models.py",
+      "lineRange": [217, 247],
+      "summary": "ORM model for a single parsed index constituent list, carrying as_of, constituent count, quarantined row count, and rule_version so membership intervals can be computed without backfilling.",
+      "tags": ["data-model", "database"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:core/db/models.py:IndexSnapshotConstituent",
+      "type": "class",
+      "name": "IndexSnapshotConstituent",
+      "filePath": "core/db/models.py",
+      "lineRange": [250, 276],
+      "summary": "ORM model for one constituent row (ISIN, symbol, series, company name, industry) within an index snapshot, linked by snapshot_id foreign key.",
+      "tags": ["data-model", "database"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:core/db/models.py:IndexSnapshotQuarantine",
+      "type": "class",
+      "name": "IndexSnapshotQuarantine",
+      "filePath": "core/db/models.py",
+      "lineRange": [279, 312],
+      "summary": "ORM model for a row from an index constituent list that could not be parsed or resolved, storing the raw row bytes, reason code, and detail so human reviewers can decide whether to accept or discard it.",
+      "tags": ["data-model", "database"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:core/db/models.py:NseBhavcopyRow",
+      "type": "class",
+      "name": "NseBhavcopyRow",
+      "filePath": "core/db/models.py",
+      "lineRange": [333, 382],
+      "summary": "ORM model for a single accepted NSE bhavcopy row with trade date, ISIN, symbol, series, OHLC prices, volume, turnover, trade count, and rule_version; all price fields stored as Decimal.",
+      "tags": ["data-model", "database"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:core/db/models.py:NseBhavcopyQuarantine",
+      "type": "class",
+      "name": "NseBhavcopyQuarantine",
+      "filePath": "core/db/models.py",
+      "lineRange": [385, 416],
+      "summary": "ORM model for a rejected NSE bhavcopy row, storing the raw CSV row, reason code, detail message, and optional resolved ISIN and symbol for post-hoc review.",
+      "tags": ["data-model", "database"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:core/db/pit.py:QuarantineEntry",
+      "type": "class",
+      "name": "QuarantineEntry",
+      "filePath": "core/db/pit.py",
+      "lineRange": [209, 216],
+      "summary": "Dataclass returned by index quarantine review functions, pairing a quarantined snapshot row with an optional superseding snapshot ID; its needs_review property indicates whether the row still requires human action.",
+      "tags": ["data-model", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:core/db/pit.py:BhavcopyQuarantineEntry",
+      "type": "class",
+      "name": "BhavcopyQuarantineEntry",
+      "filePath": "core/db/pit.py",
+      "lineRange": [398, 404],
+      "summary": "Dataclass returned by bhavcopy quarantine review functions, pairing a quarantined bhavcopy row with a boolean indicating whether a resolved row already exists for the same (source_url, isin, series) key.",
+      "tags": ["data-model", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:ingest/nse_bhavcopy/adapters.py:Tally",
+      "type": "class",
+      "name": "Tally",
+      "filePath": "ingest/nse_bhavcopy/adapters.py",
+      "lineRange": [42, 63],
+      "summary": "Mutable accumulator that tracks per-run statistics (raw files, accepted rows, quarantined rows, rejected files, skipped files, problems) and converts them to a RunResult via its result() method.",
+      "tags": ["utility", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:ingest/nse_bhavcopy/adapters.py:NseBhavcopy",
+      "type": "class",
+      "name": "NseBhavcopy",
+      "filePath": "ingest/nse_bhavcopy/adapters.py",
+      "lineRange": [154, 239],
+      "summary": "HTTP adapter that iterates over the NSE bhavcopy archive URL template for each missing trade date, downloads files via PoliteClient, stores raw bytes, and delegates parsing and DB persistence to load_bhavcopy.",
+      "tags": ["service", "api-handler", "data-pipeline"],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:ingest/nse_bhavcopy/adapters.py:NseBhavcopyDrop",
+      "type": "class",
+      "name": "NseBhavcopyDrop",
+      "filePath": "ingest/nse_bhavcopy/adapters.py",
+      "lineRange": [242, 264],
+      "summary": "Drop-folder adapter that reads pre-downloaded bhavcopy files from a watched directory and ingests them through the same load_bhavcopy pipeline as the HTTP adapter, providing a fallback when NSE is inaccessible.",
+      "tags": ["service", "data-pipeline"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:core/db/pit.py:facts_as_of",
+      "type": "function",
+      "name": "facts_as_of",
+      "filePath": "core/db/pit.py",
+      "lineRange": [32, 55],
+      "summary": "Returns the latest version of each (line_item, period_start, period_end) combination for a given ISIN and consolidation type as visible at as_of, using distinct-on-ordered-by to resolve multiple ingestion versions.",
+      "tags": ["data-model", "service", "validation"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:core/db/pit.py:raw_source_files_as_of",
+      "type": "function",
+      "name": "raw_source_files_as_of",
+      "filePath": "core/db/pit.py",
+      "lineRange": [58, 72],
+      "summary": "Returns all raw source file records ingested by a given extractor up to as_of, ordered newest-first, enabling reparse loops to iterate over historically known files.",
+      "tags": ["data-model", "service"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:core/db/pit.py:entity_isin_earliest_links_as_of",
+      "type": "function",
+      "name": "entity_isin_earliest_links_as_of",
+      "filePath": "core/db/pit.py",
+      "lineRange": [80, 94],
+      "summary": "For a set of ISINs, returns the earliest-known entity link for each ISIN that was already established by as_of, giving a stable ISIN-to-entity mapping free of future reclassifications.",
+      "tags": ["data-model", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:core/db/pit.py:index_snapshots_as_of",
+      "type": "function",
+      "name": "index_snapshots_as_of",
+      "filePath": "core/db/pit.py",
+      "lineRange": [102, 134],
+      "summary": "Retrieves the latest accepted snapshot per source URL for a given index code up to as_of, then bulk-fetches constituent ISINs for those snapshots, returning a list of Snapshot named tuples ready for membership computation.",
+      "tags": ["data-model", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:core/db/pit.py:index_snapshot_keys_as_of",
+      "type": "function",
+      "name": "index_snapshot_keys_as_of",
+      "filePath": "core/db/pit.py",
+      "lineRange": [156, 172],
+      "summary": "Returns a dict mapping (index_code, as_of) pairs to snapshot IDs for a given source URL and rule_version up to as_of, used to detect whether a file has already been loaded.",
+      "tags": ["data-model", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:core/db/pit.py:index_list_sources_settled_as_of",
+      "type": "function",
+      "name": "index_list_sources_settled_as_of",
+      "filePath": "core/db/pit.py",
+      "lineRange": [175, 196],
+      "summary": "Returns the set of source URLs that are fully settled (loaded with no outstanding quarantine-only records) for a given extractor and rule_version up to as_of, so the adapter skips already-complete files.",
+      "tags": ["data-model", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:core/db/pit.py:index_quarantine_review_as_of",
+      "type": "function",
+      "name": "index_quarantine_review_as_of",
+      "filePath": "core/db/pit.py",
+      "lineRange": [219, 263],
+      "summary": "Builds a list of QuarantineEntry objects for all quarantined index snapshot rows up to as_of, joining against known accepted snapshots to determine which quarantine entries have been superseded and which still need human review.",
+      "tags": ["data-model", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:core/db/pit.py:bhavcopy_sources_settled_as_of",
+      "type": "function",
+      "name": "bhavcopy_sources_settled_as_of",
+      "filePath": "core/db/pit.py",
+      "lineRange": [271, 292],
+      "summary": "Returns the set of bhavcopy source URLs that have at least one accepted row and no whole-file-level quarantine entry as of as_of, allowing the adapter to skip already-complete daily files.",
+      "tags": ["data-model", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:core/db/pit.py:bhavcopy_source_loaded_as_of",
+      "type": "function",
+      "name": "bhavcopy_source_loaded_as_of",
+      "filePath": "core/db/pit.py",
+      "lineRange": [295, 321],
+      "summary": "Returns True when a specific bhavcopy source URL has been fully processed (either accepted rows or a file-level quarantine entry) by the given extractor and rule_version up to as_of, providing idempotency checks for the adapter.",
+      "tags": ["data-model", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:core/db/pit.py:bhavcopy_latest_trade_date_as_of",
+      "type": "function",
+      "name": "bhavcopy_latest_trade_date_as_of",
+      "filePath": "core/db/pit.py",
+      "lineRange": [324, 342],
+      "summary": "Returns the most recent trade_date for which an accepted bhavcopy row exists for a given extractor up to as_of, used by the adapter to determine the starting point for backfill.",
+      "tags": ["data-model", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:core/db/pit.py:bhavcopy_rows_as_of",
+      "type": "function",
+      "name": "bhavcopy_rows_as_of",
+      "filePath": "core/db/pit.py",
+      "lineRange": [345, 365],
+      "summary": "Returns one NseBhavcopyRow per trade date for a given ISIN within a date range as visible at as_of, deduplicating multiple ingestion runs by keeping the latest as_of row per date.",
+      "tags": ["data-model", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:core/db/pit.py:symbol_to_isin_as_of",
+      "type": "function",
+      "name": "symbol_to_isin_as_of",
+      "filePath": "core/db/pit.py",
+      "lineRange": [368, 387],
+      "summary": "Resolves a ticker symbol to its ISIN as of a given trade date and as_of timestamp by querying the bhavcopy row history, returning the most recent matching ISIN without allowing future assignments to bleed back.",
+      "tags": ["data-model", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:core/db/pit.py:bhavcopy_quarantine_review_as_of",
+      "type": "function",
+      "name": "bhavcopy_quarantine_review_as_of",
+      "filePath": "core/db/pit.py",
+      "lineRange": [407, 436],
+      "summary": "Builds a list of BhavcopyQuarantineEntry objects for all quarantined bhavcopy rows up to as_of, joining against accepted rows to flag which quarantine entries have been resolved and which still need human action.",
+      "tags": ["data-model", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:core/timezones.py:require_aware",
+      "type": "function",
+      "name": "require_aware",
+      "filePath": "core/timezones.py",
+      "lineRange": [7, 11],
+      "summary": "Raises ValueError if the given datetime value has no UTC offset (is naive), enforcing the system-wide constraint that every timestamp must carry timezone information.",
+      "tags": ["utility", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:ingest/nse_bhavcopy/adapters.py:load_bhavcopy",
+      "type": "function",
+      "name": "load_bhavcopy",
+      "filePath": "ingest/nse_bhavcopy/adapters.py",
+      "lineRange": [76, 115],
+      "summary": "Parses a RawDocument into bhavcopy rows, skips already-loaded sources via bhavcopy_source_loaded_as_of, persists accepted NseBhavcopyRow objects and quarantined NseBhavcopyQuarantine objects in a single session, and updates the Tally.",
+      "tags": ["data-pipeline", "service"],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:ingest/nse_bhavcopy/adapters.py:reparse_stored_bhavcopy",
+      "type": "function",
+      "name": "reparse_stored_bhavcopy",
+      "filePath": "ingest/nse_bhavcopy/adapters.py",
+      "lineRange": [118, 138],
+      "summary": "Iterates over all raw source files previously saved by this adapter (via raw_source_files_as_of), re-fetches their bytes from blob storage, and re-ingests them through load_bhavcopy — enabling a parser fix to be applied without re-downloading.",
+      "tags": ["data-pipeline", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/factories.py:make_fact",
+      "type": "function",
+      "name": "make_fact",
+      "filePath": "tests/factories.py",
+      "lineRange": [11, 29],
+      "summary": "Constructs a FinancialFact ORM instance with valid default field values (ISIN, consolidation, fact_kind, period dates, Decimal value, IST-aware as_of, content_hash) and merges any caller-supplied keyword overrides before returning.",
+      "tags": ["test", "factory", "utility"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:core/db/base.py",
+      "target": "file:core/timezones.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "file:core/db/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "file:core/timezones.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "file:core/compute/membership.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "file:core/db/models.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "file:core/timezones.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "file:core/db/models.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "file:core/db/pit.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "file:core/sources.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "file:core/timezones.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "file:ingest/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "file:ingest/http.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "file:ingest/nse_bhavcopy/parser.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:migrations/env.py",
+      "target": "file:core/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:migrations/env.py",
+      "target": "file:core/db/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:migrations/env.py",
+      "target": "file:core/db/models.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/factories.py",
+      "target": "file:core/compute/hashing.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/factories.py",
+      "target": "file:core/db/models.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/factories.py",
+      "target": "file:core/timezones.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_financial_facts_schema.py",
+      "target": "file:core/db/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_financial_facts_schema.py",
+      "target": "file:core/db/models.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_financial_facts_schema.py",
+      "target": "file:core/timezones.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_financial_facts_schema.py",
+      "target": "file:tests/factories.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_nse_bhavcopy_adapters.py",
+      "target": "file:core/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_nse_bhavcopy_adapters.py",
+      "target": "file:core/db/models.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_nse_bhavcopy_adapters.py",
+      "target": "file:core/db/pit.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_nse_bhavcopy_adapters.py",
+      "target": "file:core/timezones.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_nse_bhavcopy_adapters.py",
+      "target": "file:ingest/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_nse_bhavcopy_adapters.py",
+      "target": "file:ingest/nse_bhavcopy/__init__.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_nse_bhavcopy_adapters.py",
+      "target": "file:ingest/nse_bhavcopy/adapters.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_nse_bhavcopy_adapters.py",
+      "target": "file:tests/fakes.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_pit.py",
+      "target": "file:core/db/models.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_pit.py",
+      "target": "file:core/db/pit.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_pit.py",
+      "target": "file:core/timezones.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_pit.py",
+      "target": "file:tests/factories.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:core/db/base.py",
+      "target": "class:core/db/base.py:ProvenanceMixin",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/base.py",
+      "target": "class:core/db/base.py:ProvenanceMixin",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:FinancialFact",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:FinancialFact",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:RawSourceFile",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:RawSourceFile",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:EntityIsin",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:EntityIsin",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:IndexSnapshot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:IndexSnapshot",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:IndexSnapshotConstituent",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:IndexSnapshotConstituent",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:IndexSnapshotQuarantine",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:IndexSnapshotQuarantine",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:NseBhavcopyRow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:NseBhavcopyRow",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:NseBhavcopyQuarantine",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "class:core/db/models.py:NseBhavcopyQuarantine",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "class:core/db/pit.py:QuarantineEntry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "class:core/db/pit.py:QuarantineEntry",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "class:core/db/pit.py:BhavcopyQuarantineEntry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "class:core/db/pit.py:BhavcopyQuarantineEntry",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "class:ingest/nse_bhavcopy/adapters.py:Tally",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "class:ingest/nse_bhavcopy/adapters.py:Tally",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "class:ingest/nse_bhavcopy/adapters.py:NseBhavcopy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "class:ingest/nse_bhavcopy/adapters.py:NseBhavcopy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "class:ingest/nse_bhavcopy/adapters.py:NseBhavcopyDrop",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "class:ingest/nse_bhavcopy/adapters.py:NseBhavcopyDrop",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:facts_as_of",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:facts_as_of",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:raw_source_files_as_of",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:raw_source_files_as_of",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:entity_isin_earliest_links_as_of",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:entity_isin_earliest_links_as_of",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:index_snapshots_as_of",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:index_snapshots_as_of",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:index_snapshot_keys_as_of",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:index_snapshot_keys_as_of",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:index_list_sources_settled_as_of",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:index_list_sources_settled_as_of",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:index_quarantine_review_as_of",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:index_quarantine_review_as_of",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:bhavcopy_sources_settled_as_of",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:bhavcopy_sources_settled_as_of",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:bhavcopy_source_loaded_as_of",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:bhavcopy_source_loaded_as_of",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:bhavcopy_latest_trade_date_as_of",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:bhavcopy_latest_trade_date_as_of",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:bhavcopy_rows_as_of",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:bhavcopy_rows_as_of",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:symbol_to_isin_as_of",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:symbol_to_isin_as_of",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:bhavcopy_quarantine_review_as_of",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "function:core/db/pit.py:bhavcopy_quarantine_review_as_of",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/timezones.py",
+      "target": "function:core/timezones.py:require_aware",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/timezones.py",
+      "target": "function:core/timezones.py:require_aware",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "function:ingest/nse_bhavcopy/adapters.py:load_bhavcopy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "function:ingest/nse_bhavcopy/adapters.py:load_bhavcopy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "function:ingest/nse_bhavcopy/adapters.py:reparse_stored_bhavcopy",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "function:ingest/nse_bhavcopy/adapters.py:reparse_stored_bhavcopy",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/factories.py",
+      "target": "function:tests/factories.py:make_fact",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/factories.py",
+      "target": "function:tests/factories.py:make_fact",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/db/models.py",
+      "target": "file:tests/test_financial_facts_schema.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:ingest/nse_bhavcopy/adapters.py",
+      "target": "file:tests/test_nse_bhavcopy_adapters.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:core/db/pit.py",
+      "target": "file:tests/test_pit.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "function:ingest/nse_bhavcopy/adapters.py:load_bhavcopy",
+      "target": "function:core/db/pit.py:bhavcopy_source_loaded_as_of",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:ingest/nse_bhavcopy/adapters.py:reparse_stored_bhavcopy",
+      "target": "function:core/db/pit.py:raw_source_files_as_of",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "class:core/db/models.py:FinancialFact",
+      "target": "class:core/db/base.py:ProvenanceMixin",
+      "type": "inherits",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "class:core/db/models.py:RawSourceFile",
+      "target": "class:core/db/base.py:ProvenanceMixin",
+      "type": "inherits",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "class:core/db/models.py:NseBhavcopyRow",
+      "target": "class:core/db/base.py:ProvenanceMixin",
+      "type": "inherits",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "class:core/db/models.py:IndexSnapshot",
+      "target": "class:core/db/base.py:ProvenanceMixin",
+      "type": "inherits",
+      "direction": "forward",
+      "weight": 0.9
+    },
+    {
+      "source": "file:migrations/env.py",
+      "target": "file:core/db/models.py",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

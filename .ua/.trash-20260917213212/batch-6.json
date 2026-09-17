@@ -1,0 +1,84 @@
+{
+  "nodes": [
+    {
+      "id": "pipeline:.github/workflows/ci.yml",
+      "type": "pipeline",
+      "name": "ci.yml",
+      "filePath": ".github/workflows/ci.yml",
+      "summary": "GitHub Actions CI workflow that builds the Docker test image, runs architecture and unit tests without services first, then runs the full test suite against Postgres 16 with pgvector and MinIO on every push and pull request.",
+      "tags": ["ci-cd", "testing", "containerization", "docker", "deployment"],
+      "complexity": "simple",
+      "languageNotes": "Splits tests into two stages: a fast no-services pass filtered by pytest marks ('not db and not blob') for fail-fast feedback, followed by the full suite with live Postgres and MinIO."
+    },
+    {
+      "id": "step:.github/workflows/ci.yml:Build image",
+      "type": "file",
+      "name": "Build image",
+      "filePath": ".github/workflows/ci.yml",
+      "lineRange": [17, 18],
+      "summary": "Builds the Docker test image using docker compose with the test profile.",
+      "tags": ["ci-cd", "containerization", "build-system"],
+      "complexity": "simple"
+    },
+    {
+      "id": "step:.github/workflows/ci.yml:Architecture and pure tests (no services)",
+      "type": "file",
+      "name": "Architecture and pure tests (no services)",
+      "filePath": ".github/workflows/ci.yml",
+      "lineRange": [21, 24],
+      "summary": "Runs pytest with 'not db and not blob' markers to validate architecture rules and pure functions without starting Postgres or MinIO, enabling fast fail on rule violations.",
+      "tags": ["ci-cd", "testing", "fast-feedback"],
+      "complexity": "simple"
+    },
+    {
+      "id": "step:.github/workflows/ci.yml:Full test suite against Postgres 16 + pgvector and MinIO",
+      "type": "file",
+      "name": "Full test suite against Postgres 16 + pgvector and MinIO",
+      "filePath": ".github/workflows/ci.yml",
+      "lineRange": [26, 27],
+      "summary": "Runs the complete pytest suite with live Postgres 16 and MinIO services to test database-dependent and blob-dependent code paths.",
+      "tags": ["ci-cd", "testing", "integration-test"],
+      "complexity": "simple"
+    },
+    {
+      "id": "step:.github/workflows/ci.yml:Tear down",
+      "type": "file",
+      "name": "Tear down",
+      "filePath": ".github/workflows/ci.yml",
+      "lineRange": [29, 31],
+      "summary": "Stops and removes all docker compose services and volumes unconditionally after the test run, ensuring clean state for subsequent runs.",
+      "tags": ["ci-cd", "cleanup"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "pipeline:.github/workflows/ci.yml",
+      "target": "step:.github/workflows/ci.yml:Build image",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "pipeline:.github/workflows/ci.yml",
+      "target": "step:.github/workflows/ci.yml:Architecture and pure tests (no services)",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "pipeline:.github/workflows/ci.yml",
+      "target": "step:.github/workflows/ci.yml:Full test suite against Postgres 16 + pgvector and MinIO",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "pipeline:.github/workflows/ci.yml",
+      "target": "step:.github/workflows/ci.yml:Tear down",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    }
+  ]
+}

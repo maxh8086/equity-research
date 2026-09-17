@@ -1,0 +1,160 @@
+﻿{
+  "steps": [
+    {
+      "id": "step-1",
+      "title": "Project Overview",
+      "description": "README.md is the developer quickstart: Windows/PowerShell setup, the ingest adapter CLI commands, repository layout, and the database invariants enforced at the schema level. Reading it first gives you the map before you walk the territory — you will understand why each directory exists before opening a single source file.",
+      "nodeId": "document:README.md",
+      "focus": [
+        "Repository Layout section",
+        "Database invariants",
+        "Ingest CLI commands"
+      ],
+      "nextStepId": "step-2"
+    },
+    {
+      "id": "step-2",
+      "title": "The Non-Negotiable Rules",
+      "description": "CLAUDE.md is the master specification and the most important file in the repository. It defines three inviolable rules: R1 (code computes, LLMs narrate — no model arithmetic), R2 (every table carries as_of and is append-only — no backfill), and R3 (model outputs are hypotheses with code-evaluated conditions, never stored conclusions). Every architectural decision in subsequent steps traces back to one of these three rules.",
+      "nodeId": "document:CLAUDE.md",
+      "focus": [
+        "R1 — Deterministic where computable",
+        "R2 — as_of on everything, never backfilled",
+        "R3 — The model proposes, the data disposes",
+        "Things to push back on"
+      ],
+      "nextStepId": "step-3"
+    },
+    {
+      "id": "step-3",
+      "title": "Temporal Data Model",
+      "description": "docs/temporal-model.md defines the time semantics that underpin every table in the system: the difference between event time (when something happened in the market), as_of (the timestamp used for point-in-time reads), and recorded_at (when the row was inserted). Understanding these three clocks is the prerequisite for writing any code that touches the database — a query without an as_of filter violates R2 and introduces look-ahead bias, which is invisible in code review.",
+      "nodeId": "document:docs/temporal-model.md",
+      "focus": [
+        "event time vs as_of vs recorded_at",
+        "Point-in-time read semantics",
+        "Append-only store invariants",
+        "Replay isolation"
+      ],
+      "nextStepId": "step-4"
+    },
+    {
+      "id": "step-4",
+      "title": "ORM Models and Provenance",
+      "description": "core/db/models.py is the most imported file in the codebase (fan-in: 16) and defines the SQLAlchemy ORM models that back every store. The ProvenanceMixin is the direct implementation of R2: every table that inherits it gains as_of, content_hash, source_url, extracted_by, and model_version columns, making every row's lineage fully traceable. Key models include FinancialFact (XBRL line items), RawSourceFile (every fetched byte before parsing), IndexSnapshot with its constituents, and NseBhavRecord (daily equity prices).",
+      "nodeId": "file:core/db/models.py",
+      "focus": [
+        "ProvenanceMixin",
+        "FinancialFact",
+        "RawSourceFile",
+        "IndexSnapshot",
+        "NseBhavRecord"
+      ],
+      "nextStepId": "step-5"
+    },
+    {
+      "id": "step-5",
+      "title": "Configuration and Source Classification",
+      "description": "core/config.py loads all runtime settings from EQUITY_* environment variables using Pydantic's BaseSettings, making the system portable from a laptop to Kubernetes without code changes. core/sources.py defines the SourceClass enum — official_api, official_archive, web_scrape, manual_drop — which governs what data the system is permitted to ingest in each deployment mode. In commercial mode any web_scrape adapter causes a startup failure; the classification is stored with every row and enforced at read time.",
+      "nodeId": "file:core/config.py",
+      "focus": [
+        "Settings class and EQUITY_* env vars",
+        "EQUITY_WEB_SCRAPING_ENABLED switch",
+        "EQUITY_DEPLOYMENT_MODE",
+        "SourceClass enum (core/sources.py)"
+      ],
+      "nextStepId": "step-6"
+    },
+    {
+      "id": "step-6",
+      "title": "Point-in-Time Query Gateway",
+      "description": "core/db/pit.py is the sole read surface for all application data (fan-out: 34). Every function accepts an as_of parameter and filters WHERE as_of <= t, ensuring future data cannot bleed into any query. The architecture test enforces that no module outside pit.py may issue raw ORM queries against the provenance tables — the gate is code, not convention. This is how R2 is enforced at the software boundary and how the system's replay semantics are guaranteed.",
+      "nodeId": "file:core/db/pit.py",
+      "focus": [
+        "as_of filtering pattern on every function",
+        "pit_raw_source_file",
+        "pit_index_snapshot",
+        "pit_bhavcopy"
+      ],
+      "nextStepId": "step-7"
+    },
+    {
+      "id": "step-7",
+      "title": "Pure Deterministic Computation",
+      "description": "core/compute/membership.py is R1 made concrete: it computes index membership intervals from dated constituent lists using pure arithmetic, never storing the intervals, and never delegating to a model. Given snapshots known as_of time t, it derives which companies were in scope — resolving ordering ambiguities as uncertain rather than guessing. core/compute/isin.py provides a Luhn-algorithm ISIN validator used in every parser. Both files have zero I/O, no side effects, and are fully property-tested per the rule that any function touching money or dates needs tests before it is done.",
+      "nodeId": "file:core/compute/membership.py",
+      "focus": [
+        "compute_membership pure function",
+        "Membership interval derivation from snapshots",
+        "Uncertainty between disagreeing snapshots",
+        "check_isin and calc_check_digit (core/compute/isin.py)"
+      ],
+      "nextStepId": "step-8"
+    },
+    {
+      "id": "step-8",
+      "title": "Blob Store Abstraction",
+      "description": "core/blob.py defines the BlobStore abstract interface that every adapter uses to persist raw source bytes before parsing them. The concrete implementations (S3BlobStore for cloud, MinIOBlobStore for the laptop) are selected from config at startup — adapter code never imports boto3 directly, keeping the interface swap-transparent. Objects are keyed by content_hash and treated as write-once immutable, so a parser bug can be fixed and all stored bytes can be reparsed without re-downloading anything from the exchange.",
+      "nodeId": "file:core/blob.py",
+      "focus": [
+        "BlobStore abstract base class",
+        "put / get / exists method signatures",
+        "Content-hash keying strategy",
+        "Write-once immutability contract"
+      ],
+      "nextStepId": "step-9"
+    },
+    {
+      "id": "step-9",
+      "title": "Adapter Base and Registry",
+      "description": "ingest/base.py (fan-in: 8, fan-out: 28) defines the BaseAdapter contract that every source adapter must implement: run (fetch, save to blob, parse, write rows), canary (daily shape-change detection that fires before the main run), and reparse (re-derive rows from already-stored bytes without any network call). ingest/registry.py discovers all registered adapters at startup, checks source classes against the deployment mode, and raises on misconfiguration before any network call is made — ensuring a misconfigured deployment fails loudly at launch, not silently mid-run.",
+      "nodeId": "file:ingest/base.py",
+      "focus": [
+        "BaseAdapter.run lifecycle",
+        "BaseAdapter.canary for shape detection",
+        "BaseAdapter.reparse from stored bytes",
+        "Registry startup validation (ingest/registry.py)"
+      ],
+      "nextStepId": "step-10"
+    },
+    {
+      "id": "step-10",
+      "title": "Polite HTTP Client",
+      "description": "ingest/http.py implements PoliteClient, the shared HTTP transport for all web_scrape adapters. It enforces per-host request throttling with a configurable delay, fetches and caches robots.txt per origin to honour disallow directives, and applies exponential backoff on transient server errors. If NSE or BSE blocks the client, the escalation path is a manual drop folder — never browser impersonation, rotating proxies, or CAPTCHA work-arounds. The client identifies itself honestly and stops when it is stopped.",
+      "nodeId": "file:ingest/http.py",
+      "focus": [
+        "PoliteClient class",
+        "robots.txt fetch and per-origin cache",
+        "Per-host throttle enforcement",
+        "Exponential backoff on retries"
+      ],
+      "nextStepId": "step-11"
+    },
+    {
+      "id": "step-11",
+      "title": "Bhavcopy Parser Pipeline",
+      "description": "ingest/nse_bhavcopy/parser.py is a complete concrete adapter example: it unpacks the NSE bhavcopy ZIP archive for a trading day, validates each CSV row against a strict Pydantic schema (BhavRow), checks the ISIN with the Luhn validator from Step 7, and quarantines any malformed row with a structured rejection reason rather than failing the entire file. The raw ZIP bytes are saved to blob storage before any parsing begins, implementing the blob-first guarantee from Step 8. ingest/nse_bhavcopy/adapters.py wraps this parser in the BaseAdapter interface from Step 9.",
+      "nodeId": "file:ingest/nse_bhavcopy/parser.py",
+      "focus": [
+        "parse_zip entry function",
+        "BhavRow Pydantic schema and field validation",
+        "ISIN check-digit validation per row",
+        "Quarantine record with rejection reason"
+      ],
+      "nextStepId": "step-12"
+    },
+    {
+      "id": "step-12",
+      "title": "NSE Indices Multi-Source Adapter",
+      "description": "ingest/nse_indices/adapters.py demonstrates the layered resilience strategy for unreliable sources. The LiveAdapter hits the live NSE Indices endpoint and is classified web_scrape; the DropFolderAdapter reads manually downloaded files and is classified manual_drop; the WaybackAdapter fetches historical constituent CSVs from the Internet Archive with as_of set to the Wayback capture timestamp, not the fetch time. All three adapters produce the same row shape and route through the same parser, so the system assembles a consistent view of index history from whatever combination of sources was available — a direct implementation of R2's insistence that as_of always reflects when data was public.",
+      "nodeId": "file:ingest/nse_indices/adapters.py",
+      "focus": [
+        "LiveAdapter (web_scrape class)",
+        "WaybackAdapter with CDX timestamp as as_of",
+        "DropFolderAdapter (manual_drop class)",
+        "Quarantine handling across all three paths"
+      ],
+      "nextStepId": null
+    }
+  ]
+}

@@ -1,0 +1,2730 @@
+{
+  "schemaVersion": 1,
+  "algorithm": "louvain",
+  "totalFiles": 81,
+  "totalBatches": 11,
+  "exportsByPath": {
+    ".gitattributes": [],
+    "core/__init__.py": [],
+    "core/blob.py": [
+      "BlobIntegrityError",
+      "BlobStore",
+      "object_key",
+      "_error_code",
+      "S3BlobStore",
+      "s3_blob_store"
+    ],
+    "core/compute/__init__.py": [],
+    "core/compute/hashing.py": [
+      "content_hash"
+    ],
+    "core/compute/isin.py": [
+      "isin_check_digit",
+      "is_valid_isin"
+    ],
+    "core/compute/membership.py": [
+      "Snapshot",
+      "ObservedInterval",
+      "Membership",
+      "ConflictingSnapshots",
+      "_check_simultaneous",
+      "observed_intervals",
+      "membership_on"
+    ],
+    "core/config.py": [
+      "Settings",
+      "parse_source_switches",
+      "get_settings"
+    ],
+    "core/db/__init__.py": [],
+    "core/db/base.py": [
+      "Base",
+      "ProvenanceMixin"
+    ],
+    "core/db/models.py": [
+      "Consolidation",
+      "FactKind",
+      "_pg_enum",
+      "FinancialFact",
+      "RawSourceFile",
+      "IndexCode",
+      "EntityLinkBasis",
+      "QuarantineReason",
+      "Entity",
+      "EntityIsin",
+      "IndexSnapshot",
+      "IndexSnapshotConstituent",
+      "IndexSnapshotQuarantine",
+      "BhavcopyQuarantineReason",
+      "NseBhavcopyRow",
+      "NseBhavcopyQuarantine"
+    ],
+    "core/db/pit.py": [
+      "facts_as_of",
+      "raw_source_files_as_of",
+      "entity_isin_earliest_links_as_of",
+      "index_snapshots_as_of",
+      "index_membership_as_of",
+      "index_members_on",
+      "index_snapshot_keys_as_of",
+      "index_list_sources_settled_as_of",
+      "index_snapshot_quarantine_as_of",
+      "QuarantineEntry",
+      "index_quarantine_review_as_of",
+      "bhavcopy_sources_settled_as_of",
+      "bhavcopy_source_loaded_as_of",
+      "bhavcopy_latest_trade_date_as_of",
+      "bhavcopy_rows_as_of",
+      "symbol_to_isin_as_of",
+      "bhavcopy_quarantine_as_of",
+      "BhavcopyQuarantineEntry",
+      "bhavcopy_quarantine_review_as_of"
+    ],
+    "core/sources.py": [
+      "SourceClass",
+      "DeploymentMode"
+    ],
+    "core/timezones.py": [
+      "require_aware"
+    ],
+    "ingest/__init__.py": [],
+    "ingest/__main__.py": [
+      "main"
+    ],
+    "ingest/base.py": [
+      "RunStatus",
+      "CanaryStatus",
+      "RunResult",
+      "CanaryResult",
+      "RawDocument",
+      "AdapterContext",
+      "Adapter",
+      "DropFileError",
+      "DropFileMeta",
+      "DropFolderAdapter"
+    ],
+    "ingest/http.py": [
+      "AccessBlocked",
+      "PoliteClient",
+      "_retry_after",
+      "_decode"
+    ],
+    "ingest/nse_bhavcopy/__init__.py": [],
+    "ingest/nse_bhavcopy/adapters.py": [
+      "Tally",
+      "_provenance",
+      "load_bhavcopy",
+      "reparse_stored_bhavcopy",
+      "_media_type",
+      "_day_end_ist",
+      "NseBhavcopy",
+      "NseBhavcopyDrop"
+    ],
+    "ingest/nse_bhavcopy/parser.py": [
+      "BhavcopyRawRow",
+      "BhavcopyRow",
+      "RowIssue",
+      "ParsedBhavcopy",
+      "BhavcopyRejected",
+      "_extract_csv",
+      "_fields",
+      "parse_bhavcopy"
+    ],
+    "ingest/nse_indices/__init__.py": [],
+    "ingest/nse_indices/adapters.py": [
+      "Tally",
+      "_provenance",
+      "wayback_digest",
+      "load_list",
+      "_link_entities",
+      "reparse_stored_lists",
+      "_media_type",
+      "_RunStopped",
+      "NseIndicesConstituents",
+      "NseIndicesConstituentsDrop",
+      "CdxShapeError",
+      "CdxCapture",
+      "parse_cdx",
+      "run_boundaries",
+      "WaybackIndexConstituents"
+    ],
+    "ingest/nse_indices/parser.py": [
+      "ConstituentRow",
+      "Constituent",
+      "RowIssue",
+      "ParsedList",
+      "ListRejected",
+      "index_for_url",
+      "_fields",
+      "parse_constituent_list"
+    ],
+    "ingest/registry.py": [
+      "AdapterDeclarationError",
+      "StartupRefused",
+      "validate_declaration",
+      "index_adapters",
+      "_concrete_subclasses",
+      "discover",
+      "source_class_by_extracted_by",
+      "check_startup"
+    ],
+    "ingest/schema.py": [
+      "StrictModel"
+    ],
+    "migrations/env.py": [
+      "_url",
+      "run_migrations_offline",
+      "run_migrations_online"
+    ],
+    "migrations/script.py.mako": [],
+    "migrations/versions/0001_financial_facts.py": [
+      "upgrade",
+      "downgrade"
+    ],
+    "migrations/versions/0002_raw_source_file.py": [
+      "upgrade",
+      "downgrade"
+    ],
+    "migrations/versions/0003_entity_and_index_snapshots.py": [
+      "upgrade",
+      "downgrade"
+    ],
+    "migrations/versions/0004_index_snapshot_rule_versioned.py": [
+      "upgrade",
+      "downgrade"
+    ],
+    "migrations/versions/0005_nse_bhavcopy.py": [
+      "upgrade",
+      "downgrade"
+    ],
+    "tests/__init__.py": [],
+    "tests/conftest.py": [
+      "_alembic_config",
+      "_recreate_database",
+      "engine",
+      "s3_store",
+      "session"
+    ],
+    "tests/factories.py": [
+      "make_fact"
+    ],
+    "tests/fakes.py": [
+      "MemoryBlobStore",
+      "FailingBlobStore"
+    ],
+    "tests/test_architecture.py": [
+      "SourceFile",
+      "Import",
+      "repo_files",
+      "_dotted",
+      "_terminal",
+      "_matches",
+      "_resolve_from",
+      "imports",
+      "check_gateway_imports",
+      "check_provider_sdk_imports",
+      "_mentions_float",
+      "_is_mapped",
+      "_is_money_name",
+      "_annotations",
+      "check_no_float_money",
+      "_class_index",
+      "_body_assigns",
+      "_resolve_class",
+      "_fields",
+      "table_models",
+      "check_provenance_columns",
+      "_compute_import_ok",
+      "check_compute_is_pure",
+      "check_reads_go_through_pit",
+      "check_mcp_imports",
+      "_valued_fields",
+      "check_ingest_modules_declare",
+      "test_repo_obeys_rule",
+      "test_scan_is_not_vacuous",
+      "test_ingest_infra_list_matches_registry",
+      "test_orm_metadata_has_provenance_columns",
+      "_file",
+      "test_rule_detects"
+    ],
+    "tests/test_blob_s3.py": [
+      "test_round_trip_keyed_by_content_hash",
+      "test_putting_same_bytes_again_is_a_no_op",
+      "test_missing_key",
+      "test_existing_object_cannot_be_replaced",
+      "test_bucket_has_object_lock_with_default_retention",
+      "test_malformed_key_rejected"
+    ],
+    "tests/test_compute_isin.py": [
+      "test_known_isins_are_valid",
+      "test_malformed_or_wrong_check_digit_rejected",
+      "test_exactly_one_check_digit_validates",
+      "test_bad_body_raises"
+    ],
+    "tests/test_compute_membership.py": [
+      "at",
+      "snap",
+      "members",
+      "test_runs_are_membership_and_the_edges_between_snapshots_are_uncertain",
+      "test_before_the_first_snapshot_nobody_is_a_member",
+      "test_after_the_last_snapshot_open_intervals_are_uncertain",
+      "test_absence_from_an_incomplete_snapshot_does_not_end_a_run",
+      "test_leaving_and_rejoining_makes_two_intervals",
+      "test_complete_snapshots_at_one_instant_must_agree",
+      "test_an_incomplete_snapshot_may_list_fewer_at_the_same_instant",
+      "test_a_snapshot_reads_back_at_its_own_instant",
+      "test_members_and_uncertain_are_disjoint_and_come_from_snapshots",
+      "test_input_order_does_not_matter"
+    ],
+    "tests/test_config.py": [
+      "test_source_switches_parsed_from_env_names",
+      "test_source_switch_names_are_case_insensitive",
+      "test_non_boolean_switch_value_fails_loudly",
+      "clean_env",
+      "test_defaults_are_personal_with_everything_off",
+      "test_settings_read_switches_from_environment_and_env_file",
+      "test_environment_overrides_env_file"
+    ],
+    "tests/test_financial_facts_schema.py": [
+      "_assert_rejected",
+      "test_models_match_migrations",
+      "test_valid_fact_round_trips_decimal_exactly",
+      "test_naive_as_of_rejected_before_reaching_db",
+      "test_as_of_on_period_end_day_in_ist_rejected",
+      "test_as_of_boundary_is_evaluated_in_ist_not_utc",
+      "test_non_indian_or_malformed_isin_rejected",
+      "test_period_start_after_end_rejected",
+      "test_reported_fact_requires_xbrl_element",
+      "test_computed_fact_must_not_claim_xbrl_element",
+      "test_model_version_forbidden",
+      "test_bad_content_hash_rejected",
+      "test_duplicate_version_rejected_including_null_period_start",
+      "test_store_is_append_only"
+    ],
+    "tests/test_http.py": [
+      "FakeClock",
+      "_client",
+      "test_identifies_itself",
+      "test_throttles_per_host",
+      "test_robots_disallow_stops_before_requesting",
+      "test_robots_fetched_once_per_origin",
+      "test_missing_robots_allows",
+      "test_robots_forbidden_means_disallow_all",
+      "test_block_raises_without_retry",
+      "test_other_http_errors_raise",
+      "test_apis_skip_robots",
+      "_scripted",
+      "test_overload_not_retried_by_default",
+      "test_overload_retried_with_growing_backoff",
+      "test_overload_retries_are_bounded",
+      "test_timeout_retried_then_raised",
+      "test_retry_after_longer_than_backoff_is_honoured",
+      "test_get_with_raw_returns_bytes_as_transferred_and_decoded_content",
+      "test_get_with_raw_still_stops_on_a_block",
+      "test_block_never_retried_even_when_retries_enabled"
+    ],
+    "tests/test_ingest_base.py": [
+      "_Recording",
+      "FakeScrape",
+      "FakeApi",
+      "_ctx",
+      "test_web_scrape_adapter_disabled_unless_both_switches_on",
+      "test_web_scrape_adapter_runs_with_both_switches_on",
+      "test_master_scraping_switch_does_not_affect_official_sources",
+      "test_adapter_without_a_switch_is_disabled",
+      "test_canary_skipped_when_disabled_and_run_when_enabled",
+      "test_extracted_by_is_the_adapter_import_path",
+      "_declared",
+      "test_invalid_declarations_rejected",
+      "test_duplicate_adapter_names_rejected",
+      "test_discovered_adapters_are_valid",
+      "test_every_discovered_web_scrape_adapter_is_disabled_by_its_switch",
+      "test_startup_refused",
+      "test_startup_allowed",
+      "test_cli_refuses_commercial_mode_with_scraping",
+      "FakeFailing",
+      "test_cli_exits_1_when_an_adapter_reports_failure",
+      "test_default_reparse_is_a_no_op",
+      "test_reparse_respects_the_disabled_switch",
+      "test_cli_reparse_dispatches_to_adapter",
+      "test_cli_reparse_with_no_names_covers_every_adapter"
+    ],
+    "tests/test_nse_bhavcopy_adapters.py": [
+      "_row",
+      "_bhavcopy",
+      "_url",
+      "Web",
+      "page",
+      "_tiny_bounds",
+      "_ctx",
+      "_all",
+      "test_ingest_walks_forward_storing_rows_and_skipping_holidays",
+      "test_rerun_only_rechecks_the_current_holiday_streak",
+      "test_symbol_resolves_to_the_isin_it_traded_under_on_that_date",
+      "test_blocked_source_stops_the_run_and_keeps_what_was_loaded",
+      "test_check_shape_finds_the_latest_available_day_without_storing",
+      "test_check_shape_raises_when_nothing_found_in_ten_days",
+      "test_whole_file_quarantine_is_resolved_by_reparse_after_bounds_relax",
+      "test_row_quarantine_keeps_the_rest_of_the_file",
+      "test_reparse_of_an_already_current_file_changes_nothing",
+      "test_dropped_bhavcopy_is_dated_by_its_sidecar_and_loaded_once"
+    ],
+    "tests/test_nse_bhavcopy_parser.py": [
+      "_data",
+      "_row_number",
+      "_replace",
+      "test_recorded_bhavcopy_unzips_and_parses",
+      "test_raw_csv_without_the_zip_wrapper_parses_identically",
+      "test_reliance_row_matches_the_real_market_data",
+      "test_be_series_row_is_kept",
+      "test_non_equity_rows_are_filtered_not_quarantined",
+      "test_whole_file_rejected",
+      "test_bad_row_quarantined_and_the_rest_kept",
+      "test_malformed_numeric_field_quarantined_with_partial_identity",
+      "test_row_with_wrong_field_count_quarantined_without_identity",
+      "test_duplicate_isin_series_in_one_file_quarantines_the_later_row"
+    ],
+    "tests/test_nse_indices_adapters.py": [
+      "_isins",
+      "capture_url",
+      "page",
+      "Web",
+      "_ctx",
+      "_live",
+      "_wayback",
+      "_all",
+      "test_live_lists_become_snapshots_members_and_entities",
+      "test_changed_header_quarantines_the_file_keeps_its_bytes_and_fails",
+      "test_bad_row_is_quarantined_and_the_snapshot_is_incomplete",
+      "test_blocked_source_stops_without_retrying_and_stores_nothing",
+      "test_canary_checks_live_shape_without_storing",
+      "test_recorded_run_is_five_identical_captures",
+      "test_wayback_loads_run_boundaries_dated_by_capture_time",
+      "test_wayback_rerun_skips_captures_already_stored",
+      "test_capture_that_differs_from_its_digest_is_quarantined",
+      "test_archive_overload_is_retried_a_bounded_number_of_times_then_stops_keeping_what_loaded",
+      "test_gzip_archived_capture_is_checked_as_transferred_and_stored_decoded",
+      "test_whole_file_quarantine_is_examined_again_only_after_a_rule_change",
+      "test_row_quarantine_is_never_superseded",
+      "_series_fix",
+      "test_reparse_supersedes_an_incomplete_snapshot_from_stored_bytes_only",
+      "test_reparse_of_an_already_current_file_changes_nothing",
+      "test_row_quarantine_is_superseded_once_a_newer_snapshot_replaces_its_file",
+      "test_redirect_to_another_capture_is_not_stored_under_the_requested_time",
+      "test_earlier_evidence_loaded_later_appends_an_earlier_link_to_the_same_entity",
+      "test_dropped_capture_is_dated_by_its_sidecar_and_loaded_once",
+      "test_dropped_file_for_an_unknown_list_is_quarantined",
+      "_link",
+      "test_one_isin_cannot_belong_to_two_entities",
+      "test_db_constraints",
+      "test_append_only"
+    ],
+    "tests/test_nse_indices_parser.py": [
+      "test_recorded_lists_parse_without_issues",
+      "test_recorded_2016_list_first_row",
+      "_lines",
+      "_data",
+      "_replace",
+      "test_bom_crlf_and_blank_lines_are_tolerated",
+      "test_whole_file_rejected",
+      "test_bad_row_quarantined_and_the_rest_kept",
+      "test_be_series_is_accepted_alongside_eq",
+      "test_row_with_wrong_field_count_quarantined",
+      "test_index_for_url"
+    ],
+    "tests/test_pit.py": [
+      "_read",
+      "restated",
+      "test_before_original_filing_nothing_is_known",
+      "test_read_between_filings_sees_original_not_restatement",
+      "test_as_of_boundary_is_inclusive",
+      "test_read_after_restatement_sees_latest_version_only",
+      "test_instant_and_duration_facts_are_distinct_series",
+      "test_other_consolidation_and_isin_not_leaked",
+      "test_naive_as_of_raises"
+    ],
+    "tests/test_raw_source_file.py": [
+      "Drop",
+      "_ctx",
+      "_stored",
+      "_row",
+      "_assert_rejected",
+      "test_store_raw_saves_blob_then_records_provenance",
+      "test_no_provenance_row_when_blob_write_fails",
+      "test_publication_after_fetch_rejected_before_anything_is_stored",
+      "test_naive_as_of_rejected",
+      "test_db_rejects_as_of_after_fetched_at",
+      "test_db_evaluates_as_of_against_fetch_across_time_zones",
+      "test_db_constraints",
+      "test_same_fetch_recorded_once",
+      "test_naive_fetched_at_rejected_before_reaching_db",
+      "test_append_only",
+      "test_pit_read_filters_by_publication_time_and_adapter",
+      "_drop",
+      "test_drop_folder_stores_files_with_published_time_from_sidecar",
+      "test_drop_folder_fails_rather_than_guessing_provenance",
+      "test_drop_folder_unset_is_a_failure_not_a_skip",
+      "test_drop_adapter_is_manual_drop_class"
+    ],
+    "tests/test_wayback_cdx.py": [
+      "recorded_cdx",
+      "test_recorded_cdx_response_parses",
+      "test_empty_cdx_response",
+      "test_cdx_shape_change_fails_loudly",
+      "_capture",
+      "test_run_boundaries_keeps_first_and_last_of_each_identical_run",
+      "test_recorded_captures_match_their_archive_digests"
+    ]
+  },
+  "batches": [
+    {
+      "batchIndex": 1,
+      "files": [
+        {
+          "path": "core/compute/isin.py",
+          "language": "python",
+          "sizeLines": 32,
+          "fileCategory": "code"
+        },
+        {
+          "path": "ingest/http.py",
+          "language": "python",
+          "sizeLines": 196,
+          "fileCategory": "code"
+        },
+        {
+          "path": "ingest/nse_bhavcopy/parser.py",
+          "language": "python",
+          "sizeLines": 251,
+          "fileCategory": "code"
+        },
+        {
+          "path": "ingest/nse_indices/adapters.py",
+          "language": "python",
+          "sizeLines": 489,
+          "fileCategory": "code"
+        },
+        {
+          "path": "ingest/nse_indices/parser.py",
+          "language": "python",
+          "sizeLines": 154,
+          "fileCategory": "code"
+        },
+        {
+          "path": "ingest/schema.py",
+          "language": "python",
+          "sizeLines": 7,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_compute_isin.py",
+          "language": "python",
+          "sizeLines": 47,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_http.py",
+          "language": "python",
+          "sizeLines": 189,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_nse_bhavcopy_parser.py",
+          "language": "python",
+          "sizeLines": 132,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_nse_indices_parser.py",
+          "language": "python",
+          "sizeLines": 122,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_wayback_cdx.py",
+          "language": "python",
+          "sizeLines": 71,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "core/compute/isin.py": [],
+        "ingest/http.py": [],
+        "ingest/nse_bhavcopy/parser.py": [
+          "core/compute/isin.py",
+          "core/db/models.py",
+          "ingest/schema.py"
+        ],
+        "ingest/nse_indices/adapters.py": [
+          "core/db/models.py",
+          "core/db/pit.py",
+          "core/sources.py",
+          "ingest/base.py",
+          "ingest/http.py",
+          "ingest/nse_indices/parser.py",
+          "ingest/schema.py"
+        ],
+        "ingest/nse_indices/parser.py": [
+          "core/compute/isin.py",
+          "core/db/models.py",
+          "ingest/schema.py"
+        ],
+        "ingest/schema.py": [],
+        "tests/test_compute_isin.py": [
+          "core/compute/isin.py"
+        ],
+        "tests/test_http.py": [
+          "ingest/http.py"
+        ],
+        "tests/test_nse_bhavcopy_parser.py": [
+          "core/compute/isin.py",
+          "core/db/models.py",
+          "ingest/nse_bhavcopy/parser.py"
+        ],
+        "tests/test_nse_indices_parser.py": [
+          "core/db/models.py",
+          "ingest/nse_indices/parser.py"
+        ],
+        "tests/test_wayback_cdx.py": [
+          "ingest/nse_indices/adapters.py"
+        ]
+      },
+      "neighborMap": {
+        "ingest/http.py": [
+          {
+            "path": "ingest/nse_bhavcopy/adapters.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Tally",
+              "_provenance",
+              "load_bhavcopy",
+              "reparse_stored_bhavcopy",
+              "_media_type",
+              "_day_end_ist",
+              "NseBhavcopy",
+              "NseBhavcopyDrop"
+            ]
+          }
+        ],
+        "ingest/nse_bhavcopy/parser.py": [
+          {
+            "path": "core/db/models.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Consolidation",
+              "FactKind",
+              "_pg_enum",
+              "FinancialFact",
+              "RawSourceFile",
+              "IndexCode",
+              "EntityLinkBasis",
+              "QuarantineReason",
+              "Entity",
+              "EntityIsin",
+              "IndexSnapshot",
+              "IndexSnapshotConstituent",
+              "IndexSnapshotQuarantine",
+              "BhavcopyQuarantineReason",
+              "NseBhavcopyRow",
+              "NseBhavcopyQuarantine"
+            ]
+          },
+          {
+            "path": "ingest/nse_bhavcopy/adapters.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Tally",
+              "_provenance",
+              "load_bhavcopy",
+              "reparse_stored_bhavcopy",
+              "_media_type",
+              "_day_end_ist",
+              "NseBhavcopy",
+              "NseBhavcopyDrop"
+            ]
+          }
+        ],
+        "ingest/nse_indices/adapters.py": [
+          {
+            "path": "core/db/models.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Consolidation",
+              "FactKind",
+              "_pg_enum",
+              "FinancialFact",
+              "RawSourceFile",
+              "IndexCode",
+              "EntityLinkBasis",
+              "QuarantineReason",
+              "Entity",
+              "EntityIsin",
+              "IndexSnapshot",
+              "IndexSnapshotConstituent",
+              "IndexSnapshotQuarantine",
+              "BhavcopyQuarantineReason",
+              "NseBhavcopyRow",
+              "NseBhavcopyQuarantine"
+            ]
+          },
+          {
+            "path": "core/db/pit.py",
+            "batchIndex": 2,
+            "symbols": [
+              "facts_as_of",
+              "raw_source_files_as_of",
+              "entity_isin_earliest_links_as_of",
+              "index_snapshots_as_of",
+              "index_membership_as_of",
+              "index_members_on",
+              "index_snapshot_keys_as_of",
+              "index_list_sources_settled_as_of",
+              "index_snapshot_quarantine_as_of",
+              "QuarantineEntry",
+              "index_quarantine_review_as_of",
+              "bhavcopy_sources_settled_as_of",
+              "bhavcopy_source_loaded_as_of",
+              "bhavcopy_latest_trade_date_as_of",
+              "bhavcopy_rows_as_of",
+              "symbol_to_isin_as_of",
+              "bhavcopy_quarantine_as_of",
+              "BhavcopyQuarantineEntry",
+              "bhavcopy_quarantine_review_as_of"
+            ]
+          },
+          {
+            "path": "core/sources.py",
+            "batchIndex": 4,
+            "symbols": [
+              "SourceClass",
+              "DeploymentMode"
+            ]
+          },
+          {
+            "path": "ingest/base.py",
+            "batchIndex": 4,
+            "symbols": [
+              "RunStatus",
+              "CanaryStatus",
+              "RunResult",
+              "CanaryResult",
+              "RawDocument",
+              "AdapterContext",
+              "Adapter",
+              "DropFileError",
+              "DropFileMeta",
+              "DropFolderAdapter"
+            ]
+          },
+          {
+            "path": "tests/test_nse_indices_adapters.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_isins",
+              "capture_url",
+              "page",
+              "Web",
+              "_ctx",
+              "_live",
+              "_wayback",
+              "_all",
+              "test_live_lists_become_snapshots_members_and_entities",
+              "test_changed_header_quarantines_the_file_keeps_its_bytes_and_fails",
+              "test_bad_row_is_quarantined_and_the_snapshot_is_incomplete",
+              "test_blocked_source_stops_without_retrying_and_stores_nothing",
+              "test_canary_checks_live_shape_without_storing",
+              "test_recorded_run_is_five_identical_captures",
+              "test_wayback_loads_run_boundaries_dated_by_capture_time",
+              "test_wayback_rerun_skips_captures_already_stored",
+              "test_capture_that_differs_from_its_digest_is_quarantined",
+              "test_archive_overload_is_retried_a_bounded_number_of_times_then_stops_keeping_what_loaded",
+              "test_gzip_archived_capture_is_checked_as_transferred_and_stored_decoded",
+              "test_whole_file_quarantine_is_examined_again_only_after_a_rule_change",
+              "test_row_quarantine_is_never_superseded",
+              "_series_fix",
+              "test_reparse_supersedes_an_incomplete_snapshot_from_stored_bytes_only",
+              "test_reparse_of_an_already_current_file_changes_nothing",
+              "test_row_quarantine_is_superseded_once_a_newer_snapshot_replaces_its_file",
+              "test_redirect_to_another_capture_is_not_stored_under_the_requested_time",
+              "test_earlier_evidence_loaded_later_appends_an_earlier_link_to_the_same_entity",
+              "test_dropped_capture_is_dated_by_its_sidecar_and_loaded_once",
+              "test_dropped_file_for_an_unknown_list_is_quarantined",
+              "_link",
+              "test_one_isin_cannot_belong_to_two_entities",
+              "test_db_constraints",
+              "test_append_only"
+            ]
+          }
+        ],
+        "ingest/nse_indices/parser.py": [
+          {
+            "path": "core/db/models.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Consolidation",
+              "FactKind",
+              "_pg_enum",
+              "FinancialFact",
+              "RawSourceFile",
+              "IndexCode",
+              "EntityLinkBasis",
+              "QuarantineReason",
+              "Entity",
+              "EntityIsin",
+              "IndexSnapshot",
+              "IndexSnapshotConstituent",
+              "IndexSnapshotQuarantine",
+              "BhavcopyQuarantineReason",
+              "NseBhavcopyRow",
+              "NseBhavcopyQuarantine"
+            ]
+          },
+          {
+            "path": "tests/test_nse_indices_adapters.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_isins",
+              "capture_url",
+              "page",
+              "Web",
+              "_ctx",
+              "_live",
+              "_wayback",
+              "_all",
+              "test_live_lists_become_snapshots_members_and_entities",
+              "test_changed_header_quarantines_the_file_keeps_its_bytes_and_fails",
+              "test_bad_row_is_quarantined_and_the_snapshot_is_incomplete",
+              "test_blocked_source_stops_without_retrying_and_stores_nothing",
+              "test_canary_checks_live_shape_without_storing",
+              "test_recorded_run_is_five_identical_captures",
+              "test_wayback_loads_run_boundaries_dated_by_capture_time",
+              "test_wayback_rerun_skips_captures_already_stored",
+              "test_capture_that_differs_from_its_digest_is_quarantined",
+              "test_archive_overload_is_retried_a_bounded_number_of_times_then_stops_keeping_what_loaded",
+              "test_gzip_archived_capture_is_checked_as_transferred_and_stored_decoded",
+              "test_whole_file_quarantine_is_examined_again_only_after_a_rule_change",
+              "test_row_quarantine_is_never_superseded",
+              "_series_fix",
+              "test_reparse_supersedes_an_incomplete_snapshot_from_stored_bytes_only",
+              "test_reparse_of_an_already_current_file_changes_nothing",
+              "test_row_quarantine_is_superseded_once_a_newer_snapshot_replaces_its_file",
+              "test_redirect_to_another_capture_is_not_stored_under_the_requested_time",
+              "test_earlier_evidence_loaded_later_appends_an_earlier_link_to_the_same_entity",
+              "test_dropped_capture_is_dated_by_its_sidecar_and_loaded_once",
+              "test_dropped_file_for_an_unknown_list_is_quarantined",
+              "_link",
+              "test_one_isin_cannot_belong_to_two_entities",
+              "test_db_constraints",
+              "test_append_only"
+            ]
+          }
+        ],
+        "ingest/schema.py": [
+          {
+            "path": "ingest/base.py",
+            "batchIndex": 4,
+            "symbols": [
+              "RunStatus",
+              "CanaryStatus",
+              "RunResult",
+              "CanaryResult",
+              "RawDocument",
+              "AdapterContext",
+              "Adapter",
+              "DropFileError",
+              "DropFileMeta",
+              "DropFolderAdapter"
+            ]
+          }
+        ],
+        "tests/test_nse_bhavcopy_parser.py": [
+          {
+            "path": "core/db/models.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Consolidation",
+              "FactKind",
+              "_pg_enum",
+              "FinancialFact",
+              "RawSourceFile",
+              "IndexCode",
+              "EntityLinkBasis",
+              "QuarantineReason",
+              "Entity",
+              "EntityIsin",
+              "IndexSnapshot",
+              "IndexSnapshotConstituent",
+              "IndexSnapshotQuarantine",
+              "BhavcopyQuarantineReason",
+              "NseBhavcopyRow",
+              "NseBhavcopyQuarantine"
+            ]
+          }
+        ],
+        "tests/test_nse_indices_parser.py": [
+          {
+            "path": "core/db/models.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Consolidation",
+              "FactKind",
+              "_pg_enum",
+              "FinancialFact",
+              "RawSourceFile",
+              "IndexCode",
+              "EntityLinkBasis",
+              "QuarantineReason",
+              "Entity",
+              "EntityIsin",
+              "IndexSnapshot",
+              "IndexSnapshotConstituent",
+              "IndexSnapshotQuarantine",
+              "BhavcopyQuarantineReason",
+              "NseBhavcopyRow",
+              "NseBhavcopyQuarantine"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 2,
+      "files": [
+        {
+          "path": "core/db/base.py",
+          "language": "python",
+          "sizeLines": 38,
+          "fileCategory": "code"
+        },
+        {
+          "path": "core/db/models.py",
+          "language": "python",
+          "sizeLines": 416,
+          "fileCategory": "code"
+        },
+        {
+          "path": "core/db/pit.py",
+          "language": "python",
+          "sizeLines": 436,
+          "fileCategory": "code"
+        },
+        {
+          "path": "core/timezones.py",
+          "language": "python",
+          "sizeLines": 11,
+          "fileCategory": "code"
+        },
+        {
+          "path": "ingest/nse_bhavcopy/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "ingest/nse_bhavcopy/adapters.py",
+          "language": "python",
+          "sizeLines": 264,
+          "fileCategory": "code"
+        },
+        {
+          "path": "migrations/env.py",
+          "language": "python",
+          "sizeLines": 38,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/factories.py",
+          "language": "python",
+          "sizeLines": 29,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_financial_facts_schema.py",
+          "language": "python",
+          "sizeLines": 109,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_nse_bhavcopy_adapters.py",
+          "language": "python",
+          "sizeLines": 240,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_pit.py",
+          "language": "python",
+          "sizeLines": 81,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "core/db/base.py": [
+          "core/timezones.py"
+        ],
+        "core/db/models.py": [
+          "core/db/base.py",
+          "core/timezones.py"
+        ],
+        "core/db/pit.py": [
+          "core/compute/membership.py",
+          "core/db/models.py",
+          "core/timezones.py"
+        ],
+        "core/timezones.py": [],
+        "ingest/nse_bhavcopy/__init__.py": [],
+        "ingest/nse_bhavcopy/adapters.py": [
+          "core/db/models.py",
+          "core/db/pit.py",
+          "core/sources.py",
+          "core/timezones.py",
+          "ingest/base.py",
+          "ingest/http.py",
+          "ingest/nse_bhavcopy/parser.py"
+        ],
+        "migrations/env.py": [
+          "core/config.py",
+          "core/db/base.py",
+          "core/db/models.py"
+        ],
+        "tests/factories.py": [
+          "core/compute/hashing.py",
+          "core/db/models.py",
+          "core/timezones.py"
+        ],
+        "tests/test_financial_facts_schema.py": [
+          "core/db/base.py",
+          "core/db/models.py",
+          "core/timezones.py",
+          "tests/factories.py"
+        ],
+        "tests/test_nse_bhavcopy_adapters.py": [
+          "core/config.py",
+          "core/db/models.py",
+          "core/db/pit.py",
+          "core/timezones.py",
+          "ingest/base.py",
+          "ingest/nse_bhavcopy/__init__.py",
+          "ingest/nse_bhavcopy/adapters.py",
+          "tests/fakes.py"
+        ],
+        "tests/test_pit.py": [
+          "core/db/models.py",
+          "core/db/pit.py",
+          "core/timezones.py",
+          "tests/factories.py"
+        ]
+      },
+      "neighborMap": {
+        "core/db/models.py": [
+          {
+            "path": "ingest/base.py",
+            "batchIndex": 4,
+            "symbols": [
+              "RunStatus",
+              "CanaryStatus",
+              "RunResult",
+              "CanaryResult",
+              "RawDocument",
+              "AdapterContext",
+              "Adapter",
+              "DropFileError",
+              "DropFileMeta",
+              "DropFolderAdapter"
+            ]
+          },
+          {
+            "path": "ingest/nse_bhavcopy/parser.py",
+            "batchIndex": 1,
+            "symbols": [
+              "BhavcopyRawRow",
+              "BhavcopyRow",
+              "RowIssue",
+              "ParsedBhavcopy",
+              "BhavcopyRejected",
+              "_extract_csv",
+              "_fields",
+              "parse_bhavcopy"
+            ]
+          },
+          {
+            "path": "ingest/nse_indices/adapters.py",
+            "batchIndex": 1,
+            "symbols": [
+              "Tally",
+              "_provenance",
+              "wayback_digest",
+              "load_list",
+              "_link_entities",
+              "reparse_stored_lists",
+              "_media_type",
+              "_RunStopped",
+              "NseIndicesConstituents",
+              "NseIndicesConstituentsDrop",
+              "CdxShapeError",
+              "CdxCapture",
+              "parse_cdx",
+              "run_boundaries",
+              "WaybackIndexConstituents"
+            ]
+          },
+          {
+            "path": "ingest/nse_indices/parser.py",
+            "batchIndex": 1,
+            "symbols": [
+              "ConstituentRow",
+              "Constituent",
+              "RowIssue",
+              "ParsedList",
+              "ListRejected",
+              "index_for_url",
+              "_fields",
+              "parse_constituent_list"
+            ]
+          },
+          {
+            "path": "tests/test_nse_bhavcopy_parser.py",
+            "batchIndex": 1,
+            "symbols": [
+              "_data",
+              "_row_number",
+              "_replace",
+              "test_recorded_bhavcopy_unzips_and_parses",
+              "test_raw_csv_without_the_zip_wrapper_parses_identically",
+              "test_reliance_row_matches_the_real_market_data",
+              "test_be_series_row_is_kept",
+              "test_non_equity_rows_are_filtered_not_quarantined",
+              "test_whole_file_rejected",
+              "test_bad_row_quarantined_and_the_rest_kept",
+              "test_malformed_numeric_field_quarantined_with_partial_identity",
+              "test_row_with_wrong_field_count_quarantined_without_identity",
+              "test_duplicate_isin_series_in_one_file_quarantines_the_later_row"
+            ]
+          },
+          {
+            "path": "tests/test_nse_indices_adapters.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_isins",
+              "capture_url",
+              "page",
+              "Web",
+              "_ctx",
+              "_live",
+              "_wayback",
+              "_all",
+              "test_live_lists_become_snapshots_members_and_entities",
+              "test_changed_header_quarantines_the_file_keeps_its_bytes_and_fails",
+              "test_bad_row_is_quarantined_and_the_snapshot_is_incomplete",
+              "test_blocked_source_stops_without_retrying_and_stores_nothing",
+              "test_canary_checks_live_shape_without_storing",
+              "test_recorded_run_is_five_identical_captures",
+              "test_wayback_loads_run_boundaries_dated_by_capture_time",
+              "test_wayback_rerun_skips_captures_already_stored",
+              "test_capture_that_differs_from_its_digest_is_quarantined",
+              "test_archive_overload_is_retried_a_bounded_number_of_times_then_stops_keeping_what_loaded",
+              "test_gzip_archived_capture_is_checked_as_transferred_and_stored_decoded",
+              "test_whole_file_quarantine_is_examined_again_only_after_a_rule_change",
+              "test_row_quarantine_is_never_superseded",
+              "_series_fix",
+              "test_reparse_supersedes_an_incomplete_snapshot_from_stored_bytes_only",
+              "test_reparse_of_an_already_current_file_changes_nothing",
+              "test_row_quarantine_is_superseded_once_a_newer_snapshot_replaces_its_file",
+              "test_redirect_to_another_capture_is_not_stored_under_the_requested_time",
+              "test_earlier_evidence_loaded_later_appends_an_earlier_link_to_the_same_entity",
+              "test_dropped_capture_is_dated_by_its_sidecar_and_loaded_once",
+              "test_dropped_file_for_an_unknown_list_is_quarantined",
+              "_link",
+              "test_one_isin_cannot_belong_to_two_entities",
+              "test_db_constraints",
+              "test_append_only"
+            ]
+          },
+          {
+            "path": "tests/test_nse_indices_parser.py",
+            "batchIndex": 1,
+            "symbols": [
+              "test_recorded_lists_parse_without_issues",
+              "test_recorded_2016_list_first_row",
+              "_lines",
+              "_data",
+              "_replace",
+              "test_bom_crlf_and_blank_lines_are_tolerated",
+              "test_whole_file_rejected",
+              "test_bad_row_quarantined_and_the_rest_kept",
+              "test_be_series_is_accepted_alongside_eq",
+              "test_row_with_wrong_field_count_quarantined",
+              "test_index_for_url"
+            ]
+          },
+          {
+            "path": "tests/test_raw_source_file.py",
+            "batchIndex": 4,
+            "symbols": [
+              "Drop",
+              "_ctx",
+              "_stored",
+              "_row",
+              "_assert_rejected",
+              "test_store_raw_saves_blob_then_records_provenance",
+              "test_no_provenance_row_when_blob_write_fails",
+              "test_publication_after_fetch_rejected_before_anything_is_stored",
+              "test_naive_as_of_rejected",
+              "test_db_rejects_as_of_after_fetched_at",
+              "test_db_evaluates_as_of_against_fetch_across_time_zones",
+              "test_db_constraints",
+              "test_same_fetch_recorded_once",
+              "test_naive_fetched_at_rejected_before_reaching_db",
+              "test_append_only",
+              "test_pit_read_filters_by_publication_time_and_adapter",
+              "_drop",
+              "test_drop_folder_stores_files_with_published_time_from_sidecar",
+              "test_drop_folder_fails_rather_than_guessing_provenance",
+              "test_drop_folder_unset_is_a_failure_not_a_skip",
+              "test_drop_adapter_is_manual_drop_class"
+            ]
+          }
+        ],
+        "core/db/pit.py": [
+          {
+            "path": "core/compute/membership.py",
+            "batchIndex": 3,
+            "symbols": [
+              "Snapshot",
+              "ObservedInterval",
+              "Membership",
+              "ConflictingSnapshots",
+              "_check_simultaneous",
+              "observed_intervals",
+              "membership_on"
+            ]
+          },
+          {
+            "path": "ingest/nse_indices/adapters.py",
+            "batchIndex": 1,
+            "symbols": [
+              "Tally",
+              "_provenance",
+              "wayback_digest",
+              "load_list",
+              "_link_entities",
+              "reparse_stored_lists",
+              "_media_type",
+              "_RunStopped",
+              "NseIndicesConstituents",
+              "NseIndicesConstituentsDrop",
+              "CdxShapeError",
+              "CdxCapture",
+              "parse_cdx",
+              "run_boundaries",
+              "WaybackIndexConstituents"
+            ]
+          },
+          {
+            "path": "tests/test_nse_indices_adapters.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_isins",
+              "capture_url",
+              "page",
+              "Web",
+              "_ctx",
+              "_live",
+              "_wayback",
+              "_all",
+              "test_live_lists_become_snapshots_members_and_entities",
+              "test_changed_header_quarantines_the_file_keeps_its_bytes_and_fails",
+              "test_bad_row_is_quarantined_and_the_snapshot_is_incomplete",
+              "test_blocked_source_stops_without_retrying_and_stores_nothing",
+              "test_canary_checks_live_shape_without_storing",
+              "test_recorded_run_is_five_identical_captures",
+              "test_wayback_loads_run_boundaries_dated_by_capture_time",
+              "test_wayback_rerun_skips_captures_already_stored",
+              "test_capture_that_differs_from_its_digest_is_quarantined",
+              "test_archive_overload_is_retried_a_bounded_number_of_times_then_stops_keeping_what_loaded",
+              "test_gzip_archived_capture_is_checked_as_transferred_and_stored_decoded",
+              "test_whole_file_quarantine_is_examined_again_only_after_a_rule_change",
+              "test_row_quarantine_is_never_superseded",
+              "_series_fix",
+              "test_reparse_supersedes_an_incomplete_snapshot_from_stored_bytes_only",
+              "test_reparse_of_an_already_current_file_changes_nothing",
+              "test_row_quarantine_is_superseded_once_a_newer_snapshot_replaces_its_file",
+              "test_redirect_to_another_capture_is_not_stored_under_the_requested_time",
+              "test_earlier_evidence_loaded_later_appends_an_earlier_link_to_the_same_entity",
+              "test_dropped_capture_is_dated_by_its_sidecar_and_loaded_once",
+              "test_dropped_file_for_an_unknown_list_is_quarantined",
+              "_link",
+              "test_one_isin_cannot_belong_to_two_entities",
+              "test_db_constraints",
+              "test_append_only"
+            ]
+          },
+          {
+            "path": "tests/test_raw_source_file.py",
+            "batchIndex": 4,
+            "symbols": [
+              "Drop",
+              "_ctx",
+              "_stored",
+              "_row",
+              "_assert_rejected",
+              "test_store_raw_saves_blob_then_records_provenance",
+              "test_no_provenance_row_when_blob_write_fails",
+              "test_publication_after_fetch_rejected_before_anything_is_stored",
+              "test_naive_as_of_rejected",
+              "test_db_rejects_as_of_after_fetched_at",
+              "test_db_evaluates_as_of_against_fetch_across_time_zones",
+              "test_db_constraints",
+              "test_same_fetch_recorded_once",
+              "test_naive_fetched_at_rejected_before_reaching_db",
+              "test_append_only",
+              "test_pit_read_filters_by_publication_time_and_adapter",
+              "_drop",
+              "test_drop_folder_stores_files_with_published_time_from_sidecar",
+              "test_drop_folder_fails_rather_than_guessing_provenance",
+              "test_drop_folder_unset_is_a_failure_not_a_skip",
+              "test_drop_adapter_is_manual_drop_class"
+            ]
+          }
+        ],
+        "core/timezones.py": [
+          {
+            "path": "ingest/__main__.py",
+            "batchIndex": 4,
+            "symbols": [
+              "main"
+            ]
+          },
+          {
+            "path": "ingest/base.py",
+            "batchIndex": 4,
+            "symbols": [
+              "RunStatus",
+              "CanaryStatus",
+              "RunResult",
+              "CanaryResult",
+              "RawDocument",
+              "AdapterContext",
+              "Adapter",
+              "DropFileError",
+              "DropFileMeta",
+              "DropFolderAdapter"
+            ]
+          },
+          {
+            "path": "tests/test_nse_indices_adapters.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_isins",
+              "capture_url",
+              "page",
+              "Web",
+              "_ctx",
+              "_live",
+              "_wayback",
+              "_all",
+              "test_live_lists_become_snapshots_members_and_entities",
+              "test_changed_header_quarantines_the_file_keeps_its_bytes_and_fails",
+              "test_bad_row_is_quarantined_and_the_snapshot_is_incomplete",
+              "test_blocked_source_stops_without_retrying_and_stores_nothing",
+              "test_canary_checks_live_shape_without_storing",
+              "test_recorded_run_is_five_identical_captures",
+              "test_wayback_loads_run_boundaries_dated_by_capture_time",
+              "test_wayback_rerun_skips_captures_already_stored",
+              "test_capture_that_differs_from_its_digest_is_quarantined",
+              "test_archive_overload_is_retried_a_bounded_number_of_times_then_stops_keeping_what_loaded",
+              "test_gzip_archived_capture_is_checked_as_transferred_and_stored_decoded",
+              "test_whole_file_quarantine_is_examined_again_only_after_a_rule_change",
+              "test_row_quarantine_is_never_superseded",
+              "_series_fix",
+              "test_reparse_supersedes_an_incomplete_snapshot_from_stored_bytes_only",
+              "test_reparse_of_an_already_current_file_changes_nothing",
+              "test_row_quarantine_is_superseded_once_a_newer_snapshot_replaces_its_file",
+              "test_redirect_to_another_capture_is_not_stored_under_the_requested_time",
+              "test_earlier_evidence_loaded_later_appends_an_earlier_link_to_the_same_entity",
+              "test_dropped_capture_is_dated_by_its_sidecar_and_loaded_once",
+              "test_dropped_file_for_an_unknown_list_is_quarantined",
+              "_link",
+              "test_one_isin_cannot_belong_to_two_entities",
+              "test_db_constraints",
+              "test_append_only"
+            ]
+          },
+          {
+            "path": "tests/test_raw_source_file.py",
+            "batchIndex": 4,
+            "symbols": [
+              "Drop",
+              "_ctx",
+              "_stored",
+              "_row",
+              "_assert_rejected",
+              "test_store_raw_saves_blob_then_records_provenance",
+              "test_no_provenance_row_when_blob_write_fails",
+              "test_publication_after_fetch_rejected_before_anything_is_stored",
+              "test_naive_as_of_rejected",
+              "test_db_rejects_as_of_after_fetched_at",
+              "test_db_evaluates_as_of_against_fetch_across_time_zones",
+              "test_db_constraints",
+              "test_same_fetch_recorded_once",
+              "test_naive_fetched_at_rejected_before_reaching_db",
+              "test_append_only",
+              "test_pit_read_filters_by_publication_time_and_adapter",
+              "_drop",
+              "test_drop_folder_stores_files_with_published_time_from_sidecar",
+              "test_drop_folder_fails_rather_than_guessing_provenance",
+              "test_drop_folder_unset_is_a_failure_not_a_skip",
+              "test_drop_adapter_is_manual_drop_class"
+            ]
+          }
+        ],
+        "ingest/nse_bhavcopy/adapters.py": [
+          {
+            "path": "core/sources.py",
+            "batchIndex": 4,
+            "symbols": [
+              "SourceClass",
+              "DeploymentMode"
+            ]
+          },
+          {
+            "path": "ingest/base.py",
+            "batchIndex": 4,
+            "symbols": [
+              "RunStatus",
+              "CanaryStatus",
+              "RunResult",
+              "CanaryResult",
+              "RawDocument",
+              "AdapterContext",
+              "Adapter",
+              "DropFileError",
+              "DropFileMeta",
+              "DropFolderAdapter"
+            ]
+          },
+          {
+            "path": "ingest/http.py",
+            "batchIndex": 1,
+            "symbols": [
+              "AccessBlocked",
+              "PoliteClient",
+              "_retry_after",
+              "_decode"
+            ]
+          },
+          {
+            "path": "ingest/nse_bhavcopy/parser.py",
+            "batchIndex": 1,
+            "symbols": [
+              "BhavcopyRawRow",
+              "BhavcopyRow",
+              "RowIssue",
+              "ParsedBhavcopy",
+              "BhavcopyRejected",
+              "_extract_csv",
+              "_fields",
+              "parse_bhavcopy"
+            ]
+          }
+        ],
+        "migrations/env.py": [
+          {
+            "path": "core/config.py",
+            "batchIndex": 4,
+            "symbols": [
+              "Settings",
+              "parse_source_switches",
+              "get_settings"
+            ]
+          }
+        ],
+        "tests/factories.py": [
+          {
+            "path": "core/compute/hashing.py",
+            "batchIndex": 3,
+            "symbols": [
+              "content_hash"
+            ]
+          }
+        ],
+        "tests/test_nse_bhavcopy_adapters.py": [
+          {
+            "path": "core/config.py",
+            "batchIndex": 4,
+            "symbols": [
+              "Settings",
+              "parse_source_switches",
+              "get_settings"
+            ]
+          },
+          {
+            "path": "ingest/base.py",
+            "batchIndex": 4,
+            "symbols": [
+              "RunStatus",
+              "CanaryStatus",
+              "RunResult",
+              "CanaryResult",
+              "RawDocument",
+              "AdapterContext",
+              "Adapter",
+              "DropFileError",
+              "DropFileMeta",
+              "DropFolderAdapter"
+            ]
+          },
+          {
+            "path": "tests/fakes.py",
+            "batchIndex": 3,
+            "symbols": [
+              "MemoryBlobStore",
+              "FailingBlobStore"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 3,
+      "files": [
+        {
+          "path": "core/blob.py",
+          "language": "python",
+          "sizeLines": 97,
+          "fileCategory": "code"
+        },
+        {
+          "path": "core/compute/hashing.py",
+          "language": "python",
+          "sizeLines": 6,
+          "fileCategory": "code"
+        },
+        {
+          "path": "core/compute/membership.py",
+          "language": "python",
+          "sizeLines": 106,
+          "fileCategory": "code"
+        },
+        {
+          "path": "ingest/nse_indices/__init__.py",
+          "language": "python",
+          "sizeLines": 1,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/conftest.py",
+          "language": "python",
+          "sizeLines": 85,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/fakes.py",
+          "language": "python",
+          "sizeLines": 24,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_blob_s3.py",
+          "language": "python",
+          "sizeLines": 49,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_compute_membership.py",
+          "language": "python",
+          "sizeLines": 112,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_nse_indices_adapters.py",
+          "language": "python",
+          "sizeLines": 478,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "core/blob.py": [
+          "core/compute/hashing.py",
+          "core/config.py"
+        ],
+        "core/compute/hashing.py": [],
+        "core/compute/membership.py": [],
+        "ingest/nse_indices/__init__.py": [],
+        "tests/conftest.py": [
+          "core/blob.py",
+          "core/config.py"
+        ],
+        "tests/fakes.py": [
+          "core/compute/hashing.py"
+        ],
+        "tests/test_blob_s3.py": [
+          "core/blob.py",
+          "core/compute/hashing.py"
+        ],
+        "tests/test_compute_membership.py": [
+          "core/compute/membership.py"
+        ],
+        "tests/test_nse_indices_adapters.py": [
+          "core/compute/hashing.py",
+          "core/compute/membership.py",
+          "core/config.py",
+          "core/db/models.py",
+          "core/db/pit.py",
+          "core/timezones.py",
+          "ingest/base.py",
+          "ingest/nse_indices/__init__.py",
+          "ingest/nse_indices/adapters.py",
+          "ingest/nse_indices/parser.py",
+          "tests/fakes.py"
+        ]
+      },
+      "neighborMap": {
+        "core/blob.py": [
+          {
+            "path": "core/config.py",
+            "batchIndex": 4,
+            "symbols": [
+              "Settings",
+              "parse_source_switches",
+              "get_settings"
+            ]
+          },
+          {
+            "path": "ingest/__main__.py",
+            "batchIndex": 4,
+            "symbols": [
+              "main"
+            ]
+          },
+          {
+            "path": "ingest/base.py",
+            "batchIndex": 4,
+            "symbols": [
+              "RunStatus",
+              "CanaryStatus",
+              "RunResult",
+              "CanaryResult",
+              "RawDocument",
+              "AdapterContext",
+              "Adapter",
+              "DropFileError",
+              "DropFileMeta",
+              "DropFolderAdapter"
+            ]
+          }
+        ],
+        "core/compute/hashing.py": [
+          {
+            "path": "tests/factories.py",
+            "batchIndex": 2,
+            "symbols": [
+              "make_fact"
+            ]
+          },
+          {
+            "path": "tests/test_raw_source_file.py",
+            "batchIndex": 4,
+            "symbols": [
+              "Drop",
+              "_ctx",
+              "_stored",
+              "_row",
+              "_assert_rejected",
+              "test_store_raw_saves_blob_then_records_provenance",
+              "test_no_provenance_row_when_blob_write_fails",
+              "test_publication_after_fetch_rejected_before_anything_is_stored",
+              "test_naive_as_of_rejected",
+              "test_db_rejects_as_of_after_fetched_at",
+              "test_db_evaluates_as_of_against_fetch_across_time_zones",
+              "test_db_constraints",
+              "test_same_fetch_recorded_once",
+              "test_naive_fetched_at_rejected_before_reaching_db",
+              "test_append_only",
+              "test_pit_read_filters_by_publication_time_and_adapter",
+              "_drop",
+              "test_drop_folder_stores_files_with_published_time_from_sidecar",
+              "test_drop_folder_fails_rather_than_guessing_provenance",
+              "test_drop_folder_unset_is_a_failure_not_a_skip",
+              "test_drop_adapter_is_manual_drop_class"
+            ]
+          }
+        ],
+        "core/compute/membership.py": [
+          {
+            "path": "core/db/pit.py",
+            "batchIndex": 2,
+            "symbols": [
+              "facts_as_of",
+              "raw_source_files_as_of",
+              "entity_isin_earliest_links_as_of",
+              "index_snapshots_as_of",
+              "index_membership_as_of",
+              "index_members_on",
+              "index_snapshot_keys_as_of",
+              "index_list_sources_settled_as_of",
+              "index_snapshot_quarantine_as_of",
+              "QuarantineEntry",
+              "index_quarantine_review_as_of",
+              "bhavcopy_sources_settled_as_of",
+              "bhavcopy_source_loaded_as_of",
+              "bhavcopy_latest_trade_date_as_of",
+              "bhavcopy_rows_as_of",
+              "symbol_to_isin_as_of",
+              "bhavcopy_quarantine_as_of",
+              "BhavcopyQuarantineEntry",
+              "bhavcopy_quarantine_review_as_of"
+            ]
+          }
+        ],
+        "tests/conftest.py": [
+          {
+            "path": "core/config.py",
+            "batchIndex": 4,
+            "symbols": [
+              "Settings",
+              "parse_source_switches",
+              "get_settings"
+            ]
+          }
+        ],
+        "tests/fakes.py": [
+          {
+            "path": "tests/test_ingest_base.py",
+            "batchIndex": 4,
+            "symbols": [
+              "_Recording",
+              "FakeScrape",
+              "FakeApi",
+              "_ctx",
+              "test_web_scrape_adapter_disabled_unless_both_switches_on",
+              "test_web_scrape_adapter_runs_with_both_switches_on",
+              "test_master_scraping_switch_does_not_affect_official_sources",
+              "test_adapter_without_a_switch_is_disabled",
+              "test_canary_skipped_when_disabled_and_run_when_enabled",
+              "test_extracted_by_is_the_adapter_import_path",
+              "_declared",
+              "test_invalid_declarations_rejected",
+              "test_duplicate_adapter_names_rejected",
+              "test_discovered_adapters_are_valid",
+              "test_every_discovered_web_scrape_adapter_is_disabled_by_its_switch",
+              "test_startup_refused",
+              "test_startup_allowed",
+              "test_cli_refuses_commercial_mode_with_scraping",
+              "FakeFailing",
+              "test_cli_exits_1_when_an_adapter_reports_failure",
+              "test_default_reparse_is_a_no_op",
+              "test_reparse_respects_the_disabled_switch",
+              "test_cli_reparse_dispatches_to_adapter",
+              "test_cli_reparse_with_no_names_covers_every_adapter"
+            ]
+          },
+          {
+            "path": "tests/test_nse_bhavcopy_adapters.py",
+            "batchIndex": 2,
+            "symbols": [
+              "_row",
+              "_bhavcopy",
+              "_url",
+              "Web",
+              "page",
+              "_tiny_bounds",
+              "_ctx",
+              "_all",
+              "test_ingest_walks_forward_storing_rows_and_skipping_holidays",
+              "test_rerun_only_rechecks_the_current_holiday_streak",
+              "test_symbol_resolves_to_the_isin_it_traded_under_on_that_date",
+              "test_blocked_source_stops_the_run_and_keeps_what_was_loaded",
+              "test_check_shape_finds_the_latest_available_day_without_storing",
+              "test_check_shape_raises_when_nothing_found_in_ten_days",
+              "test_whole_file_quarantine_is_resolved_by_reparse_after_bounds_relax",
+              "test_row_quarantine_keeps_the_rest_of_the_file",
+              "test_reparse_of_an_already_current_file_changes_nothing",
+              "test_dropped_bhavcopy_is_dated_by_its_sidecar_and_loaded_once"
+            ]
+          },
+          {
+            "path": "tests/test_raw_source_file.py",
+            "batchIndex": 4,
+            "symbols": [
+              "Drop",
+              "_ctx",
+              "_stored",
+              "_row",
+              "_assert_rejected",
+              "test_store_raw_saves_blob_then_records_provenance",
+              "test_no_provenance_row_when_blob_write_fails",
+              "test_publication_after_fetch_rejected_before_anything_is_stored",
+              "test_naive_as_of_rejected",
+              "test_db_rejects_as_of_after_fetched_at",
+              "test_db_evaluates_as_of_against_fetch_across_time_zones",
+              "test_db_constraints",
+              "test_same_fetch_recorded_once",
+              "test_naive_fetched_at_rejected_before_reaching_db",
+              "test_append_only",
+              "test_pit_read_filters_by_publication_time_and_adapter",
+              "_drop",
+              "test_drop_folder_stores_files_with_published_time_from_sidecar",
+              "test_drop_folder_fails_rather_than_guessing_provenance",
+              "test_drop_folder_unset_is_a_failure_not_a_skip",
+              "test_drop_adapter_is_manual_drop_class"
+            ]
+          }
+        ],
+        "tests/test_nse_indices_adapters.py": [
+          {
+            "path": "core/config.py",
+            "batchIndex": 4,
+            "symbols": [
+              "Settings",
+              "parse_source_switches",
+              "get_settings"
+            ]
+          },
+          {
+            "path": "core/db/models.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Consolidation",
+              "FactKind",
+              "_pg_enum",
+              "FinancialFact",
+              "RawSourceFile",
+              "IndexCode",
+              "EntityLinkBasis",
+              "QuarantineReason",
+              "Entity",
+              "EntityIsin",
+              "IndexSnapshot",
+              "IndexSnapshotConstituent",
+              "IndexSnapshotQuarantine",
+              "BhavcopyQuarantineReason",
+              "NseBhavcopyRow",
+              "NseBhavcopyQuarantine"
+            ]
+          },
+          {
+            "path": "core/db/pit.py",
+            "batchIndex": 2,
+            "symbols": [
+              "facts_as_of",
+              "raw_source_files_as_of",
+              "entity_isin_earliest_links_as_of",
+              "index_snapshots_as_of",
+              "index_membership_as_of",
+              "index_members_on",
+              "index_snapshot_keys_as_of",
+              "index_list_sources_settled_as_of",
+              "index_snapshot_quarantine_as_of",
+              "QuarantineEntry",
+              "index_quarantine_review_as_of",
+              "bhavcopy_sources_settled_as_of",
+              "bhavcopy_source_loaded_as_of",
+              "bhavcopy_latest_trade_date_as_of",
+              "bhavcopy_rows_as_of",
+              "symbol_to_isin_as_of",
+              "bhavcopy_quarantine_as_of",
+              "BhavcopyQuarantineEntry",
+              "bhavcopy_quarantine_review_as_of"
+            ]
+          },
+          {
+            "path": "core/timezones.py",
+            "batchIndex": 2,
+            "symbols": [
+              "require_aware"
+            ]
+          },
+          {
+            "path": "ingest/base.py",
+            "batchIndex": 4,
+            "symbols": [
+              "RunStatus",
+              "CanaryStatus",
+              "RunResult",
+              "CanaryResult",
+              "RawDocument",
+              "AdapterContext",
+              "Adapter",
+              "DropFileError",
+              "DropFileMeta",
+              "DropFolderAdapter"
+            ]
+          },
+          {
+            "path": "ingest/nse_indices/adapters.py",
+            "batchIndex": 1,
+            "symbols": [
+              "Tally",
+              "_provenance",
+              "wayback_digest",
+              "load_list",
+              "_link_entities",
+              "reparse_stored_lists",
+              "_media_type",
+              "_RunStopped",
+              "NseIndicesConstituents",
+              "NseIndicesConstituentsDrop",
+              "CdxShapeError",
+              "CdxCapture",
+              "parse_cdx",
+              "run_boundaries",
+              "WaybackIndexConstituents"
+            ]
+          },
+          {
+            "path": "ingest/nse_indices/parser.py",
+            "batchIndex": 1,
+            "symbols": [
+              "ConstituentRow",
+              "Constituent",
+              "RowIssue",
+              "ParsedList",
+              "ListRejected",
+              "index_for_url",
+              "_fields",
+              "parse_constituent_list"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 4,
+      "files": [
+        {
+          "path": "core/config.py",
+          "language": "python",
+          "sizeLines": 91,
+          "fileCategory": "code"
+        },
+        {
+          "path": "core/sources.py",
+          "language": "python",
+          "sizeLines": 19,
+          "fileCategory": "code"
+        },
+        {
+          "path": "ingest/__init__.py",
+          "language": "python",
+          "sizeLines": 5,
+          "fileCategory": "code"
+        },
+        {
+          "path": "ingest/__main__.py",
+          "language": "python",
+          "sizeLines": 82,
+          "fileCategory": "code"
+        },
+        {
+          "path": "ingest/base.py",
+          "language": "python",
+          "sizeLines": 244,
+          "fileCategory": "code"
+        },
+        {
+          "path": "ingest/registry.py",
+          "language": "python",
+          "sizeLines": 91,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_config.py",
+          "language": "python",
+          "sizeLines": 58,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_ingest_base.py",
+          "language": "python",
+          "sizeLines": 244,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/test_raw_source_file.py",
+          "language": "python",
+          "sizeLines": 215,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        "core/config.py": [
+          "core/sources.py"
+        ],
+        "core/sources.py": [],
+        "ingest/__init__.py": [],
+        "ingest/__main__.py": [
+          "core/blob.py",
+          "core/config.py",
+          "core/timezones.py",
+          "ingest/base.py",
+          "ingest/registry.py"
+        ],
+        "ingest/base.py": [
+          "core/blob.py",
+          "core/config.py",
+          "core/db/models.py",
+          "core/sources.py",
+          "core/timezones.py",
+          "ingest/schema.py"
+        ],
+        "ingest/registry.py": [
+          "core/config.py",
+          "core/sources.py",
+          "ingest/__init__.py",
+          "ingest/base.py"
+        ],
+        "tests/test_config.py": [
+          "core/config.py",
+          "core/sources.py"
+        ],
+        "tests/test_ingest_base.py": [
+          "core/config.py",
+          "core/sources.py",
+          "ingest/__init__.py",
+          "ingest/base.py",
+          "ingest/registry.py",
+          "tests/fakes.py"
+        ],
+        "tests/test_raw_source_file.py": [
+          "core/compute/hashing.py",
+          "core/config.py",
+          "core/db/models.py",
+          "core/db/pit.py",
+          "core/sources.py",
+          "core/timezones.py",
+          "ingest/base.py",
+          "tests/fakes.py"
+        ]
+      },
+      "neighborMap": {
+        "core/config.py": [
+          {
+            "path": "core/blob.py",
+            "batchIndex": 3,
+            "symbols": [
+              "BlobIntegrityError",
+              "BlobStore",
+              "object_key",
+              "_error_code",
+              "S3BlobStore",
+              "s3_blob_store"
+            ]
+          },
+          {
+            "path": "migrations/env.py",
+            "batchIndex": 2,
+            "symbols": [
+              "_url",
+              "run_migrations_offline",
+              "run_migrations_online"
+            ]
+          },
+          {
+            "path": "tests/conftest.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_alembic_config",
+              "_recreate_database",
+              "engine",
+              "s3_store",
+              "session"
+            ]
+          },
+          {
+            "path": "tests/test_nse_bhavcopy_adapters.py",
+            "batchIndex": 2,
+            "symbols": [
+              "_row",
+              "_bhavcopy",
+              "_url",
+              "Web",
+              "page",
+              "_tiny_bounds",
+              "_ctx",
+              "_all",
+              "test_ingest_walks_forward_storing_rows_and_skipping_holidays",
+              "test_rerun_only_rechecks_the_current_holiday_streak",
+              "test_symbol_resolves_to_the_isin_it_traded_under_on_that_date",
+              "test_blocked_source_stops_the_run_and_keeps_what_was_loaded",
+              "test_check_shape_finds_the_latest_available_day_without_storing",
+              "test_check_shape_raises_when_nothing_found_in_ten_days",
+              "test_whole_file_quarantine_is_resolved_by_reparse_after_bounds_relax",
+              "test_row_quarantine_keeps_the_rest_of_the_file",
+              "test_reparse_of_an_already_current_file_changes_nothing",
+              "test_dropped_bhavcopy_is_dated_by_its_sidecar_and_loaded_once"
+            ]
+          },
+          {
+            "path": "tests/test_nse_indices_adapters.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_isins",
+              "capture_url",
+              "page",
+              "Web",
+              "_ctx",
+              "_live",
+              "_wayback",
+              "_all",
+              "test_live_lists_become_snapshots_members_and_entities",
+              "test_changed_header_quarantines_the_file_keeps_its_bytes_and_fails",
+              "test_bad_row_is_quarantined_and_the_snapshot_is_incomplete",
+              "test_blocked_source_stops_without_retrying_and_stores_nothing",
+              "test_canary_checks_live_shape_without_storing",
+              "test_recorded_run_is_five_identical_captures",
+              "test_wayback_loads_run_boundaries_dated_by_capture_time",
+              "test_wayback_rerun_skips_captures_already_stored",
+              "test_capture_that_differs_from_its_digest_is_quarantined",
+              "test_archive_overload_is_retried_a_bounded_number_of_times_then_stops_keeping_what_loaded",
+              "test_gzip_archived_capture_is_checked_as_transferred_and_stored_decoded",
+              "test_whole_file_quarantine_is_examined_again_only_after_a_rule_change",
+              "test_row_quarantine_is_never_superseded",
+              "_series_fix",
+              "test_reparse_supersedes_an_incomplete_snapshot_from_stored_bytes_only",
+              "test_reparse_of_an_already_current_file_changes_nothing",
+              "test_row_quarantine_is_superseded_once_a_newer_snapshot_replaces_its_file",
+              "test_redirect_to_another_capture_is_not_stored_under_the_requested_time",
+              "test_earlier_evidence_loaded_later_appends_an_earlier_link_to_the_same_entity",
+              "test_dropped_capture_is_dated_by_its_sidecar_and_loaded_once",
+              "test_dropped_file_for_an_unknown_list_is_quarantined",
+              "_link",
+              "test_one_isin_cannot_belong_to_two_entities",
+              "test_db_constraints",
+              "test_append_only"
+            ]
+          }
+        ],
+        "core/sources.py": [
+          {
+            "path": "ingest/nse_bhavcopy/adapters.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Tally",
+              "_provenance",
+              "load_bhavcopy",
+              "reparse_stored_bhavcopy",
+              "_media_type",
+              "_day_end_ist",
+              "NseBhavcopy",
+              "NseBhavcopyDrop"
+            ]
+          },
+          {
+            "path": "ingest/nse_indices/adapters.py",
+            "batchIndex": 1,
+            "symbols": [
+              "Tally",
+              "_provenance",
+              "wayback_digest",
+              "load_list",
+              "_link_entities",
+              "reparse_stored_lists",
+              "_media_type",
+              "_RunStopped",
+              "NseIndicesConstituents",
+              "NseIndicesConstituentsDrop",
+              "CdxShapeError",
+              "CdxCapture",
+              "parse_cdx",
+              "run_boundaries",
+              "WaybackIndexConstituents"
+            ]
+          }
+        ],
+        "ingest/__main__.py": [
+          {
+            "path": "core/blob.py",
+            "batchIndex": 3,
+            "symbols": [
+              "BlobIntegrityError",
+              "BlobStore",
+              "object_key",
+              "_error_code",
+              "S3BlobStore",
+              "s3_blob_store"
+            ]
+          },
+          {
+            "path": "core/timezones.py",
+            "batchIndex": 2,
+            "symbols": [
+              "require_aware"
+            ]
+          }
+        ],
+        "ingest/base.py": [
+          {
+            "path": "core/blob.py",
+            "batchIndex": 3,
+            "symbols": [
+              "BlobIntegrityError",
+              "BlobStore",
+              "object_key",
+              "_error_code",
+              "S3BlobStore",
+              "s3_blob_store"
+            ]
+          },
+          {
+            "path": "core/db/models.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Consolidation",
+              "FactKind",
+              "_pg_enum",
+              "FinancialFact",
+              "RawSourceFile",
+              "IndexCode",
+              "EntityLinkBasis",
+              "QuarantineReason",
+              "Entity",
+              "EntityIsin",
+              "IndexSnapshot",
+              "IndexSnapshotConstituent",
+              "IndexSnapshotQuarantine",
+              "BhavcopyQuarantineReason",
+              "NseBhavcopyRow",
+              "NseBhavcopyQuarantine"
+            ]
+          },
+          {
+            "path": "core/timezones.py",
+            "batchIndex": 2,
+            "symbols": [
+              "require_aware"
+            ]
+          },
+          {
+            "path": "ingest/schema.py",
+            "batchIndex": 1,
+            "symbols": [
+              "StrictModel"
+            ]
+          },
+          {
+            "path": "ingest/nse_bhavcopy/adapters.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Tally",
+              "_provenance",
+              "load_bhavcopy",
+              "reparse_stored_bhavcopy",
+              "_media_type",
+              "_day_end_ist",
+              "NseBhavcopy",
+              "NseBhavcopyDrop"
+            ]
+          },
+          {
+            "path": "ingest/nse_indices/adapters.py",
+            "batchIndex": 1,
+            "symbols": [
+              "Tally",
+              "_provenance",
+              "wayback_digest",
+              "load_list",
+              "_link_entities",
+              "reparse_stored_lists",
+              "_media_type",
+              "_RunStopped",
+              "NseIndicesConstituents",
+              "NseIndicesConstituentsDrop",
+              "CdxShapeError",
+              "CdxCapture",
+              "parse_cdx",
+              "run_boundaries",
+              "WaybackIndexConstituents"
+            ]
+          },
+          {
+            "path": "tests/test_nse_bhavcopy_adapters.py",
+            "batchIndex": 2,
+            "symbols": [
+              "_row",
+              "_bhavcopy",
+              "_url",
+              "Web",
+              "page",
+              "_tiny_bounds",
+              "_ctx",
+              "_all",
+              "test_ingest_walks_forward_storing_rows_and_skipping_holidays",
+              "test_rerun_only_rechecks_the_current_holiday_streak",
+              "test_symbol_resolves_to_the_isin_it_traded_under_on_that_date",
+              "test_blocked_source_stops_the_run_and_keeps_what_was_loaded",
+              "test_check_shape_finds_the_latest_available_day_without_storing",
+              "test_check_shape_raises_when_nothing_found_in_ten_days",
+              "test_whole_file_quarantine_is_resolved_by_reparse_after_bounds_relax",
+              "test_row_quarantine_keeps_the_rest_of_the_file",
+              "test_reparse_of_an_already_current_file_changes_nothing",
+              "test_dropped_bhavcopy_is_dated_by_its_sidecar_and_loaded_once"
+            ]
+          },
+          {
+            "path": "tests/test_nse_indices_adapters.py",
+            "batchIndex": 3,
+            "symbols": [
+              "_isins",
+              "capture_url",
+              "page",
+              "Web",
+              "_ctx",
+              "_live",
+              "_wayback",
+              "_all",
+              "test_live_lists_become_snapshots_members_and_entities",
+              "test_changed_header_quarantines_the_file_keeps_its_bytes_and_fails",
+              "test_bad_row_is_quarantined_and_the_snapshot_is_incomplete",
+              "test_blocked_source_stops_without_retrying_and_stores_nothing",
+              "test_canary_checks_live_shape_without_storing",
+              "test_recorded_run_is_five_identical_captures",
+              "test_wayback_loads_run_boundaries_dated_by_capture_time",
+              "test_wayback_rerun_skips_captures_already_stored",
+              "test_capture_that_differs_from_its_digest_is_quarantined",
+              "test_archive_overload_is_retried_a_bounded_number_of_times_then_stops_keeping_what_loaded",
+              "test_gzip_archived_capture_is_checked_as_transferred_and_stored_decoded",
+              "test_whole_file_quarantine_is_examined_again_only_after_a_rule_change",
+              "test_row_quarantine_is_never_superseded",
+              "_series_fix",
+              "test_reparse_supersedes_an_incomplete_snapshot_from_stored_bytes_only",
+              "test_reparse_of_an_already_current_file_changes_nothing",
+              "test_row_quarantine_is_superseded_once_a_newer_snapshot_replaces_its_file",
+              "test_redirect_to_another_capture_is_not_stored_under_the_requested_time",
+              "test_earlier_evidence_loaded_later_appends_an_earlier_link_to_the_same_entity",
+              "test_dropped_capture_is_dated_by_its_sidecar_and_loaded_once",
+              "test_dropped_file_for_an_unknown_list_is_quarantined",
+              "_link",
+              "test_one_isin_cannot_belong_to_two_entities",
+              "test_db_constraints",
+              "test_append_only"
+            ]
+          }
+        ],
+        "tests/test_ingest_base.py": [
+          {
+            "path": "tests/fakes.py",
+            "batchIndex": 3,
+            "symbols": [
+              "MemoryBlobStore",
+              "FailingBlobStore"
+            ]
+          }
+        ],
+        "tests/test_raw_source_file.py": [
+          {
+            "path": "core/compute/hashing.py",
+            "batchIndex": 3,
+            "symbols": [
+              "content_hash"
+            ]
+          },
+          {
+            "path": "core/db/models.py",
+            "batchIndex": 2,
+            "symbols": [
+              "Consolidation",
+              "FactKind",
+              "_pg_enum",
+              "FinancialFact",
+              "RawSourceFile",
+              "IndexCode",
+              "EntityLinkBasis",
+              "QuarantineReason",
+              "Entity",
+              "EntityIsin",
+              "IndexSnapshot",
+              "IndexSnapshotConstituent",
+              "IndexSnapshotQuarantine",
+              "BhavcopyQuarantineReason",
+              "NseBhavcopyRow",
+              "NseBhavcopyQuarantine"
+            ]
+          },
+          {
+            "path": "core/db/pit.py",
+            "batchIndex": 2,
+            "symbols": [
+              "facts_as_of",
+              "raw_source_files_as_of",
+              "entity_isin_earliest_links_as_of",
+              "index_snapshots_as_of",
+              "index_membership_as_of",
+              "index_members_on",
+              "index_snapshot_keys_as_of",
+              "index_list_sources_settled_as_of",
+              "index_snapshot_quarantine_as_of",
+              "QuarantineEntry",
+              "index_quarantine_review_as_of",
+              "bhavcopy_sources_settled_as_of",
+              "bhavcopy_source_loaded_as_of",
+              "bhavcopy_latest_trade_date_as_of",
+              "bhavcopy_rows_as_of",
+              "symbol_to_isin_as_of",
+              "bhavcopy_quarantine_as_of",
+              "BhavcopyQuarantineEntry",
+              "bhavcopy_quarantine_review_as_of"
+            ]
+          },
+          {
+            "path": "core/timezones.py",
+            "batchIndex": 2,
+            "symbols": [
+              "require_aware"
+            ]
+          },
+          {
+            "path": "tests/fakes.py",
+            "batchIndex": 3,
+            "symbols": [
+              "MemoryBlobStore",
+              "FailingBlobStore"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "batchIndex": 5,
+      "files": [
+        {
+          "path": ".dockerignore",
+          "language": "unknown",
+          "sizeLines": 9,
+          "fileCategory": "infra"
+        },
+        {
+          "path": "Dockerfile",
+          "language": "dockerfile",
+          "sizeLines": 25,
+          "fileCategory": "infra"
+        },
+        {
+          "path": "docker-compose.yml",
+          "language": "yaml",
+          "sizeLines": 94,
+          "fileCategory": "infra"
+        }
+      ],
+      "batchImportData": {
+        ".dockerignore": [],
+        "Dockerfile": [],
+        "docker-compose.yml": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 6,
+      "files": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "language": "yaml",
+          "sizeLines": 31,
+          "fileCategory": "infra"
+        }
+      ],
+      "batchImportData": {
+        ".github/workflows/ci.yml": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 7,
+      "files": [
+        {
+          "path": ".env.example",
+          "language": "config",
+          "sizeLines": 19,
+          "fileCategory": "config"
+        },
+        {
+          "path": "CLAUDE.md",
+          "language": "markdown",
+          "sizeLines": 493,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "README.md",
+          "language": "markdown",
+          "sizeLines": 93,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "Welcome.md",
+          "language": "markdown",
+          "sizeLines": 4,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "alembic.ini",
+          "language": "config",
+          "sizeLines": 40,
+          "fileCategory": "config"
+        },
+        {
+          "path": "getting-started-plan.md",
+          "language": "markdown",
+          "sizeLines": 158,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "pyproject.toml",
+          "language": "toml",
+          "sizeLines": 38,
+          "fileCategory": "config"
+        },
+        {
+          "path": "requirements.txt",
+          "language": "txt",
+          "sizeLines": 36,
+          "fileCategory": "docs"
+        }
+      ],
+      "batchImportData": {
+        ".env.example": [],
+        "CLAUDE.md": [],
+        "README.md": [],
+        "Welcome.md": [],
+        "alembic.ini": [],
+        "getting-started-plan.md": [],
+        "pyproject.toml": [],
+        "requirements.txt": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 8,
+      "files": [
+        {
+          "path": ".obsidian/app.json",
+          "language": "json",
+          "sizeLines": 0,
+          "fileCategory": "config"
+        },
+        {
+          "path": ".obsidian/appearance.json",
+          "language": "json",
+          "sizeLines": 2,
+          "fileCategory": "config"
+        },
+        {
+          "path": ".obsidian/backlink.json",
+          "language": "json",
+          "sizeLines": 2,
+          "fileCategory": "config"
+        },
+        {
+          "path": ".obsidian/core-plugins.json",
+          "language": "json",
+          "sizeLines": 32,
+          "fileCategory": "config"
+        },
+        {
+          "path": ".obsidian/graph.json",
+          "language": "json",
+          "sizeLines": 21,
+          "fileCategory": "config"
+        },
+        {
+          "path": ".obsidian/workspace.json",
+          "language": "json",
+          "sizeLines": 191,
+          "fileCategory": "config"
+        }
+      ],
+      "batchImportData": {
+        ".obsidian/app.json": [],
+        ".obsidian/appearance.json": [],
+        ".obsidian/backlink.json": [],
+        ".obsidian/core-plugins.json": [],
+        ".obsidian/graph.json": [],
+        ".obsidian/workspace.json": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 9,
+      "files": [
+        {
+          "path": ".ua/intermediate/scan-result.json",
+          "language": "json",
+          "sizeLines": 758,
+          "fileCategory": "config"
+        },
+        {
+          "path": ".ua/intermediate/ua-import-map-output.json",
+          "language": "json",
+          "sizeLines": 222,
+          "fileCategory": "config"
+        },
+        {
+          "path": ".ua/intermediate/ua-scan-files.json",
+          "language": "json",
+          "sizeLines": 465,
+          "fileCategory": "config"
+        }
+      ],
+      "batchImportData": {
+        ".ua/intermediate/scan-result.json": [],
+        ".ua/intermediate/ua-import-map-output.json": [],
+        ".ua/intermediate/ua-scan-files.json": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 10,
+      "files": [
+        {
+          "path": "tests/fixtures/nse_indices/SOURCES.md",
+          "language": "markdown",
+          "sizeLines": 16,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json",
+          "language": "json",
+          "sizeLines": 18,
+          "fileCategory": "config"
+        },
+        {
+          "path": "tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv",
+          "language": "csv",
+          "sizeLines": 51,
+          "fileCategory": "data"
+        },
+        {
+          "path": "tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv",
+          "language": "csv",
+          "sizeLines": 51,
+          "fileCategory": "data"
+        },
+        {
+          "path": "tests/fixtures/nse_indices/ind_nifty50list_20260915.csv",
+          "language": "csv",
+          "sizeLines": 51,
+          "fileCategory": "data"
+        },
+        {
+          "path": "tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv",
+          "language": "csv",
+          "sizeLines": 51,
+          "fileCategory": "data"
+        }
+      ],
+      "batchImportData": {
+        "tests/fixtures/nse_indices/SOURCES.md": [],
+        "tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json": [],
+        "tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv": [],
+        "tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv": [],
+        "tests/fixtures/nse_indices/ind_nifty50list_20260915.csv": [],
+        "tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv": []
+      },
+      "neighborMap": {}
+    },
+    {
+      "batchIndex": 11,
+      "files": [
+        {
+          "path": ".gitattributes",
+          "language": "unknown",
+          "sizeLines": 6,
+          "fileCategory": "code"
+        },
+        {
+          "path": "core/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "core/compute/__init__.py",
+          "language": "python",
+          "sizeLines": 5,
+          "fileCategory": "code"
+        },
+        {
+          "path": "core/db/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "docs/temporal-model.md",
+          "language": "markdown",
+          "sizeLines": 124,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "migrations/script.py.mako",
+          "language": "mako",
+          "sizeLines": 25,
+          "fileCategory": "code"
+        },
+        {
+          "path": "migrations/versions/0001_financial_facts.py",
+          "language": "python",
+          "sizeLines": 119,
+          "fileCategory": "code"
+        },
+        {
+          "path": "migrations/versions/0002_raw_source_file.py",
+          "language": "python",
+          "sizeLines": 68,
+          "fileCategory": "code"
+        },
+        {
+          "path": "migrations/versions/0003_entity_and_index_snapshots.py",
+          "language": "python",
+          "sizeLines": 209,
+          "fileCategory": "code"
+        },
+        {
+          "path": "migrations/versions/0004_index_snapshot_rule_versioned.py",
+          "language": "python",
+          "sizeLines": 38,
+          "fileCategory": "code"
+        },
+        {
+          "path": "migrations/versions/0005_nse_bhavcopy.py",
+          "language": "python",
+          "sizeLines": 130,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/__init__.py",
+          "language": "python",
+          "sizeLines": 0,
+          "fileCategory": "code"
+        },
+        {
+          "path": "tests/fixtures/nse_bhavcopy/SOURCES.md",
+          "language": "markdown",
+          "sizeLines": 12,
+          "fileCategory": "docs"
+        },
+        {
+          "path": "tests/test_architecture.py",
+          "language": "python",
+          "sizeLines": 721,
+          "fileCategory": "code"
+        }
+      ],
+      "batchImportData": {
+        ".gitattributes": [],
+        "core/__init__.py": [],
+        "core/compute/__init__.py": [],
+        "core/db/__init__.py": [],
+        "docs/temporal-model.md": [],
+        "migrations/script.py.mako": [],
+        "migrations/versions/0001_financial_facts.py": [],
+        "migrations/versions/0002_raw_source_file.py": [],
+        "migrations/versions/0003_entity_and_index_snapshots.py": [],
+        "migrations/versions/0004_index_snapshot_rule_versioned.py": [],
+        "migrations/versions/0005_nse_bhavcopy.py": [],
+        "tests/__init__.py": [],
+        "tests/fixtures/nse_bhavcopy/SOURCES.md": [],
+        "tests/test_architecture.py": []
+      },
+      "neighborMap": {}
+    }
+  ]
+}

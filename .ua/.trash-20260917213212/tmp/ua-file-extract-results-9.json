@@ -1,0 +1,157 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 3,
+  "filesSkipped": [],
+  "filesUnreadable": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 3,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 3
+    }
+  },
+  "results": [
+    {
+      "path": ".ua/intermediate/scan-result.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 837,
+      "nonEmptyLines": 786,
+      "sections": [
+        {
+          "heading": "name",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "description",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "languages",
+          "level": 1,
+          "line": 4
+        },
+        {
+          "heading": "frameworks",
+          "level": 1,
+          "line": 15
+        },
+        {
+          "heading": "files",
+          "level": 1,
+          "line": 24
+        },
+        {
+          "heading": "totalFiles",
+          "level": 1,
+          "line": 512
+        },
+        {
+          "heading": "filteredByIgnore",
+          "level": 1,
+          "line": 513
+        },
+        {
+          "heading": "estimatedComplexity",
+          "level": 1,
+          "line": 514
+        },
+        {
+          "heading": "importMap",
+          "level": 1,
+          "line": 515
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 9
+      }
+    },
+    {
+      "path": ".ua/intermediate/ua-import-map-output.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 223,
+      "nonEmptyLines": 223,
+      "sections": [
+        {
+          "heading": "scriptCompleted",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "stats",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "importMap",
+          "level": 1,
+          "line": 8
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 3
+      }
+    },
+    {
+      "path": ".ua/intermediate/ua-scan-files.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 466,
+      "nonEmptyLines": 466,
+      "sections": [
+        {
+          "heading": "scriptCompleted",
+          "level": 1,
+          "line": 2
+        },
+        {
+          "heading": "files",
+          "level": 1,
+          "line": 3
+        },
+        {
+          "heading": "totalFiles",
+          "level": 1,
+          "line": 437
+        },
+        {
+          "heading": "filteredByIgnore",
+          "level": 1,
+          "line": 438
+        },
+        {
+          "heading": "estimatedComplexity",
+          "level": 1,
+          "line": 439
+        },
+        {
+          "heading": "stats",
+          "level": 1,
+          "line": 440
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 6
+      }
+    }
+  ]
+}

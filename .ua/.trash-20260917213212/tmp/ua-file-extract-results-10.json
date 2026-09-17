@@ -1,0 +1,59 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 2,
+  "filesSkipped": [
+    "tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv",
+    "tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv",
+    "tests/fixtures/nse_indices/ind_nifty50list_20260915.csv",
+    "tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv"
+  ],
+  "filesUnreadable": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 2,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 2
+    }
+  },
+  "results": [
+    {
+      "path": "tests/fixtures/nse_indices/SOURCES.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 16,
+      "nonEmptyLines": 13,
+      "sections": [
+        {
+          "heading": "Recorded responses",
+          "level": 1,
+          "line": 1
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json",
+      "language": "json",
+      "fileCategory": "config",
+      "totalLines": 18,
+      "nonEmptyLines": 18,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 0
+      }
+    }
+  ]
+}

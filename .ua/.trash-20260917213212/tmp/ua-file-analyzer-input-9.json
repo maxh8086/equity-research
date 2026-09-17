@@ -1,0 +1,13 @@
+{
+  "projectRoot": "C:/Users/vaibh/Downloads/Projects/Cluade Agent Swarm - Market Analyst",
+  "batchFiles": [
+    {"path": ".ua/intermediate/scan-result.json", "language": "json", "sizeLines": 758, "fileCategory": "config"},
+    {"path": ".ua/intermediate/ua-import-map-output.json", "language": "json", "sizeLines": 222, "fileCategory": "config"},
+    {"path": ".ua/intermediate/ua-scan-files.json", "language": "json", "sizeLines": 465, "fileCategory": "config"}
+  ],
+  "batchImportData": {
+    ".ua/intermediate/scan-result.json": [],
+    ".ua/intermediate/ua-import-map-output.json": [],
+    ".ua/intermediate/ua-scan-files.json": []
+  }
+}

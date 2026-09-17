@@ -1,0 +1,9 @@
+{
+  "projectRoot": "C:\Users\vaibh\Downloads\Projects\Cluade Agent Swarm - Market Analyst",
+  "batchFiles": [
+    {"path": ".dockerignore", "language": "unknown", "sizeLines": 9, "fileCategory": "infra"},
+    {"path": "Dockerfile", "language": "dockerfile", "sizeLines": 25, "fileCategory": "infra"},
+    {"path": "docker-compose.yml", "language": "yaml", "sizeLines": 94, "fileCategory": "infra"}
+  ],
+  "batchImportData": {".dockerignore":[],"Dockerfile":[],"docker-compose.yml":[]}
+}

@@ -1,0 +1,960 @@
+{
+  "nodes": [
+    {
+      "id": "file:core/config.py",
+      "type": "file",
+      "name": "config.py",
+      "filePath": "core/config.py",
+      "summary": "Central settings module that parses EQUITY_* environment variables and .env files into a typed Pydantic Settings object, including per-source enable switches and deployment-mode control.",
+      "tags": ["configuration", "settings", "deployment-mode", "source-switches"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:core/sources.py",
+      "type": "file",
+      "name": "sources.py",
+      "filePath": "core/sources.py",
+      "summary": "Defines the SourceClass and DeploymentMode enums used throughout the system to classify data adapters and guard against scraping in commercial deployments.",
+      "tags": ["type-definition", "configuration", "enum"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:ingest/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "ingest/__init__.py",
+      "summary": "Package marker for the ingest module; currently empty aside from a package docstring.",
+      "tags": ["entry-point", "barrel"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:ingest/__main__.py",
+      "type": "file",
+      "name": "__main__.py",
+      "filePath": "ingest/__main__.py",
+      "summary": "CLI entry point for the ingest subsystem; dispatches run, canary, and reparse subcommands to discovered adapters, enforces startup checks, and manages the SQLAlchemy session and blob store lifecycle.",
+      "tags": ["entry-point", "cli", "ingest", "service"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:ingest/base.py",
+      "type": "file",
+      "name": "base.py",
+      "filePath": "ingest/base.py",
+      "summary": "Defines the abstract Adapter and DropFolderAdapter base classes plus all supporting value types (RunResult, CanaryResult, RawDocument, AdapterContext), encoding the adapter protocol: save raw bytes to blob storage before parsing, respect source-class switches, and record full provenance.",
+      "tags": ["middleware", "adapter", "service", "factory"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:ingest/registry.py",
+      "type": "file",
+      "name": "registry.py",
+      "filePath": "ingest/registry.py",
+      "summary": "Discovers all concrete Adapter subclasses in the ingest package at runtime, validates their declarations, and enforces startup rules including refusing to start in commercial mode if any web-scrape adapter is enabled.",
+      "tags": ["registry", "validation", "service", "middleware"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:tests/test_config.py",
+      "type": "file",
+      "name": "test_config.py",
+      "filePath": "tests/test_config.py",
+      "summary": "Tests that EQUITY_SOURCE_* environment variables are parsed into per-source switches correctly, that boolean parsing is strict, and that the .env file and environment variables interact as expected.",
+      "tags": ["test", "configuration", "source-switches"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_ingest_base.py",
+      "type": "file",
+      "name": "test_ingest_base.py",
+      "filePath": "tests/test_ingest_base.py",
+      "summary": "Comprehensive tests for the Adapter base class and registry: verifies per-source and master scraping switches disable adapters correctly, that commercial-mode startup is refused when scraping is on, and that the CLI reparse subcommand dispatches to adapters.",
+      "tags": ["test", "ingest", "adapter", "registry"],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/test_raw_source_file.py",
+      "type": "file",
+      "name": "test_raw_source_file.py",
+      "filePath": "tests/test_raw_source_file.py",
+      "summary": "Integration tests for the store_raw pathway and RawSourceFile database model: verifies blob-first write ordering, timezone-aware as_of enforcement, append-only constraints, point-in-time reads, and drop-folder ingestion.",
+      "tags": ["test", "ingest", "database", "temporal"],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:core/config.py:Settings",
+      "type": "class",
+      "name": "Settings",
+      "filePath": "core/config.py",
+      "lineRange": [17, 76],
+      "summary": "Pydantic BaseSettings class declaring all EQUITY_* environment variables including database URL, deployment mode, web-scraping master switch, per-source switches map, blob storage coordinates, and adapter-specific rate-limit parameters.",
+      "tags": ["configuration", "settings", "pydantic"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:core/config.py:parse_source_switches",
+      "type": "function",
+      "name": "parse_source_switches",
+      "filePath": "core/config.py",
+      "lineRange": [79, 85],
+      "summary": "Scans os.environ for EQUITY_SOURCE_<NAME>_ENABLED keys and returns a lowercase-name-to-bool mapping used as the Settings.source_switches dict.",
+      "tags": ["configuration", "source-switches", "parsing"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:core/config.py:get_settings",
+      "type": "function",
+      "name": "get_settings",
+      "filePath": "core/config.py",
+      "lineRange": [88, 91],
+      "summary": "Factory that merges a .env file into os.environ then constructs and returns a fully populated Settings instance.",
+      "tags": ["configuration", "factory"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:core/sources.py:SourceClass",
+      "type": "class",
+      "name": "SourceClass",
+      "filePath": "core/sources.py",
+      "lineRange": [10, 14],
+      "summary": "Enum of adapter source classes: official_api, official_archive, web_scrape, and manual_drop; used to gate adapters in commercial mode.",
+      "tags": ["type-definition", "enum", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:core/sources.py:DeploymentMode",
+      "type": "class",
+      "name": "DeploymentMode",
+      "filePath": "core/sources.py",
+      "lineRange": [17, 19],
+      "summary": "Enum distinguishing personal from commercial deployment modes, determining whether web-scrape adapters are permitted.",
+      "tags": ["type-definition", "enum", "configuration"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:ingest/__main__.py:main",
+      "type": "function",
+      "name": "main",
+      "filePath": "ingest/__main__.py",
+      "lineRange": [25, 78],
+      "summary": "Parses CLI arguments for run/canary/reparse subcommands, discovers adapters, enforces startup checks, opens a DB session and blob store, dispatches the requested operation, and exits with status 1 on any adapter failure.",
+      "tags": ["entry-point", "cli", "ingest"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:ingest/base.py:Adapter",
+      "type": "class",
+      "name": "Adapter",
+      "filePath": "ingest/base.py",
+      "lineRange": [87, 172],
+      "summary": "Abstract base class for all data adapters; enforces the blob-first store_raw contract, manages disabled-reason logic from source-class switches, and declares the run/canary/reparse/ingest/check_shape interface that concrete adapters must implement.",
+      "tags": ["adapter", "middleware", "factory", "abstract"],
+      "complexity": "complex"
+    },
+    {
+      "id": "class:ingest/base.py:DropFolderAdapter",
+      "type": "class",
+      "name": "DropFolderAdapter",
+      "filePath": "ingest/base.py",
+      "lineRange": [198, 244],
+      "summary": "Adapter subclass for ingesting files from a configured local drop folder; reads a JSON sidecar for provenance metadata and refuses to proceed without one, ensuring no guessed as_of timestamps.",
+      "tags": ["adapter", "manual-drop", "ingest"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:ingest/base.py:RunStatus",
+      "type": "class",
+      "name": "RunStatus",
+      "filePath": "ingest/base.py",
+      "lineRange": [38, 41],
+      "summary": "Enum of adapter run outcomes: ok, disabled, and failed.",
+      "tags": ["type-definition", "enum"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:ingest/base.py:CanaryStatus",
+      "type": "class",
+      "name": "CanaryStatus",
+      "filePath": "ingest/base.py",
+      "lineRange": [44, 47],
+      "summary": "Enum of canary check outcomes: ok, disabled, and failed.",
+      "tags": ["type-definition", "enum"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:ingest/base.py:RunResult",
+      "type": "class",
+      "name": "RunResult",
+      "filePath": "ingest/base.py",
+      "lineRange": [51, 57],
+      "summary": "Dataclass capturing the outcome of an adapter run: status, detail message, list of stored raw files, rows written, and quarantined count.",
+      "tags": ["type-definition", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:ingest/base.py:CanaryResult",
+      "type": "class",
+      "name": "CanaryResult",
+      "filePath": "ingest/base.py",
+      "lineRange": [61, 64],
+      "summary": "Dataclass capturing the outcome of an adapter canary check: status and detail message.",
+      "tags": ["type-definition", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:ingest/base.py:RawDocument",
+      "type": "class",
+      "name": "RawDocument",
+      "filePath": "ingest/base.py",
+      "lineRange": [68, 76],
+      "summary": "Value object returned by store_raw containing raw bytes and full provenance fields (content_hash, source_url, as_of, fetched_at, media_type) for downstream parsers.",
+      "tags": ["type-definition", "data-model", "provenance"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:ingest/base.py:AdapterContext",
+      "type": "class",
+      "name": "AdapterContext",
+      "filePath": "ingest/base.py",
+      "lineRange": [80, 84],
+      "summary": "Dependency bundle passed to every adapter method containing the SQLAlchemy session, blob store, settings, and a timezone-aware now timestamp.",
+      "tags": ["type-definition", "data-model"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:ingest/base.py:DropFileError",
+      "type": "class",
+      "name": "DropFileError",
+      "filePath": "ingest/base.py",
+      "lineRange": [182, 183],
+      "summary": "Exception raised by DropFolderAdapter when a required sidecar is missing or the drop folder is misconfigured.",
+      "tags": ["type-definition", "error-handling"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:ingest/base.py:DropFileMeta",
+      "type": "class",
+      "name": "DropFileMeta",
+      "filePath": "ingest/base.py",
+      "lineRange": [186, 195],
+      "summary": "Pydantic model for the JSON sidecar that accompanies each drop-folder file, carrying source_url, published_at, and media_type.",
+      "tags": ["type-definition", "data-model", "pydantic"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:ingest/registry.py:AdapterDeclarationError",
+      "type": "class",
+      "name": "AdapterDeclarationError",
+      "filePath": "ingest/registry.py",
+      "lineRange": [19, 20],
+      "summary": "Exception raised when an adapter class fails declaration validation (missing or invalid name, source_class, or target_stores).",
+      "tags": ["type-definition", "error-handling", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "class:ingest/registry.py:StartupRefused",
+      "type": "class",
+      "name": "StartupRefused",
+      "filePath": "ingest/registry.py",
+      "lineRange": [23, 24],
+      "summary": "Exception raised by check_startup when deployment configuration violates invariants such as web-scrape adapters enabled in commercial mode.",
+      "tags": ["type-definition", "error-handling"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:ingest/registry.py:validate_declaration",
+      "type": "function",
+      "name": "validate_declaration",
+      "filePath": "ingest/registry.py",
+      "lineRange": [27, 39],
+      "summary": "Validates that an adapter class has a correctly typed name string, a SourceClass source_class, and a non-empty list of target_stores strings; raises AdapterDeclarationError on any violation.",
+      "tags": ["validation", "registry"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:ingest/registry.py:index_adapters",
+      "type": "function",
+      "name": "index_adapters",
+      "filePath": "ingest/registry.py",
+      "lineRange": [42, 49],
+      "summary": "Validates and indexes a list of adapter classes into a name-keyed dict, raising AdapterDeclarationError on duplicate names.",
+      "tags": ["registry", "validation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:ingest/registry.py:_concrete_subclasses",
+      "type": "function",
+      "name": "_concrete_subclasses",
+      "filePath": "ingest/registry.py",
+      "lineRange": [52, 56],
+      "summary": "Recursively collects all non-abstract subclasses of the Adapter base class from the Python class registry.",
+      "tags": ["registry", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:ingest/registry.py:discover",
+      "type": "function",
+      "name": "discover",
+      "filePath": "ingest/registry.py",
+      "lineRange": [59, 66],
+      "summary": "Walks the ingest package, imports all sub-modules to trigger adapter class registration, then indexes and returns all discovered concrete Adapter subclasses.",
+      "tags": ["registry", "utility", "ingest"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:ingest/registry.py:source_class_by_extracted_by",
+      "type": "function",
+      "name": "source_class_by_extracted_by",
+      "filePath": "ingest/registry.py",
+      "lineRange": [69, 71],
+      "summary": "Returns a mapping from each adapter's extracted_by string to its SourceClass, used by the point-in-time read layer to filter rows by allowed source classes.",
+      "tags": ["registry", "utility"],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:ingest/registry.py:check_startup",
+      "type": "function",
+      "name": "check_startup",
+      "filePath": "ingest/registry.py",
+      "lineRange": [74, 91],
+      "summary": "Validates that the adapter set is consistent with the current settings: refuses startup in commercial mode if any web-scrape adapter is enabled, and raises StartupRefused with all problems listed.",
+      "tags": ["validation", "registry", "deployment-mode"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "class:tests/test_ingest_base.py:_Recording",
+      "type": "class",
+      "name": "_Recording",
+      "filePath": "tests/test_ingest_base.py",
+      "lineRange": [21, 31],
+      "summary": "Test double Adapter subclass that records the ingest call sequence for verifying dispatch behavior in adapter base class tests.",
+      "tags": ["test", "adapter"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:core/config.py",
+      "target": "class:core/config.py:Settings",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/config.py",
+      "target": "function:core/config.py:parse_source_switches",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/config.py",
+      "target": "function:core/config.py:get_settings",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/config.py",
+      "target": "class:core/config.py:Settings",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/config.py",
+      "target": "function:core/config.py:parse_source_switches",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/config.py",
+      "target": "function:core/config.py:get_settings",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/config.py",
+      "target": "file:core/sources.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:core/sources.py",
+      "target": "class:core/sources.py:SourceClass",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/sources.py",
+      "target": "class:core/sources.py:DeploymentMode",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:core/sources.py",
+      "target": "class:core/sources.py:SourceClass",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:core/sources.py",
+      "target": "class:core/sources.py:DeploymentMode",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/__main__.py",
+      "target": "function:ingest/__main__.py:main",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/__main__.py",
+      "target": "function:ingest/__main__.py:main",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/__main__.py",
+      "target": "file:core/blob.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/__main__.py",
+      "target": "file:core/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/__main__.py",
+      "target": "file:core/timezones.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/__main__.py",
+      "target": "file:ingest/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/__main__.py",
+      "target": "file:ingest/registry.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:RunStatus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:CanaryStatus",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:RunResult",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:CanaryResult",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:RawDocument",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:AdapterContext",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:Adapter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:DropFileError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:DropFileMeta",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:DropFolderAdapter",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:RunStatus",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:CanaryStatus",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:RunResult",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:CanaryResult",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:RawDocument",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:AdapterContext",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:Adapter",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:DropFileError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:DropFileMeta",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "class:ingest/base.py:DropFolderAdapter",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "file:core/blob.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "file:core/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "file:core/db/models.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "file:core/sources.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "file:core/timezones.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "file:ingest/schema.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "class:ingest/registry.py:AdapterDeclarationError",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "class:ingest/registry.py:StartupRefused",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "function:ingest/registry.py:validate_declaration",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "function:ingest/registry.py:index_adapters",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "function:ingest/registry.py:_concrete_subclasses",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "function:ingest/registry.py:discover",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "function:ingest/registry.py:source_class_by_extracted_by",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "function:ingest/registry.py:check_startup",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "class:ingest/registry.py:AdapterDeclarationError",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "class:ingest/registry.py:StartupRefused",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "function:ingest/registry.py:validate_declaration",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "function:ingest/registry.py:index_adapters",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "function:ingest/registry.py:_concrete_subclasses",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "function:ingest/registry.py:discover",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "function:ingest/registry.py:source_class_by_extracted_by",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "function:ingest/registry.py:check_startup",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "file:core/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "file:core/sources.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "file:ingest/__init__.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "file:ingest/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_config.py",
+      "target": "file:core/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_config.py",
+      "target": "file:core/sources.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_ingest_base.py",
+      "target": "class:tests/test_ingest_base.py:_Recording",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_ingest_base.py",
+      "target": "file:core/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_ingest_base.py",
+      "target": "file:core/sources.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_ingest_base.py",
+      "target": "file:ingest/__init__.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_ingest_base.py",
+      "target": "file:ingest/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_ingest_base.py",
+      "target": "file:ingest/registry.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_ingest_base.py",
+      "target": "file:tests/fakes.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_raw_source_file.py",
+      "target": "file:core/compute/hashing.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_raw_source_file.py",
+      "target": "file:core/config.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_raw_source_file.py",
+      "target": "file:core/db/models.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_raw_source_file.py",
+      "target": "file:core/db/pit.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_raw_source_file.py",
+      "target": "file:core/sources.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_raw_source_file.py",
+      "target": "file:core/timezones.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_raw_source_file.py",
+      "target": "file:ingest/base.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:tests/test_raw_source_file.py",
+      "target": "file:tests/fakes.py",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:core/config.py",
+      "target": "file:tests/test_config.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "file:tests/test_ingest_base.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:ingest/registry.py",
+      "target": "file:tests/test_ingest_base.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:ingest/base.py",
+      "target": "file:tests/test_raw_source_file.py",
+      "type": "tested_by",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "function:ingest/__main__.py:main",
+      "target": "function:core/config.py:get_settings",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:ingest/__main__.py:main",
+      "target": "function:ingest/registry.py:discover",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:ingest/__main__.py:main",
+      "target": "function:ingest/registry.py:check_startup",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "function:ingest/__main__.py:main",
+      "target": "function:core/blob.py:s3_blob_store",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.8
+    }
+  ]
+}

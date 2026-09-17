@@ -1,0 +1,519 @@
+{
+  "scriptCompleted": true,
+  "contentDigest": "6bc519121850bfc6697ea80f120cc3ee749c49a247bf5cc2bd253a5a7320a357",
+  "files": [
+    {
+      "path": ".dockerignore",
+      "language": "unknown",
+      "sizeLines": 9,
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".env.example",
+      "language": "config",
+      "sizeLines": 19,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".gitattributes",
+      "language": "unknown",
+      "sizeLines": 6,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "language": "yaml",
+      "sizeLines": 31,
+      "fileCategory": "infra"
+    },
+    {
+      "path": ".obsidian/app.json",
+      "language": "json",
+      "sizeLines": 0,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".obsidian/appearance.json",
+      "language": "json",
+      "sizeLines": 2,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".obsidian/backlink.json",
+      "language": "json",
+      "sizeLines": 2,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".obsidian/core-plugins.json",
+      "language": "json",
+      "sizeLines": 32,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".obsidian/graph.json",
+      "language": "json",
+      "sizeLines": 21,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".obsidian/workspace.json",
+      "language": "json",
+      "sizeLines": 191,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".ua/intermediate/scan-result.json",
+      "language": "json",
+      "sizeLines": 758,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".ua/intermediate/ua-import-map-output.json",
+      "language": "json",
+      "sizeLines": 222,
+      "fileCategory": "config"
+    },
+    {
+      "path": ".ua/intermediate/ua-scan-files.json",
+      "language": "json",
+      "sizeLines": 465,
+      "fileCategory": "config"
+    },
+    {
+      "path": "CLAUDE.md",
+      "language": "markdown",
+      "sizeLines": 493,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "Dockerfile",
+      "language": "dockerfile",
+      "sizeLines": 25,
+      "fileCategory": "infra"
+    },
+    {
+      "path": "README.md",
+      "language": "markdown",
+      "sizeLines": 93,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "Welcome.md",
+      "language": "markdown",
+      "sizeLines": 4,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "alembic.ini",
+      "language": "config",
+      "sizeLines": 40,
+      "fileCategory": "config"
+    },
+    {
+      "path": "core/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "core/blob.py",
+      "language": "python",
+      "sizeLines": 97,
+      "fileCategory": "code"
+    },
+    {
+      "path": "core/compute/__init__.py",
+      "language": "python",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "core/compute/hashing.py",
+      "language": "python",
+      "sizeLines": 6,
+      "fileCategory": "code"
+    },
+    {
+      "path": "core/compute/isin.py",
+      "language": "python",
+      "sizeLines": 32,
+      "fileCategory": "code"
+    },
+    {
+      "path": "core/compute/membership.py",
+      "language": "python",
+      "sizeLines": 106,
+      "fileCategory": "code"
+    },
+    {
+      "path": "core/config.py",
+      "language": "python",
+      "sizeLines": 91,
+      "fileCategory": "code"
+    },
+    {
+      "path": "core/db/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "core/db/base.py",
+      "language": "python",
+      "sizeLines": 38,
+      "fileCategory": "code"
+    },
+    {
+      "path": "core/db/models.py",
+      "language": "python",
+      "sizeLines": 416,
+      "fileCategory": "code"
+    },
+    {
+      "path": "core/db/pit.py",
+      "language": "python",
+      "sizeLines": 436,
+      "fileCategory": "code"
+    },
+    {
+      "path": "core/sources.py",
+      "language": "python",
+      "sizeLines": 19,
+      "fileCategory": "code"
+    },
+    {
+      "path": "core/timezones.py",
+      "language": "python",
+      "sizeLines": 11,
+      "fileCategory": "code"
+    },
+    {
+      "path": "docker-compose.yml",
+      "language": "yaml",
+      "sizeLines": 94,
+      "fileCategory": "infra"
+    },
+    {
+      "path": "docs/temporal-model.md",
+      "language": "markdown",
+      "sizeLines": 124,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "getting-started-plan.md",
+      "language": "markdown",
+      "sizeLines": 158,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "ingest/__init__.py",
+      "language": "python",
+      "sizeLines": 5,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ingest/__main__.py",
+      "language": "python",
+      "sizeLines": 82,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ingest/base.py",
+      "language": "python",
+      "sizeLines": 244,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ingest/http.py",
+      "language": "python",
+      "sizeLines": 196,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ingest/nse_bhavcopy/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ingest/nse_bhavcopy/adapters.py",
+      "language": "python",
+      "sizeLines": 264,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ingest/nse_bhavcopy/parser.py",
+      "language": "python",
+      "sizeLines": 251,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ingest/nse_indices/__init__.py",
+      "language": "python",
+      "sizeLines": 1,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ingest/nse_indices/adapters.py",
+      "language": "python",
+      "sizeLines": 489,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ingest/nse_indices/parser.py",
+      "language": "python",
+      "sizeLines": 154,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ingest/registry.py",
+      "language": "python",
+      "sizeLines": 91,
+      "fileCategory": "code"
+    },
+    {
+      "path": "ingest/schema.py",
+      "language": "python",
+      "sizeLines": 7,
+      "fileCategory": "code"
+    },
+    {
+      "path": "migrations/env.py",
+      "language": "python",
+      "sizeLines": 38,
+      "fileCategory": "code"
+    },
+    {
+      "path": "migrations/script.py.mako",
+      "language": "mako",
+      "sizeLines": 25,
+      "fileCategory": "code"
+    },
+    {
+      "path": "migrations/versions/0001_financial_facts.py",
+      "language": "python",
+      "sizeLines": 119,
+      "fileCategory": "code"
+    },
+    {
+      "path": "migrations/versions/0002_raw_source_file.py",
+      "language": "python",
+      "sizeLines": 68,
+      "fileCategory": "code"
+    },
+    {
+      "path": "migrations/versions/0003_entity_and_index_snapshots.py",
+      "language": "python",
+      "sizeLines": 209,
+      "fileCategory": "code"
+    },
+    {
+      "path": "migrations/versions/0004_index_snapshot_rule_versioned.py",
+      "language": "python",
+      "sizeLines": 38,
+      "fileCategory": "code"
+    },
+    {
+      "path": "migrations/versions/0005_nse_bhavcopy.py",
+      "language": "python",
+      "sizeLines": 130,
+      "fileCategory": "code"
+    },
+    {
+      "path": "pyproject.toml",
+      "language": "toml",
+      "sizeLines": 38,
+      "fileCategory": "config"
+    },
+    {
+      "path": "requirements.txt",
+      "language": "txt",
+      "sizeLines": 36,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "tests/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/conftest.py",
+      "language": "python",
+      "sizeLines": 85,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/factories.py",
+      "language": "python",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/fakes.py",
+      "language": "python",
+      "sizeLines": 24,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/fixtures/nse_bhavcopy/SOURCES.md",
+      "language": "markdown",
+      "sizeLines": 12,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "tests/fixtures/nse_indices/SOURCES.md",
+      "language": "markdown",
+      "sizeLines": 16,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json",
+      "language": "json",
+      "sizeLines": 18,
+      "fileCategory": "config"
+    },
+    {
+      "path": "tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv",
+      "language": "csv",
+      "sizeLines": 51,
+      "fileCategory": "data"
+    },
+    {
+      "path": "tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv",
+      "language": "csv",
+      "sizeLines": 51,
+      "fileCategory": "data"
+    },
+    {
+      "path": "tests/fixtures/nse_indices/ind_nifty50list_20260915.csv",
+      "language": "csv",
+      "sizeLines": 51,
+      "fileCategory": "data"
+    },
+    {
+      "path": "tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv",
+      "language": "csv",
+      "sizeLines": 51,
+      "fileCategory": "data"
+    },
+    {
+      "path": "tests/test_architecture.py",
+      "language": "python",
+      "sizeLines": 721,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_blob_s3.py",
+      "language": "python",
+      "sizeLines": 49,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_compute_isin.py",
+      "language": "python",
+      "sizeLines": 47,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_compute_membership.py",
+      "language": "python",
+      "sizeLines": 112,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_config.py",
+      "language": "python",
+      "sizeLines": 58,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_financial_facts_schema.py",
+      "language": "python",
+      "sizeLines": 109,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_http.py",
+      "language": "python",
+      "sizeLines": 189,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_ingest_base.py",
+      "language": "python",
+      "sizeLines": 244,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_nse_bhavcopy_adapters.py",
+      "language": "python",
+      "sizeLines": 240,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_nse_bhavcopy_parser.py",
+      "language": "python",
+      "sizeLines": 132,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_nse_indices_adapters.py",
+      "language": "python",
+      "sizeLines": 478,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_nse_indices_parser.py",
+      "language": "python",
+      "sizeLines": 122,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_pit.py",
+      "language": "python",
+      "sizeLines": 81,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_raw_source_file.py",
+      "language": "python",
+      "sizeLines": 215,
+      "fileCategory": "code"
+    },
+    {
+      "path": "tests/test_wayback_cdx.py",
+      "language": "python",
+      "sizeLines": 71,
+      "fileCategory": "code"
+    }
+  ],
+  "totalFiles": 81,
+  "filteredByIgnore": 0,
+  "estimatedComplexity": "moderate",
+  "failures": [],
+  "stats": {
+    "filesScanned": 81,
+    "byCategory": {
+      "infra": 4,
+      "config": 13,
+      "code": 52,
+      "docs": 8,
+      "data": 4
+    },
+    "byLanguage": {
+      "unknown": 2,
+      "config": 2,
+      "yaml": 2,
+      "json": 10,
+      "markdown": 7,
+      "dockerfile": 1,
+      "python": 50,
+      "mako": 1,
+      "toml": 1,
+      "txt": 1,
+      "csv": 4
+    }
+  }
+}

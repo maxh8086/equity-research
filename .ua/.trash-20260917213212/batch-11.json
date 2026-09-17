@@ -1,0 +1,626 @@
+{
+  "nodes": [
+    {
+      "id": "file:.gitattributes",
+      "type": "file",
+      "name": ".gitattributes",
+      "filePath": ".gitattributes",
+      "summary": "Enforces LF line endings for all files (container compatibility) and marks test fixtures as binary to preserve byte-exact recorded HTTP responses for archive digest checks.",
+      "tags": [
+        "configuration",
+        "build-system",
+        "infrastructure"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:core/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "core/__init__.py",
+      "summary": "Empty package initializer that marks the core/ directory as a Python package, the root namespace for financial computations and database access.",
+      "tags": [
+        "entry-point",
+        "barrel"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:core/compute/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "core/compute/__init__.py",
+      "summary": "Package initializer for core/compute/ documenting the strict no-I/O contract: every function takes values and returns values with no database, network, or LLM calls.",
+      "tags": [
+        "entry-point",
+        "barrel",
+        "utility"
+      ],
+      "complexity": "simple",
+      "languageNotes": "Docstring-only package init enforcing the pure-function architectural boundary for financial computations."
+    },
+    {
+      "id": "file:core/db/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "core/db/__init__.py",
+      "summary": "Empty package initializer for core/db/, the namespace for point-in-time database access functions.",
+      "tags": [
+        "entry-point",
+        "barrel"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:docs/temporal-model.md",
+      "type": "document",
+      "name": "temporal-model.md",
+      "filePath": "docs/temporal-model.md",
+      "summary": "Defines the three-time model (event_time, as_of, recorded_at), append-only store semantics, and replay isolation rules that every store in the system must follow; also covers hypothesis storage (R3) and enforcement via test_architecture.py.",
+      "tags": [
+        "documentation",
+        "data-model",
+        "database",
+        "security"
+      ],
+      "complexity": "moderate",
+      "languageNotes": "8 sections covering temporal semantics, timeline shapes, reprising under rule changes, and live vs replay isolation."
+    },
+    {
+      "id": "file:migrations/script.py.mako",
+      "type": "file",
+      "name": "script.py.mako",
+      "filePath": "migrations/script.py.mako",
+      "summary": "Alembic migration script template used to generate new migration files; emits the standard revision metadata and empty upgrade/downgrade stubs with the project required imports.",
+      "tags": [
+        "configuration",
+        "database",
+        "migration"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:migrations/versions/0001_financial_facts.py",
+      "type": "file",
+      "name": "0001_financial_facts.py",
+      "filePath": "migrations/versions/0001_financial_facts.py",
+      "summary": "Initial Alembic migration that enables pgvector, creates the append-only forbid_mutation trigger function, and creates the financial_facts table with XBRL line items, computed ratios, and full provenance columns (as_of, content_hash, source_url, extracted_by, model_version).",
+      "tags": [
+        "database",
+        "migration",
+        "schema-definition"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Uses sa.Numeric (Decimal-safe) for all monetary values; row and statement triggers enforce the append-only R2 rule."
+    },
+    {
+      "id": "function:migrations/versions/0001_financial_facts.py:upgrade",
+      "type": "function",
+      "name": "upgrade",
+      "filePath": "migrations/versions/0001_financial_facts.py",
+      "lineRange": [
+        19,
+        112
+      ],
+      "summary": "Creates the pgvector extension, the forbid_mutation PL/pgSQL trigger (used by all append-only stores), and the financial_facts table with 14 columns, check constraints, and a covering index.",
+      "tags": [
+        "database",
+        "migration",
+        "schema-definition"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:migrations/versions/0002_raw_source_file.py",
+      "type": "file",
+      "name": "0002_raw_source_file.py",
+      "filePath": "migrations/versions/0002_raw_source_file.py",
+      "summary": "Alembic migration creating the raw_source_file table, which stores blob storage references (content_hash-keyed) for every fetched source file before parsing, enabling parser re-runs without re-downloading.",
+      "tags": [
+        "database",
+        "migration",
+        "schema-definition"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:migrations/versions/0002_raw_source_file.py:upgrade",
+      "type": "function",
+      "name": "upgrade",
+      "filePath": "migrations/versions/0002_raw_source_file.py",
+      "lineRange": [
+        19,
+        64
+      ],
+      "summary": "Creates the raw_source_file table with provenance columns, a content_hash uniqueness constraint, and the append-only triggers inherited from migration 0001.",
+      "tags": [
+        "database",
+        "migration",
+        "schema-definition"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:migrations/versions/0003_entity_and_index_snapshots.py",
+      "type": "file",
+      "name": "0003_entity_and_index_snapshots.py",
+      "filePath": "migrations/versions/0003_entity_and_index_snapshots.py",
+      "summary": "Alembic migration creating the entity (ISIN-keyed company master), index_snapshot, index_snapshot_constituent, and index_snapshot_mapping tables with full provenance and append-only enforcement, seeding known index names.",
+      "tags": [
+        "database",
+        "migration",
+        "schema-definition"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Creates a custom Enum type for corporate_action_type; manages enum lifecycle explicitly with create/drop for Postgres compatibility."
+    },
+    {
+      "id": "function:migrations/versions/0003_entity_and_index_snapshots.py:upgrade",
+      "type": "function",
+      "name": "upgrade",
+      "filePath": "migrations/versions/0003_entity_and_index_snapshots.py",
+      "lineRange": [
+        50,
+        200
+      ],
+      "summary": "Creates four tables (entity, index_snapshot, index_snapshot_constituent, index_snapshot_mapping), seeds initial index names (Nifty 50, Nifty Next 50, etc.), and attaches append-only triggers to each.",
+      "tags": [
+        "database",
+        "migration",
+        "data-model"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:migrations/versions/0004_index_snapshot_rule_versioned.py",
+      "type": "file",
+      "name": "0004_index_snapshot_rule_versioned.py",
+      "filePath": "migrations/versions/0004_index_snapshot_rule_versioned.py",
+      "summary": "Alembic migration that alters the unique constraint on index_snapshot_constituent to include rule_version, enabling multiple rule-versioned computations of membership intervals from the same snapshot data.",
+      "tags": [
+        "database",
+        "migration",
+        "schema-definition"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:migrations/versions/0005_nse_bhavcopy.py",
+      "type": "file",
+      "name": "0005_nse_bhavcopy.py",
+      "filePath": "migrations/versions/0005_nse_bhavcopy.py",
+      "summary": "Alembic migration creating the nse_bhavcopy_row (daily OHLCV records from NSE bhavcopy archives) and nse_bhavcopy_quarantine tables, with a QUARANTINE_REASON enum and full provenance columns.",
+      "tags": [
+        "database",
+        "migration",
+        "schema-definition"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Uses sa.Numeric for all price/volume fields; quarantine table enables manual review of rejected rows without losing data."
+    },
+    {
+      "id": "function:migrations/versions/0005_nse_bhavcopy.py:upgrade",
+      "type": "function",
+      "name": "upgrade",
+      "filePath": "migrations/versions/0005_nse_bhavcopy.py",
+      "lineRange": [
+        38,
+        123
+      ],
+      "summary": "Creates QUARANTINE_REASON enum, the nse_bhavcopy_row table (OHLCV with ISIN key), and nse_bhavcopy_quarantine table, seeding ingest source class rows and attaching append-only triggers.",
+      "tags": [
+        "database",
+        "migration",
+        "data-model"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:tests/__init__.py",
+      "type": "file",
+      "name": "__init__.py",
+      "filePath": "tests/__init__.py",
+      "summary": "Empty package initializer making tests/ a Python package, enabling pytest discovery and relative imports within test modules.",
+      "tags": [
+        "test",
+        "entry-point"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "document:tests/fixtures/nse_bhavcopy/SOURCES.md",
+      "type": "document",
+      "name": "SOURCES.md",
+      "filePath": "tests/fixtures/nse_bhavcopy/SOURCES.md",
+      "summary": "Documents the origin, fetch date, and content summary of the recorded NSE bhavcopy fixture file used in adapter tests, confirming byte-exact preservation and spot-checking against a known ISIN.",
+      "tags": [
+        "documentation",
+        "test",
+        "data-pipeline"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/test_architecture.py",
+      "type": "file",
+      "name": "test_architecture.py",
+      "filePath": "tests/test_architecture.py",
+      "summary": "AST-based architecture enforcement test suite that checks the live codebase for violations of CLAUDE.md rules: no float for money, LLM gateway imports only from extract/narrate, store reads only through core/db/pit.py, MCP imports only in ingest/gateway, and provenance columns on all ORM table models.",
+      "tags": [
+        "test",
+        "validation",
+        "security"
+      ],
+      "complexity": "complex",
+      "languageNotes": "Uses Python ast module to parse and walk the source tree of every project file without executing it; each rule is a standalone function returning violation strings."
+    },
+    {
+      "id": "class:tests/test_architecture.py:SourceFile",
+      "type": "class",
+      "name": "SourceFile",
+      "filePath": "tests/test_architecture.py",
+      "lineRange": [
+        119,
+        138
+      ],
+      "summary": "Dataclass wrapping a project Python file with its relative path and parsed AST, providing helpers for module name derivation and package-prefix membership checks used by all rule functions.",
+      "tags": [
+        "utility",
+        "test"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_architecture.py:repo_files",
+      "type": "function",
+      "name": "repo_files",
+      "filePath": "tests/test_architecture.py",
+      "lineRange": [
+        156,
+        174
+      ],
+      "summary": "Walks the project tree, parses every Python file with ast.parse, and returns a cached tuple of SourceFile objects, skipping virtual envs, __pycache__, and non-.py files.",
+      "tags": [
+        "utility",
+        "test"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_architecture.py:check_gateway_imports",
+      "type": "function",
+      "name": "check_gateway_imports",
+      "filePath": "tests/test_architecture.py",
+      "lineRange": [
+        230,
+        241
+      ],
+      "summary": "Enforces that the LLM gateway package (gateway/) is only imported by extract/ and narrate/ modules; returns violation strings for any other importer.",
+      "tags": [
+        "validation",
+        "test",
+        "security"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_architecture.py:check_provider_sdk_imports",
+      "type": "function",
+      "name": "check_provider_sdk_imports",
+      "filePath": "tests/test_architecture.py",
+      "lineRange": [
+        244,
+        255
+      ],
+      "summary": "Enforces that LLM provider SDKs (anthropic, openai, google.genai, etc.) are only imported inside gateway/; returns violations for any import outside that boundary.",
+      "tags": [
+        "validation",
+        "test",
+        "security"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_architecture.py:check_no_float_money",
+      "type": "function",
+      "name": "check_no_float_money",
+      "filePath": "tests/test_architecture.py",
+      "lineRange": [
+        303,
+        335
+      ],
+      "summary": "Scans all non-test Python files for type annotations, function calls, and argument types that mention float in a money context, returning violations to enforce the Decimal-only rule for financial values (R1).",
+      "tags": [
+        "validation",
+        "test",
+        "security"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_architecture.py:check_provenance_columns",
+      "type": "function",
+      "name": "check_provenance_columns",
+      "filePath": "tests/test_architecture.py",
+      "lineRange": [
+        403,
+        430
+      ],
+      "summary": "Inspects SQLAlchemy ORM table model classes to verify each has the five required provenance columns (as_of, content_hash, source_url, extracted_by, model_version), returning violation strings for missing columns.",
+      "tags": [
+        "validation",
+        "test",
+        "database"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_architecture.py:check_compute_is_pure",
+      "type": "function",
+      "name": "check_compute_is_pure",
+      "filePath": "tests/test_architecture.py",
+      "lineRange": [
+        445,
+        466
+      ],
+      "summary": "Verifies that core/compute/ modules only import from stdlib, typing, and decimal packages and do not import database, network, or LLM modules, enforcing the no-I/O contract.",
+      "tags": [
+        "validation",
+        "test",
+        "utility"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_architecture.py:check_reads_go_through_pit",
+      "type": "function",
+      "name": "check_reads_go_through_pit",
+      "filePath": "tests/test_architecture.py",
+      "lineRange": [
+        474,
+        510
+      ],
+      "summary": "Ensures that SQLAlchemy Session and Connection objects are only accessed through core/db/pit.py by flagging any code outside that module that directly calls session.execute or uses select/update ORM constructs.",
+      "tags": [
+        "validation",
+        "test",
+        "database"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_architecture.py:check_mcp_imports",
+      "type": "function",
+      "name": "check_mcp_imports",
+      "filePath": "tests/test_architecture.py",
+      "lineRange": [
+        518,
+        529
+      ],
+      "summary": "Enforces that MCP client packages (mcp, fastmcp) are only imported by ingest/ adapters and gateway/, preventing model-free MCP calls from slipping into core or other layers.",
+      "tags": [
+        "validation",
+        "test",
+        "security"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:tests/test_architecture.py:check_ingest_modules_declare",
+      "type": "function",
+      "name": "check_ingest_modules_declare",
+      "filePath": "tests/test_architecture.py",
+      "lineRange": [
+        548,
+        567
+      ],
+      "summary": "Verifies that each ingest/ adapter module declares its SOURCE_CLASS and TARGET_STORE constants, ensuring the ingest registry is complete and consistent.",
+      "tags": [
+        "validation",
+        "test",
+        "data-pipeline"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:tests/test_architecture.py:test_scan_is_not_vacuous",
+      "type": "function",
+      "name": "test_scan_is_not_vacuous",
+      "filePath": "tests/test_architecture.py",
+      "lineRange": [
+        592,
+        607
+      ],
+      "summary": "Sanity-checks that repo_files() found a meaningful set of source files (at least 10 Python files including core/__init__.py) so that a misconfigured scan does not pass all rules vacuously.",
+      "tags": [
+        "test",
+        "validation"
+      ],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:migrations/versions/0001_financial_facts.py",
+      "target": "function:migrations/versions/0001_financial_facts.py:upgrade",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:migrations/versions/0001_financial_facts.py",
+      "target": "function:migrations/versions/0001_financial_facts.py:upgrade",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:migrations/versions/0002_raw_source_file.py",
+      "target": "function:migrations/versions/0002_raw_source_file.py:upgrade",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:migrations/versions/0002_raw_source_file.py",
+      "target": "function:migrations/versions/0002_raw_source_file.py:upgrade",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:migrations/versions/0003_entity_and_index_snapshots.py",
+      "target": "function:migrations/versions/0003_entity_and_index_snapshots.py:upgrade",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:migrations/versions/0003_entity_and_index_snapshots.py",
+      "target": "function:migrations/versions/0003_entity_and_index_snapshots.py:upgrade",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:migrations/versions/0005_nse_bhavcopy.py",
+      "target": "function:migrations/versions/0005_nse_bhavcopy.py:upgrade",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:migrations/versions/0005_nse_bhavcopy.py",
+      "target": "function:migrations/versions/0005_nse_bhavcopy.py:upgrade",
+      "type": "exports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/test_architecture.py",
+      "target": "class:tests/test_architecture.py:SourceFile",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_architecture.py",
+      "target": "function:tests/test_architecture.py:repo_files",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_architecture.py",
+      "target": "function:tests/test_architecture.py:check_gateway_imports",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_architecture.py",
+      "target": "function:tests/test_architecture.py:check_provider_sdk_imports",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_architecture.py",
+      "target": "function:tests/test_architecture.py:check_no_float_money",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_architecture.py",
+      "target": "function:tests/test_architecture.py:check_provenance_columns",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_architecture.py",
+      "target": "function:tests/test_architecture.py:check_compute_is_pure",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_architecture.py",
+      "target": "function:tests/test_architecture.py:check_reads_go_through_pit",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_architecture.py",
+      "target": "function:tests/test_architecture.py:check_mcp_imports",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_architecture.py",
+      "target": "function:tests/test_architecture.py:check_ingest_modules_declare",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "file:tests/test_architecture.py",
+      "target": "function:tests/test_architecture.py:test_scan_is_not_vacuous",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1.0
+    },
+    {
+      "source": "document:docs/temporal-model.md",
+      "target": "file:migrations/versions/0001_financial_facts.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/temporal-model.md",
+      "target": "file:core/db/__init__.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:docs/temporal-model.md",
+      "target": "file:tests/test_architecture.py",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:migrations/versions/0004_index_snapshot_rule_versioned.py",
+      "target": "file:migrations/versions/0003_entity_and_index_snapshots.py",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "file:migrations/versions/0005_nse_bhavcopy.py",
+      "target": "file:migrations/versions/0002_raw_source_file.py",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "document:tests/fixtures/nse_bhavcopy/SOURCES.md",
+      "target": "file:tests/test_architecture.py",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:.gitattributes",
+      "target": "document:tests/fixtures/nse_bhavcopy/SOURCES.md",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

@@ -1,0 +1,4222 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 11,
+  "filesSkipped": [],
+  "filesUnreadable": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 11,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 11,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "results": [
+    {
+      "path": "core/compute/isin.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 32,
+      "nonEmptyLines": 25,
+      "functions": [
+        {
+          "name": "isin_check_digit",
+          "startLine": 9,
+          "endLine": 26,
+          "params": [
+            "body"
+          ]
+        },
+        {
+          "name": "is_valid_isin",
+          "startLine": 29,
+          "endLine": 32,
+          "params": [
+            "value"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "isin_check_digit",
+          "line": 9,
+          "isDefault": false
+        },
+        {
+          "name": "is_valid_isin",
+          "line": 29,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "isin_check_digit",
+          "callee": "_BODY_RE.match",
+          "lineNumber": 15
+        },
+        {
+          "caller": "isin_check_digit",
+          "callee": "ValueError",
+          "lineNumber": 16
+        },
+        {
+          "caller": "isin_check_digit",
+          "callee": "\"\".join",
+          "lineNumber": 17
+        },
+        {
+          "caller": "isin_check_digit",
+          "callee": "str",
+          "lineNumber": 17
+        },
+        {
+          "caller": "isin_check_digit",
+          "callee": "int",
+          "lineNumber": 17
+        },
+        {
+          "caller": "isin_check_digit",
+          "callee": "enumerate",
+          "lineNumber": 19
+        },
+        {
+          "caller": "isin_check_digit",
+          "callee": "reversed",
+          "lineNumber": 19
+        },
+        {
+          "caller": "isin_check_digit",
+          "callee": "int",
+          "lineNumber": 20
+        },
+        {
+          "caller": "is_valid_isin",
+          "callee": "_ISIN_RE.match",
+          "lineNumber": 30
+        },
+        {
+          "caller": "is_valid_isin",
+          "callee": "isin_check_digit",
+          "lineNumber": 32
+        },
+        {
+          "caller": "is_valid_isin",
+          "callee": "int",
+          "lineNumber": 32
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "ingest/http.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 196,
+      "nonEmptyLines": 173,
+      "functions": [
+        {
+          "name": "_retry_after",
+          "startLine": 175,
+          "endLine": 178,
+          "params": [
+            "response"
+          ]
+        },
+        {
+          "name": "_decode",
+          "startLine": 181,
+          "endLine": 196,
+          "params": [
+            "raw",
+            "content_encoding"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "AccessBlocked",
+          "startLine": 27,
+          "endLine": 28,
+          "methods": [],
+          "properties": []
+        },
+        {
+          "name": "PoliteClient",
+          "startLine": 31,
+          "endLine": 172,
+          "methods": [
+            "__init__",
+            "__enter__",
+            "__exit__",
+            "close",
+            "get",
+            "get_with_raw",
+            "_get",
+            "_throttled_get",
+            "_robots_for"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "AccessBlocked",
+          "line": 27,
+          "isDefault": false
+        },
+        {
+          "name": "PoliteClient",
+          "line": 31,
+          "isDefault": false
+        },
+        {
+          "name": "_retry_after",
+          "line": 175,
+          "isDefault": false
+        },
+        {
+          "name": "_decode",
+          "line": 181,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "__init__",
+          "callee": "httpx.Client",
+          "lineNumber": 59
+        },
+        {
+          "caller": "__exit__",
+          "callee": "self.close",
+          "lineNumber": 70
+        },
+        {
+          "caller": "close",
+          "callee": "self._http.close",
+          "lineNumber": 73
+        },
+        {
+          "caller": "get",
+          "callee": "self._get",
+          "lineNumber": 82
+        },
+        {
+          "caller": "get_with_raw",
+          "callee": "self._get",
+          "lineNumber": 96
+        },
+        {
+          "caller": "_get",
+          "callee": "self._robots_for(url).can_fetch",
+          "lineNumber": 108
+        },
+        {
+          "caller": "_get",
+          "callee": "self._robots_for",
+          "lineNumber": 108
+        },
+        {
+          "caller": "_get",
+          "callee": "AccessBlocked",
+          "lineNumber": 109
+        },
+        {
+          "caller": "_get",
+          "callee": "range",
+          "lineNumber": 110
+        },
+        {
+          "caller": "_get",
+          "callee": "self._throttled_get",
+          "lineNumber": 113
+        },
+        {
+          "caller": "_get",
+          "callee": "self._sleep",
+          "lineNumber": 119
+        },
+        {
+          "caller": "_get",
+          "callee": "AccessBlocked",
+          "lineNumber": 122
+        },
+        {
+          "caller": "_get",
+          "callee": "self._sleep",
+          "lineNumber": 124
+        },
+        {
+          "caller": "_get",
+          "callee": "max",
+          "lineNumber": 124
+        },
+        {
+          "caller": "_get",
+          "callee": "_retry_after",
+          "lineNumber": 124
+        },
+        {
+          "caller": "_get",
+          "callee": "response.raise_for_status",
+          "lineNumber": 126
+        },
+        {
+          "caller": "_get",
+          "callee": "AssertionError",
+          "lineNumber": 128
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "urlsplit",
+          "lineNumber": 133
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "self._last_request.get",
+          "lineNumber": 134
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "self._monotonic",
+          "lineNumber": 135
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "self._sleep",
+          "lineNumber": 137
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "self._http.get",
+          "lineNumber": 140
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "self._http.send",
+          "lineNumber": 141
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "self._http.build_request",
+          "lineNumber": 141
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "b\"\".join",
+          "lineNumber": 143
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "streamed.iter_raw",
+          "lineNumber": 143
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "streamed.close",
+          "lineNumber": 145
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "httpx.Response",
+          "lineNumber": 146
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "streamed.headers.multi_items",
+          "lineNumber": 149
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "k.lower",
+          "lineNumber": 149
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "_decode",
+          "lineNumber": 151
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "streamed.headers.get",
+          "lineNumber": 151
+        },
+        {
+          "caller": "_throttled_get",
+          "callee": "self._monotonic",
+          "lineNumber": 157
+        },
+        {
+          "caller": "_robots_for",
+          "callee": "urlsplit",
+          "lineNumber": 160
+        },
+        {
+          "caller": "_robots_for",
+          "callee": "urllib.robotparser.RobotFileParser",
+          "lineNumber": 163
+        },
+        {
+          "caller": "_robots_for",
+          "callee": "self._throttled_get",
+          "lineNumber": 164
+        },
+        {
+          "caller": "_robots_for",
+          "callee": "parser.parse",
+          "lineNumber": 170
+        },
+        {
+          "caller": "_robots_for",
+          "callee": "response.text.splitlines",
+          "lineNumber": 170
+        },
+        {
+          "caller": "_retry_after",
+          "callee": "response.headers.get(\"retry-after\", \"\").strip",
+          "lineNumber": 177
+        },
+        {
+          "caller": "_retry_after",
+          "callee": "response.headers.get",
+          "lineNumber": 177
+        },
+        {
+          "caller": "_retry_after",
+          "callee": "float",
+          "lineNumber": 178
+        },
+        {
+          "caller": "_retry_after",
+          "callee": "value.isdigit",
+          "lineNumber": 178
+        },
+        {
+          "caller": "_decode",
+          "callee": "reversed",
+          "lineNumber": 184
+        },
+        {
+          "caller": "_decode",
+          "callee": "c.strip().lower",
+          "lineNumber": 184
+        },
+        {
+          "caller": "_decode",
+          "callee": "c.strip",
+          "lineNumber": 184
+        },
+        {
+          "caller": "_decode",
+          "callee": "content_encoding.split",
+          "lineNumber": 184
+        },
+        {
+          "caller": "_decode",
+          "callee": "c.strip",
+          "lineNumber": 184
+        },
+        {
+          "caller": "_decode",
+          "callee": "gzip.decompress",
+          "lineNumber": 188
+        },
+        {
+          "caller": "_decode",
+          "callee": "zlib.decompress",
+          "lineNumber": 191
+        },
+        {
+          "caller": "_decode",
+          "callee": "zlib.decompress",
+          "lineNumber": 193
+        },
+        {
+          "caller": "_decode",
+          "callee": "ValueError",
+          "lineNumber": 195
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 4,
+        "functionCount": 2,
+        "classCount": 2
+      }
+    },
+    {
+      "path": "ingest/nse_bhavcopy/parser.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 251,
+      "nonEmptyLines": 218,
+      "functions": [
+        {
+          "name": "_extract_csv",
+          "startLine": 122,
+          "endLine": 136,
+          "params": [
+            "data"
+          ]
+        },
+        {
+          "name": "_fields",
+          "startLine": 139,
+          "endLine": 140,
+          "params": [
+            "line"
+          ]
+        },
+        {
+          "name": "parse_bhavcopy",
+          "startLine": 143,
+          "endLine": 251,
+          "params": [
+            "data"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "BhavcopyRawRow",
+          "startLine": 64,
+          "endLine": 75,
+          "methods": [],
+          "properties": [
+            "isin",
+            "symbol",
+            "series",
+            "open",
+            "high",
+            "low",
+            "close",
+            "prev_close",
+            "volume",
+            "turnover",
+            "trades"
+          ]
+        },
+        {
+          "name": "BhavcopyRow",
+          "startLine": 79,
+          "endLine": 92,
+          "methods": [],
+          "properties": [
+            "row_number",
+            "trade_date",
+            "isin",
+            "symbol",
+            "series",
+            "open",
+            "high",
+            "low",
+            "close",
+            "prev_close",
+            "volume",
+            "turnover",
+            "trades"
+          ]
+        },
+        {
+          "name": "RowIssue",
+          "startLine": 96,
+          "endLine": 103,
+          "methods": [],
+          "properties": [
+            "row_number",
+            "raw_row",
+            "reason",
+            "detail",
+            "isin",
+            "symbol",
+            "series"
+          ]
+        },
+        {
+          "name": "ParsedBhavcopy",
+          "startLine": 107,
+          "endLine": 110,
+          "methods": [],
+          "properties": [
+            "trade_date",
+            "rows",
+            "issues"
+          ]
+        },
+        {
+          "name": "BhavcopyRejected",
+          "startLine": 113,
+          "endLine": 119,
+          "methods": [
+            "__init__"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "BhavcopyRawRow",
+          "line": 64,
+          "isDefault": false
+        },
+        {
+          "name": "BhavcopyRow",
+          "line": 78,
+          "isDefault": false
+        },
+        {
+          "name": "RowIssue",
+          "line": 95,
+          "isDefault": false
+        },
+        {
+          "name": "ParsedBhavcopy",
+          "line": 106,
+          "isDefault": false
+        },
+        {
+          "name": "BhavcopyRejected",
+          "line": 113,
+          "isDefault": false
+        },
+        {
+          "name": "_extract_csv",
+          "line": 122,
+          "isDefault": false
+        },
+        {
+          "name": "_fields",
+          "line": 139,
+          "isDefault": false
+        },
+        {
+          "name": "parse_bhavcopy",
+          "line": 143,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "__init__",
+          "callee": "super().__init__",
+          "lineNumber": 117
+        },
+        {
+          "caller": "__init__",
+          "callee": "super",
+          "lineNumber": 117
+        },
+        {
+          "caller": "_extract_csv",
+          "callee": "zipfile.ZipFile",
+          "lineNumber": 127
+        },
+        {
+          "caller": "_extract_csv",
+          "callee": "io.BytesIO",
+          "lineNumber": 127
+        },
+        {
+          "caller": "_extract_csv",
+          "callee": "zf.namelist",
+          "lineNumber": 128
+        },
+        {
+          "caller": "_extract_csv",
+          "callee": "n.lower().endswith",
+          "lineNumber": 128
+        },
+        {
+          "caller": "_extract_csv",
+          "callee": "n.lower",
+          "lineNumber": 128
+        },
+        {
+          "caller": "_extract_csv",
+          "callee": "len",
+          "lineNumber": 129
+        },
+        {
+          "caller": "_extract_csv",
+          "callee": "BhavcopyRejected",
+          "lineNumber": 130
+        },
+        {
+          "caller": "_extract_csv",
+          "callee": "len",
+          "lineNumber": 132
+        },
+        {
+          "caller": "_extract_csv",
+          "callee": "zf.namelist",
+          "lineNumber": 132
+        },
+        {
+          "caller": "_extract_csv",
+          "callee": "zf.read",
+          "lineNumber": 134
+        },
+        {
+          "caller": "_extract_csv",
+          "callee": "BhavcopyRejected",
+          "lineNumber": 136
+        },
+        {
+          "caller": "_fields",
+          "callee": "next",
+          "lineNumber": 140
+        },
+        {
+          "caller": "_fields",
+          "callee": "csv.reader",
+          "lineNumber": 140
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "_extract_csv(data).decode",
+          "lineNumber": 145
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "_extract_csv",
+          "lineNumber": 145
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "BhavcopyRejected",
+          "lineNumber": 147
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "text.splitlines",
+          "lineNumber": 149
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "line.strip",
+          "lineNumber": 149
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "BhavcopyRejected",
+          "lineNumber": 151
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "_fields",
+          "lineNumber": 152
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "BhavcopyRejected",
+          "lineNumber": 154
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "len",
+          "lineNumber": 157
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "BhavcopyRejected",
+          "lineNumber": 158
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "len",
+          "lineNumber": 160
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "_fields(line)[header.index(\"TradDt\")].strip",
+          "lineNumber": 163
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "_fields",
+          "lineNumber": 163
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "header.index",
+          "lineNumber": 163
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "len",
+          "lineNumber": 163
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "_fields",
+          "lineNumber": 163
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "len",
+          "lineNumber": 163
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "len",
+          "lineNumber": 164
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "BhavcopyRejected",
+          "lineNumber": 165
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "sorted",
+          "lineNumber": 166
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "datetime.strptime(next(iter(trade_dates)), \"%Y-%m-%d\").date",
+          "lineNumber": 169
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "datetime.strptime",
+          "lineNumber": 169
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "next",
+          "lineNumber": 169
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "iter",
+          "lineNumber": 169
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "BhavcopyRejected",
+          "lineNumber": 171
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "enumerate",
+          "lineNumber": 177
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "_fields",
+          "lineNumber": 178
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "len",
+          "lineNumber": 179
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "len",
+          "lineNumber": 179
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "issues.append",
+          "lineNumber": 180
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "RowIssue",
+          "lineNumber": 181
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "len",
+          "lineNumber": 181
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "len",
+          "lineNumber": 181
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "dict",
+          "lineNumber": 184
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "zip",
+          "lineNumber": 184
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw[\"SctySrs\"].strip",
+          "lineNumber": 185
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "BhavcopyRawRow",
+          "lineNumber": 190
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw[\"ISIN\"].strip",
+          "lineNumber": 191
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw[\"TckrSymb\"].strip",
+          "lineNumber": 192
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw[\"OpnPric\"].strip",
+          "lineNumber": 194
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw[\"HghPric\"].strip",
+          "lineNumber": 195
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw[\"LwPric\"].strip",
+          "lineNumber": 196
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw[\"ClsPric\"].strip",
+          "lineNumber": 197
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw[\"PrvsClsgPric\"].strip",
+          "lineNumber": 198
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw[\"TtlTradgVol\"].strip",
+          "lineNumber": 199
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw[\"TtlTrfVal\"].strip",
+          "lineNumber": 200
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw[\"TtlNbOfTxsExctd\"].strip",
+          "lineNumber": 201
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "exc.errors",
+          "lineNumber": 204
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "'.'.join",
+          "lineNumber": 205
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "map",
+          "lineNumber": 205
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "issues.append",
+          "lineNumber": 206
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "RowIssue",
+          "lineNumber": 207
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw.get(\"ISIN\", \"\").strip",
+          "lineNumber": 208
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw.get",
+          "lineNumber": 208
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw.get(\"TckrSymb\", \"\").strip",
+          "lineNumber": 209
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "raw.get",
+          "lineNumber": 209
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "is_valid_isin",
+          "lineNumber": 212
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "issues.append",
+          "lineNumber": 213
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "RowIssue",
+          "lineNumber": 214
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "issues.append",
+          "lineNumber": 221
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "RowIssue",
+          "lineNumber": 222
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "rows.append",
+          "lineNumber": 228
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "BhavcopyRow",
+          "lineNumber": 229
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "Decimal",
+          "lineNumber": 235
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "Decimal",
+          "lineNumber": 236
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "Decimal",
+          "lineNumber": 237
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "Decimal",
+          "lineNumber": 238
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "Decimal",
+          "lineNumber": 239
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "int",
+          "lineNumber": 240
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "Decimal",
+          "lineNumber": 241
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "int",
+          "lineNumber": 242
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "BhavcopyRejected",
+          "lineNumber": 247
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "ParsedBhavcopy",
+          "lineNumber": 251
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "tuple",
+          "lineNumber": 251
+        },
+        {
+          "caller": "parse_bhavcopy",
+          "callee": "tuple",
+          "lineNumber": 251
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 8,
+        "functionCount": 3,
+        "classCount": 5
+      }
+    },
+    {
+      "path": "ingest/nse_indices/adapters.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 489,
+      "nonEmptyLines": 416,
+      "functions": [
+        {
+          "name": "_provenance",
+          "startLine": 101,
+          "endLine": 108,
+          "params": [
+            "adapter",
+            "doc"
+          ]
+        },
+        {
+          "name": "wayback_digest",
+          "startLine": 111,
+          "endLine": 113,
+          "params": [
+            "data"
+          ]
+        },
+        {
+          "name": "load_list",
+          "startLine": 116,
+          "endLine": 201,
+          "params": [
+            "adapter",
+            "ctx",
+            "doc",
+            "tally",
+            "expected_digest",
+            "archived_payload"
+          ]
+        },
+        {
+          "name": "_link_entities",
+          "startLine": 204,
+          "endLine": 218,
+          "params": [
+            "adapter",
+            "ctx",
+            "doc",
+            "isins"
+          ]
+        },
+        {
+          "name": "reparse_stored_lists",
+          "startLine": 221,
+          "endLine": 246,
+          "params": [
+            "adapter",
+            "ctx"
+          ]
+        },
+        {
+          "name": "_media_type",
+          "startLine": 249,
+          "endLine": 250,
+          "params": [
+            "response"
+          ]
+        },
+        {
+          "name": "parse_cdx",
+          "startLine": 359,
+          "endLine": 369,
+          "params": [
+            "data"
+          ]
+        },
+        {
+          "name": "run_boundaries",
+          "startLine": 372,
+          "endLine": 386,
+          "params": [
+            "captures"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "Tally",
+          "startLine": 73,
+          "endLine": 98,
+          "methods": [
+            "result"
+          ],
+          "properties": [
+            "raw_files",
+            "snapshots",
+            "rows_written",
+            "quarantined",
+            "rejected_files",
+            "skipped",
+            "problems"
+          ]
+        },
+        {
+          "name": "_RunStopped",
+          "startLine": 253,
+          "endLine": 254,
+          "methods": [],
+          "properties": []
+        },
+        {
+          "name": "NseIndicesConstituents",
+          "startLine": 262,
+          "endLine": 310,
+          "methods": [
+            "__init__",
+            "_client",
+            "_urls",
+            "ingest",
+            "check_shape",
+            "_reparse"
+          ],
+          "properties": []
+        },
+        {
+          "name": "NseIndicesConstituentsDrop",
+          "startLine": 313,
+          "endLine": 337,
+          "methods": [
+            "ingest",
+            "check_shape",
+            "_reparse"
+          ],
+          "properties": []
+        },
+        {
+          "name": "CdxShapeError",
+          "startLine": 343,
+          "endLine": 344,
+          "methods": [],
+          "properties": []
+        },
+        {
+          "name": "CdxCapture",
+          "startLine": 347,
+          "endLine": 356,
+          "methods": [
+            "captured_at"
+          ],
+          "properties": [
+            "timestamp",
+            "original",
+            "mimetype",
+            "statuscode",
+            "digest"
+          ]
+        },
+        {
+          "name": "WaybackIndexConstituents",
+          "startLine": 389,
+          "endLine": 489,
+          "methods": [
+            "__init__",
+            "_client",
+            "_cdx",
+            "_capture_url",
+            "_fetch_capture",
+            "ingest",
+            "check_shape",
+            "_reparse"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "Tally",
+          "line": 72,
+          "isDefault": false
+        },
+        {
+          "name": "_provenance",
+          "line": 101,
+          "isDefault": false
+        },
+        {
+          "name": "wayback_digest",
+          "line": 111,
+          "isDefault": false
+        },
+        {
+          "name": "load_list",
+          "line": 116,
+          "isDefault": false
+        },
+        {
+          "name": "_link_entities",
+          "line": 204,
+          "isDefault": false
+        },
+        {
+          "name": "reparse_stored_lists",
+          "line": 221,
+          "isDefault": false
+        },
+        {
+          "name": "_media_type",
+          "line": 249,
+          "isDefault": false
+        },
+        {
+          "name": "_RunStopped",
+          "line": 253,
+          "isDefault": false
+        },
+        {
+          "name": "NseIndicesConstituents",
+          "line": 262,
+          "isDefault": false
+        },
+        {
+          "name": "NseIndicesConstituentsDrop",
+          "line": 313,
+          "isDefault": false
+        },
+        {
+          "name": "CdxShapeError",
+          "line": 343,
+          "isDefault": false
+        },
+        {
+          "name": "CdxCapture",
+          "line": 347,
+          "isDefault": false
+        },
+        {
+          "name": "parse_cdx",
+          "line": 359,
+          "isDefault": false
+        },
+        {
+          "name": "run_boundaries",
+          "line": 372,
+          "isDefault": false
+        },
+        {
+          "name": "WaybackIndexConstituents",
+          "line": 389,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "result",
+          "callee": "\"; \".join",
+          "lineNumber": 89
+        },
+        {
+          "caller": "result",
+          "callee": "bool",
+          "lineNumber": 90
+        },
+        {
+          "caller": "result",
+          "callee": "RunResult",
+          "lineNumber": 91
+        },
+        {
+          "caller": "_provenance",
+          "callee": "dict",
+          "lineNumber": 102
+        },
+        {
+          "caller": "_provenance",
+          "callee": "adapter.extracted_by",
+          "lineNumber": 106
+        },
+        {
+          "caller": "wayback_digest",
+          "callee": "base64.b32encode(hashlib.sha1(data, usedforsecurity=False).digest()).decode",
+          "lineNumber": 113
+        },
+        {
+          "caller": "wayback_digest",
+          "callee": "base64.b32encode",
+          "lineNumber": 113
+        },
+        {
+          "caller": "wayback_digest",
+          "callee": "hashlib.sha1(data, usedforsecurity=False).digest",
+          "lineNumber": 113
+        },
+        {
+          "caller": "wayback_digest",
+          "callee": "hashlib.sha1",
+          "lineNumber": 113
+        },
+        {
+          "caller": "load_list",
+          "callee": "_provenance",
+          "lineNumber": 131
+        },
+        {
+          "caller": "load_list",
+          "callee": "index_for_url",
+          "lineNumber": 132
+        },
+        {
+          "caller": "load_list",
+          "callee": "ListRejected",
+          "lineNumber": 135
+        },
+        {
+          "caller": "load_list",
+          "callee": "wayback_digest",
+          "lineNumber": 137
+        },
+        {
+          "caller": "load_list",
+          "callee": "ListRejected",
+          "lineNumber": 138
+        },
+        {
+          "caller": "load_list",
+          "callee": "index_snapshot_keys_as_of",
+          "lineNumber": 141
+        },
+        {
+          "caller": "load_list",
+          "callee": "parse_constituent_list",
+          "lineNumber": 147
+        },
+        {
+          "caller": "load_list",
+          "callee": "ctx.session.add",
+          "lineNumber": 149
+        },
+        {
+          "caller": "load_list",
+          "callee": "IndexSnapshotQuarantine",
+          "lineNumber": 150
+        },
+        {
+          "caller": "load_list",
+          "callee": "ctx.session.flush",
+          "lineNumber": 158
+        },
+        {
+          "caller": "load_list",
+          "callee": "IndexSnapshot",
+          "lineNumber": 163
+        },
+        {
+          "caller": "load_list",
+          "callee": "len",
+          "lineNumber": 165
+        },
+        {
+          "caller": "load_list",
+          "callee": "len",
+          "lineNumber": 166
+        },
+        {
+          "caller": "load_list",
+          "callee": "ctx.session.add",
+          "lineNumber": 170
+        },
+        {
+          "caller": "load_list",
+          "callee": "ctx.session.flush",
+          "lineNumber": 171
+        },
+        {
+          "caller": "load_list",
+          "callee": "ctx.session.add_all",
+          "lineNumber": 172
+        },
+        {
+          "caller": "load_list",
+          "callee": "IndexSnapshotConstituent",
+          "lineNumber": 173
+        },
+        {
+          "caller": "load_list",
+          "callee": "ctx.session.add_all",
+          "lineNumber": 185
+        },
+        {
+          "caller": "load_list",
+          "callee": "IndexSnapshotQuarantine",
+          "lineNumber": 186
+        },
+        {
+          "caller": "load_list",
+          "callee": "_link_entities",
+          "lineNumber": 198
+        },
+        {
+          "caller": "load_list",
+          "callee": "len",
+          "lineNumber": 200
+        },
+        {
+          "caller": "load_list",
+          "callee": "len",
+          "lineNumber": 201
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "_provenance",
+          "lineNumber": 206
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "entity_isin_earliest_links_as_of",
+          "lineNumber": 207
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "ctx.now",
+          "lineNumber": 207
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "Entity",
+          "lineNumber": 208
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "ctx.session.add_all",
+          "lineNumber": 209
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "new.values",
+          "lineNumber": 209
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "ctx.session.flush",
+          "lineNumber": 210
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "new.items",
+          "lineNumber": 211
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "ctx.session.add",
+          "lineNumber": 212
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "EntityIsin",
+          "lineNumber": 213
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "earliest.items",
+          "lineNumber": 215
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "ctx.session.add",
+          "lineNumber": 217
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "EntityIsin",
+          "lineNumber": 217
+        },
+        {
+          "caller": "_link_entities",
+          "callee": "ctx.session.flush",
+          "lineNumber": 218
+        },
+        {
+          "caller": "reparse_stored_lists",
+          "callee": "Tally",
+          "lineNumber": 233
+        },
+        {
+          "caller": "reparse_stored_lists",
+          "callee": "raw_source_files_as_of",
+          "lineNumber": 234
+        },
+        {
+          "caller": "reparse_stored_lists",
+          "callee": "adapter.extracted_by",
+          "lineNumber": 234
+        },
+        {
+          "caller": "reparse_stored_lists",
+          "callee": "ctx.now",
+          "lineNumber": 234
+        },
+        {
+          "caller": "reparse_stored_lists",
+          "callee": "index_for_url",
+          "lineNumber": 235
+        },
+        {
+          "caller": "reparse_stored_lists",
+          "callee": "RawDocument",
+          "lineNumber": 237
+        },
+        {
+          "caller": "reparse_stored_lists",
+          "callee": "ctx.blob.get",
+          "lineNumber": 238
+        },
+        {
+          "caller": "reparse_stored_lists",
+          "callee": "load_list",
+          "lineNumber": 245
+        },
+        {
+          "caller": "reparse_stored_lists",
+          "callee": "tally.result",
+          "lineNumber": 246
+        },
+        {
+          "caller": "_media_type",
+          "callee": "response.headers.get(\"content-type\", \"application/octet-stream\").split(\";\")[0].strip",
+          "lineNumber": 250
+        },
+        {
+          "caller": "_media_type",
+          "callee": "response.headers.get(\"content-type\", \"application/octet-stream\").split",
+          "lineNumber": 250
+        },
+        {
+          "caller": "_media_type",
+          "callee": "response.headers.get",
+          "lineNumber": 250
+        },
+        {
+          "caller": "_client",
+          "callee": "PoliteClient",
+          "lineNumber": 277
+        },
+        {
+          "caller": "_urls",
+          "callee": "ctx.settings.nse_indices_archive_base_url.rstrip",
+          "lineNumber": 285
+        },
+        {
+          "caller": "ingest",
+          "callee": "Tally",
+          "lineNumber": 289
+        },
+        {
+          "caller": "ingest",
+          "callee": "self._client",
+          "lineNumber": 290
+        },
+        {
+          "caller": "ingest",
+          "callee": "self._urls",
+          "lineNumber": 291
+        },
+        {
+          "caller": "ingest",
+          "callee": "http.get",
+          "lineNumber": 293
+        },
+        {
+          "caller": "ingest",
+          "callee": "tally.problems.append",
+          "lineNumber": 295
+        },
+        {
+          "caller": "ingest",
+          "callee": "self.store_raw",
+          "lineNumber": 297
+        },
+        {
+          "caller": "ingest",
+          "callee": "ctx.now",
+          "lineNumber": 298
+        },
+        {
+          "caller": "ingest",
+          "callee": "_media_type",
+          "lineNumber": 299
+        },
+        {
+          "caller": "ingest",
+          "callee": "load_list",
+          "lineNumber": 301
+        },
+        {
+          "caller": "ingest",
+          "callee": "tally.result",
+          "lineNumber": 302
+        },
+        {
+          "caller": "check_shape",
+          "callee": "self._client",
+          "lineNumber": 305
+        },
+        {
+          "caller": "check_shape",
+          "callee": "self._urls",
+          "lineNumber": 306
+        },
+        {
+          "caller": "check_shape",
+          "callee": "parse_constituent_list",
+          "lineNumber": 307
+        },
+        {
+          "caller": "check_shape",
+          "callee": "http.get",
+          "lineNumber": 307
+        },
+        {
+          "caller": "check_shape",
+          "callee": "index_for_url",
+          "lineNumber": 307
+        },
+        {
+          "caller": "_reparse",
+          "callee": "reparse_stored_lists",
+          "lineNumber": 310
+        },
+        {
+          "caller": "ingest",
+          "callee": "Tally",
+          "lineNumber": 325
+        },
+        {
+          "caller": "ingest",
+          "callee": "self.drop_files",
+          "lineNumber": 326
+        },
+        {
+          "caller": "ingest",
+          "callee": "load_list",
+          "lineNumber": 327
+        },
+        {
+          "caller": "ingest",
+          "callee": "tally.result",
+          "lineNumber": 328
+        },
+        {
+          "caller": "check_shape",
+          "callee": "self.pending",
+          "lineNumber": 331
+        },
+        {
+          "caller": "check_shape",
+          "callee": "index_for_url",
+          "lineNumber": 332
+        },
+        {
+          "caller": "check_shape",
+          "callee": "ListRejected",
+          "lineNumber": 333
+        },
+        {
+          "caller": "check_shape",
+          "callee": "parse_constituent_list",
+          "lineNumber": 334
+        },
+        {
+          "caller": "check_shape",
+          "callee": "path.read_bytes",
+          "lineNumber": 334
+        },
+        {
+          "caller": "_reparse",
+          "callee": "reparse_stored_lists",
+          "lineNumber": 337
+        },
+        {
+          "caller": "captured_at",
+          "callee": "datetime.strptime(self.timestamp, \"%Y%m%d%H%M%S\").replace",
+          "lineNumber": 356
+        },
+        {
+          "caller": "captured_at",
+          "callee": "datetime.strptime",
+          "lineNumber": 356
+        },
+        {
+          "caller": "parse_cdx",
+          "callee": "json.loads",
+          "lineNumber": 361
+        },
+        {
+          "caller": "parse_cdx",
+          "callee": "isinstance",
+          "lineNumber": 364
+        },
+        {
+          "caller": "parse_cdx",
+          "callee": "isinstance",
+          "lineNumber": 364
+        },
+        {
+          "caller": "parse_cdx",
+          "callee": "tuple",
+          "lineNumber": 364
+        },
+        {
+          "caller": "parse_cdx",
+          "callee": "CdxShapeError",
+          "lineNumber": 365
+        },
+        {
+          "caller": "parse_cdx",
+          "callee": "list",
+          "lineNumber": 365
+        },
+        {
+          "caller": "parse_cdx",
+          "callee": "str",
+          "lineNumber": 365
+        },
+        {
+          "caller": "parse_cdx",
+          "callee": "CdxCapture",
+          "lineNumber": 367
+        },
+        {
+          "caller": "parse_cdx",
+          "callee": "dict",
+          "lineNumber": 367
+        },
+        {
+          "caller": "parse_cdx",
+          "callee": "zip",
+          "lineNumber": 367
+        },
+        {
+          "caller": "parse_cdx",
+          "callee": "CdxShapeError",
+          "lineNumber": 369
+        },
+        {
+          "caller": "parse_cdx",
+          "callee": "list",
+          "lineNumber": 369
+        },
+        {
+          "caller": "run_boundaries",
+          "callee": "sorted",
+          "lineNumber": 378
+        },
+        {
+          "caller": "run_boundaries",
+          "callee": "enumerate",
+          "lineNumber": 381
+        },
+        {
+          "caller": "run_boundaries",
+          "callee": "len",
+          "lineNumber": 383
+        },
+        {
+          "caller": "_client",
+          "callee": "PoliteClient",
+          "lineNumber": 412
+        },
+        {
+          "caller": "_cdx",
+          "callee": "http.get",
+          "lineNumber": 423
+        },
+        {
+          "caller": "_cdx",
+          "callee": "\",\".join",
+          "lineNumber": 425
+        },
+        {
+          "caller": "_capture_url",
+          "callee": "ctx.settings.wayback_capture_url.format",
+          "lineNumber": 430
+        },
+        {
+          "caller": "_fetch_capture",
+          "callee": "self._capture_url",
+          "lineNumber": 437
+        },
+        {
+          "caller": "_fetch_capture",
+          "callee": "http.get_with_raw",
+          "lineNumber": 438
+        },
+        {
+          "caller": "_fetch_capture",
+          "callee": "httpx.URL",
+          "lineNumber": 439
+        },
+        {
+          "caller": "_fetch_capture",
+          "callee": "_RunStopped",
+          "lineNumber": 440
+        },
+        {
+          "caller": "ingest",
+          "callee": "Tally",
+          "lineNumber": 444
+        },
+        {
+          "caller": "ingest",
+          "callee": "index_list_sources_settled_as_of",
+          "lineNumber": 445
+        },
+        {
+          "caller": "ingest",
+          "callee": "self.extracted_by",
+          "lineNumber": 446
+        },
+        {
+          "caller": "ingest",
+          "callee": "ctx.now",
+          "lineNumber": 446
+        },
+        {
+          "caller": "ingest",
+          "callee": "self._client",
+          "lineNumber": 448
+        },
+        {
+          "caller": "ingest",
+          "callee": "self._cdx",
+          "lineNumber": 453
+        },
+        {
+          "caller": "ingest",
+          "callee": "location.rstrip",
+          "lineNumber": 453
+        },
+        {
+          "caller": "ingest",
+          "callee": "self.store_raw",
+          "lineNumber": 454
+        },
+        {
+          "caller": "ingest",
+          "callee": "str",
+          "lineNumber": 455
+        },
+        {
+          "caller": "ingest",
+          "callee": "ctx.now",
+          "lineNumber": 456
+        },
+        {
+          "caller": "ingest",
+          "callee": "_media_type",
+          "lineNumber": 456
+        },
+        {
+          "caller": "ingest",
+          "callee": "parse_cdx",
+          "lineNumber": 458
+        },
+        {
+          "caller": "ingest",
+          "callee": "run_boundaries",
+          "lineNumber": 459
+        },
+        {
+          "caller": "ingest",
+          "callee": "self._capture_url",
+          "lineNumber": 460
+        },
+        {
+          "caller": "ingest",
+          "callee": "self._fetch_capture",
+          "lineNumber": 463
+        },
+        {
+          "caller": "ingest",
+          "callee": "self.store_raw",
+          "lineNumber": 464
+        },
+        {
+          "caller": "ingest",
+          "callee": "_media_type",
+          "lineNumber": 466
+        },
+        {
+          "caller": "ingest",
+          "callee": "settled.add",
+          "lineNumber": 468
+        },
+        {
+          "caller": "ingest",
+          "callee": "load_list",
+          "lineNumber": 469
+        },
+        {
+          "caller": "ingest",
+          "callee": "tally.problems.append",
+          "lineNumber": 473
+        },
+        {
+          "caller": "ingest",
+          "callee": "tally.result",
+          "lineNumber": 474
+        },
+        {
+          "caller": "check_shape",
+          "callee": "ctx.settings.wayback_list_locations[0].rstrip",
+          "lineNumber": 477
+        },
+        {
+          "caller": "check_shape",
+          "callee": "next",
+          "lineNumber": 478
+        },
+        {
+          "caller": "check_shape",
+          "callee": "iter",
+          "lineNumber": 478
+        },
+        {
+          "caller": "check_shape",
+          "callee": "self._client",
+          "lineNumber": 479
+        },
+        {
+          "caller": "check_shape",
+          "callee": "parse_cdx",
+          "lineNumber": 480
+        },
+        {
+          "caller": "check_shape",
+          "callee": "self._cdx",
+          "lineNumber": 480
+        },
+        {
+          "caller": "check_shape",
+          "callee": "CdxShapeError",
+          "lineNumber": 482
+        },
+        {
+          "caller": "check_shape",
+          "callee": "self._fetch_capture",
+          "lineNumber": 483
+        },
+        {
+          "caller": "check_shape",
+          "callee": "wayback_digest",
+          "lineNumber": 484
+        },
+        {
+          "caller": "check_shape",
+          "callee": "ListRejected",
+          "lineNumber": 485
+        },
+        {
+          "caller": "check_shape",
+          "callee": "parse_constituent_list",
+          "lineNumber": 486
+        },
+        {
+          "caller": "_reparse",
+          "callee": "reparse_stored_lists",
+          "lineNumber": 489
+        }
+      ],
+      "metrics": {
+        "importCount": 7,
+        "exportCount": 15,
+        "functionCount": 8,
+        "classCount": 7
+      }
+    },
+    {
+      "path": "ingest/nse_indices/parser.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 154,
+      "nonEmptyLines": 122,
+      "functions": [
+        {
+          "name": "index_for_url",
+          "startLine": 94,
+          "endLine": 96,
+          "params": [
+            "url"
+          ]
+        },
+        {
+          "name": "_fields",
+          "startLine": 99,
+          "endLine": 100,
+          "params": [
+            "line"
+          ]
+        },
+        {
+          "name": "parse_constituent_list",
+          "startLine": 103,
+          "endLine": 154,
+          "params": [
+            "data",
+            "index_code"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "ConstituentRow",
+          "startLine": 56,
+          "endLine": 61,
+          "methods": [],
+          "properties": [
+            "company_name",
+            "industry",
+            "symbol",
+            "series",
+            "isin"
+          ]
+        },
+        {
+          "name": "Constituent",
+          "startLine": 65,
+          "endLine": 67,
+          "methods": [],
+          "properties": [
+            "row_number",
+            "row"
+          ]
+        },
+        {
+          "name": "RowIssue",
+          "startLine": 71,
+          "endLine": 75,
+          "methods": [],
+          "properties": [
+            "row_number",
+            "raw_row",
+            "reason",
+            "detail"
+          ]
+        },
+        {
+          "name": "ParsedList",
+          "startLine": 79,
+          "endLine": 82,
+          "methods": [],
+          "properties": [
+            "index_code",
+            "constituents",
+            "issues"
+          ]
+        },
+        {
+          "name": "ListRejected",
+          "startLine": 85,
+          "endLine": 91,
+          "methods": [
+            "__init__"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "ConstituentRow",
+          "line": 56,
+          "isDefault": false
+        },
+        {
+          "name": "Constituent",
+          "line": 64,
+          "isDefault": false
+        },
+        {
+          "name": "RowIssue",
+          "line": 70,
+          "isDefault": false
+        },
+        {
+          "name": "ParsedList",
+          "line": 78,
+          "isDefault": false
+        },
+        {
+          "name": "ListRejected",
+          "line": 85,
+          "isDefault": false
+        },
+        {
+          "name": "index_for_url",
+          "line": 94,
+          "isDefault": false
+        },
+        {
+          "name": "_fields",
+          "line": 99,
+          "isDefault": false
+        },
+        {
+          "name": "parse_constituent_list",
+          "line": 103,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "__init__",
+          "callee": "super().__init__",
+          "lineNumber": 89
+        },
+        {
+          "caller": "__init__",
+          "callee": "super",
+          "lineNumber": 89
+        },
+        {
+          "caller": "index_for_url",
+          "callee": "LIST_FILES.get",
+          "lineNumber": 96
+        },
+        {
+          "caller": "index_for_url",
+          "callee": "urlsplit(url).path.rsplit",
+          "lineNumber": 96
+        },
+        {
+          "caller": "index_for_url",
+          "callee": "urlsplit",
+          "lineNumber": 96
+        },
+        {
+          "caller": "_fields",
+          "callee": "f.strip",
+          "lineNumber": 100
+        },
+        {
+          "caller": "_fields",
+          "callee": "next",
+          "lineNumber": 100
+        },
+        {
+          "caller": "_fields",
+          "callee": "csv.reader",
+          "lineNumber": 100
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "data.decode",
+          "lineNumber": 105
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "ListRejected",
+          "lineNumber": 107
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "text.splitlines",
+          "lineNumber": 109
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "line.strip",
+          "lineNumber": 109
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "ListRejected",
+          "lineNumber": 111
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "tuple",
+          "lineNumber": 112
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "_fields",
+          "lineNumber": 112
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "ListRejected",
+          "lineNumber": 113
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "len",
+          "lineNumber": 115
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "ListRejected",
+          "lineNumber": 116
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "len",
+          "lineNumber": 118
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "enumerate",
+          "lineNumber": 124
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "_fields",
+          "lineNumber": 125
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "len",
+          "lineNumber": 126
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "len",
+          "lineNumber": 126
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "issues.append",
+          "lineNumber": 127
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "RowIssue",
+          "lineNumber": 128
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "len",
+          "lineNumber": 128
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "ConstituentRow",
+          "lineNumber": 132
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "dict",
+          "lineNumber": 132
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "zip",
+          "lineNumber": 132
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "exc.errors",
+          "lineNumber": 134
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "'.'.join",
+          "lineNumber": 135
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "map",
+          "lineNumber": 135
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "issues.append",
+          "lineNumber": 136
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "RowIssue",
+          "lineNumber": 136
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "_INDIAN_ISIN.match",
+          "lineNumber": 138
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "is_valid_isin",
+          "lineNumber": 138
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "issues.append",
+          "lineNumber": 139
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "RowIssue",
+          "lineNumber": 140
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "issues.append",
+          "lineNumber": 144
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "RowIssue",
+          "lineNumber": 145
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "ListRejected",
+          "lineNumber": 149
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "constituents.append",
+          "lineNumber": 153
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "Constituent",
+          "lineNumber": 153
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "ParsedList",
+          "lineNumber": 154
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "tuple",
+          "lineNumber": 154
+        },
+        {
+          "caller": "parse_constituent_list",
+          "callee": "tuple",
+          "lineNumber": 154
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 8,
+        "functionCount": 3,
+        "classCount": 5
+      }
+    },
+    {
+      "path": "ingest/schema.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 7,
+      "nonEmptyLines": 4,
+      "classes": [
+        {
+          "name": "StrictModel",
+          "startLine": 4,
+          "endLine": 7,
+          "methods": [],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "StrictModel",
+          "line": 4,
+          "isDefault": false
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 1,
+        "functionCount": 0,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "tests/test_compute_isin.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 47,
+      "nonEmptyLines": 36,
+      "functions": [
+        {
+          "name": "test_known_isins_are_valid",
+          "startLine": 27,
+          "endLine": 28,
+          "params": [
+            "isin"
+          ]
+        },
+        {
+          "name": "test_malformed_or_wrong_check_digit_rejected",
+          "startLine": 35,
+          "endLine": 36,
+          "params": [
+            "isin"
+          ]
+        },
+        {
+          "name": "test_exactly_one_check_digit_validates",
+          "startLine": 40,
+          "endLine": 42,
+          "params": [
+            "body"
+          ]
+        },
+        {
+          "name": "test_bad_body_raises",
+          "startLine": 45,
+          "endLine": 47,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "test_known_isins_are_valid",
+          "line": 17,
+          "isDefault": false
+        },
+        {
+          "name": "test_malformed_or_wrong_check_digit_rejected",
+          "line": 31,
+          "isDefault": false
+        },
+        {
+          "name": "test_exactly_one_check_digit_validates",
+          "line": 39,
+          "isDefault": false
+        },
+        {
+          "name": "test_bad_body_raises",
+          "line": 45,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "test_known_isins_are_valid",
+          "callee": "is_valid_isin",
+          "lineNumber": 28
+        },
+        {
+          "caller": "test_malformed_or_wrong_check_digit_rejected",
+          "callee": "is_valid_isin",
+          "lineNumber": 36
+        },
+        {
+          "caller": "test_exactly_one_check_digit_validates",
+          "callee": "range",
+          "lineNumber": 41
+        },
+        {
+          "caller": "test_exactly_one_check_digit_validates",
+          "callee": "is_valid_isin",
+          "lineNumber": 41
+        },
+        {
+          "caller": "test_exactly_one_check_digit_validates",
+          "callee": "isin_check_digit",
+          "lineNumber": 42
+        },
+        {
+          "caller": "test_bad_body_raises",
+          "callee": "pytest.raises",
+          "lineNumber": 46
+        },
+        {
+          "caller": "test_bad_body_raises",
+          "callee": "isin_check_digit",
+          "lineNumber": 47
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 4,
+        "functionCount": 4,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/test_http.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 189,
+      "nonEmptyLines": 138,
+      "functions": [
+        {
+          "name": "_client",
+          "startLine": 24,
+          "endLine": 40,
+          "params": [
+            "routes",
+            "respect_robots",
+            "clock"
+          ]
+        },
+        {
+          "name": "test_identifies_itself",
+          "startLine": 43,
+          "endLine": 46,
+          "params": []
+        },
+        {
+          "name": "test_throttles_per_host",
+          "startLine": 49,
+          "endLine": 56,
+          "params": []
+        },
+        {
+          "name": "test_robots_disallow_stops_before_requesting",
+          "startLine": 59,
+          "endLine": 64,
+          "params": []
+        },
+        {
+          "name": "test_robots_fetched_once_per_origin",
+          "startLine": 67,
+          "endLine": 72,
+          "params": []
+        },
+        {
+          "name": "test_missing_robots_allows",
+          "startLine": 75,
+          "endLine": 77,
+          "params": []
+        },
+        {
+          "name": "test_robots_forbidden_means_disallow_all",
+          "startLine": 80,
+          "endLine": 83,
+          "params": []
+        },
+        {
+          "name": "test_block_raises_without_retry",
+          "startLine": 87,
+          "endLine": 91,
+          "params": [
+            "status"
+          ]
+        },
+        {
+          "name": "test_other_http_errors_raise",
+          "startLine": 94,
+          "endLine": 97,
+          "params": []
+        },
+        {
+          "name": "test_apis_skip_robots",
+          "startLine": 100,
+          "endLine": 103,
+          "params": []
+        },
+        {
+          "name": "_scripted",
+          "startLine": 111,
+          "endLine": 128,
+          "params": [
+            "answers",
+            "retries"
+          ]
+        },
+        {
+          "name": "test_overload_not_retried_by_default",
+          "startLine": 131,
+          "endLine": 135,
+          "params": []
+        },
+        {
+          "name": "test_overload_retried_with_growing_backoff",
+          "startLine": 139,
+          "endLine": 142,
+          "params": [
+            "status"
+          ]
+        },
+        {
+          "name": "test_overload_retries_are_bounded",
+          "startLine": 145,
+          "endLine": 149,
+          "params": []
+        },
+        {
+          "name": "test_timeout_retried_then_raised",
+          "startLine": 152,
+          "endLine": 156,
+          "params": []
+        },
+        {
+          "name": "test_retry_after_longer_than_backoff_is_honoured",
+          "startLine": 159,
+          "endLine": 162,
+          "params": []
+        },
+        {
+          "name": "test_get_with_raw_returns_bytes_as_transferred_and_decoded_content",
+          "startLine": 166,
+          "endLine": 175,
+          "params": [
+            "encoding"
+          ]
+        },
+        {
+          "name": "test_get_with_raw_still_stops_on_a_block",
+          "startLine": 178,
+          "endLine": 181,
+          "params": []
+        },
+        {
+          "name": "test_block_never_retried_even_when_retries_enabled",
+          "startLine": 185,
+          "endLine": 189,
+          "params": [
+            "status"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "FakeClock",
+          "startLine": 11,
+          "endLine": 21,
+          "methods": [
+            "__init__",
+            "monotonic",
+            "sleep"
+          ],
+          "properties": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "FakeClock",
+          "line": 11,
+          "isDefault": false
+        },
+        {
+          "name": "_client",
+          "line": 24,
+          "isDefault": false
+        },
+        {
+          "name": "test_identifies_itself",
+          "line": 43,
+          "isDefault": false
+        },
+        {
+          "name": "test_throttles_per_host",
+          "line": 49,
+          "isDefault": false
+        },
+        {
+          "name": "test_robots_disallow_stops_before_requesting",
+          "line": 59,
+          "isDefault": false
+        },
+        {
+          "name": "test_robots_fetched_once_per_origin",
+          "line": 67,
+          "isDefault": false
+        },
+        {
+          "name": "test_missing_robots_allows",
+          "line": 75,
+          "isDefault": false
+        },
+        {
+          "name": "test_robots_forbidden_means_disallow_all",
+          "line": 80,
+          "isDefault": false
+        },
+        {
+          "name": "test_block_raises_without_retry",
+          "line": 86,
+          "isDefault": false
+        },
+        {
+          "name": "test_other_http_errors_raise",
+          "line": 94,
+          "isDefault": false
+        },
+        {
+          "name": "test_apis_skip_robots",
+          "line": 100,
+          "isDefault": false
+        },
+        {
+          "name": "_scripted",
+          "line": 111,
+          "isDefault": false
+        },
+        {
+          "name": "test_overload_not_retried_by_default",
+          "line": 131,
+          "isDefault": false
+        },
+        {
+          "name": "test_overload_retried_with_growing_backoff",
+          "line": 138,
+          "isDefault": false
+        },
+        {
+          "name": "test_overload_retries_are_bounded",
+          "line": 145,
+          "isDefault": false
+        },
+        {
+          "name": "test_timeout_retried_then_raised",
+          "line": 152,
+          "isDefault": false
+        },
+        {
+          "name": "test_retry_after_longer_than_backoff_is_honoured",
+          "line": 159,
+          "isDefault": false
+        },
+        {
+          "name": "test_get_with_raw_returns_bytes_as_transferred_and_decoded_content",
+          "line": 165,
+          "isDefault": false
+        },
+        {
+          "name": "test_get_with_raw_still_stops_on_a_block",
+          "line": 178,
+          "isDefault": false
+        },
+        {
+          "name": "test_block_never_retried_even_when_retries_enabled",
+          "line": 184,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "sleep",
+          "callee": "self.sleeps.append",
+          "lineNumber": 20
+        },
+        {
+          "caller": "handler",
+          "callee": "seen.append",
+          "lineNumber": 28
+        },
+        {
+          "caller": "handler",
+          "callee": "routes.get",
+          "lineNumber": 29
+        },
+        {
+          "caller": "handler",
+          "callee": "httpx.Response",
+          "lineNumber": 29
+        },
+        {
+          "caller": "_client",
+          "callee": "FakeClock",
+          "lineNumber": 31
+        },
+        {
+          "caller": "_client",
+          "callee": "PoliteClient",
+          "lineNumber": 32
+        },
+        {
+          "caller": "_client",
+          "callee": "httpx.MockTransport",
+          "lineNumber": 36
+        },
+        {
+          "caller": "test_identifies_itself",
+          "callee": "_client",
+          "lineNumber": 44
+        },
+        {
+          "caller": "test_identifies_itself",
+          "callee": "httpx.Response",
+          "lineNumber": 44
+        },
+        {
+          "caller": "test_identifies_itself",
+          "callee": "client.get",
+          "lineNumber": 45
+        },
+        {
+          "caller": "test_throttles_per_host",
+          "callee": "FakeClock",
+          "lineNumber": 50
+        },
+        {
+          "caller": "test_throttles_per_host",
+          "callee": "_client",
+          "lineNumber": 51
+        },
+        {
+          "caller": "test_throttles_per_host",
+          "callee": "httpx.Response",
+          "lineNumber": 51
+        },
+        {
+          "caller": "test_throttles_per_host",
+          "callee": "httpx.Response",
+          "lineNumber": 51
+        },
+        {
+          "caller": "test_throttles_per_host",
+          "callee": "client.get",
+          "lineNumber": 52
+        },
+        {
+          "caller": "test_throttles_per_host",
+          "callee": "client.get",
+          "lineNumber": 54
+        },
+        {
+          "caller": "test_throttles_per_host",
+          "callee": "client.get",
+          "lineNumber": 55
+        },
+        {
+          "caller": "test_robots_disallow_stops_before_requesting",
+          "callee": "httpx.Response",
+          "lineNumber": 60
+        },
+        {
+          "caller": "test_robots_disallow_stops_before_requesting",
+          "callee": "_client",
+          "lineNumber": 61
+        },
+        {
+          "caller": "test_robots_disallow_stops_before_requesting",
+          "callee": "httpx.Response",
+          "lineNumber": 61
+        },
+        {
+          "caller": "test_robots_disallow_stops_before_requesting",
+          "callee": "pytest.raises",
+          "lineNumber": 62
+        },
+        {
+          "caller": "test_robots_disallow_stops_before_requesting",
+          "callee": "client.get",
+          "lineNumber": 63
+        },
+        {
+          "caller": "test_robots_fetched_once_per_origin",
+          "callee": "httpx.Response",
+          "lineNumber": 68
+        },
+        {
+          "caller": "test_robots_fetched_once_per_origin",
+          "callee": "_client",
+          "lineNumber": 69
+        },
+        {
+          "caller": "test_robots_fetched_once_per_origin",
+          "callee": "httpx.Response",
+          "lineNumber": 69
+        },
+        {
+          "caller": "test_robots_fetched_once_per_origin",
+          "callee": "httpx.Response",
+          "lineNumber": 69
+        },
+        {
+          "caller": "test_robots_fetched_once_per_origin",
+          "callee": "client.get",
+          "lineNumber": 70
+        },
+        {
+          "caller": "test_robots_fetched_once_per_origin",
+          "callee": "client.get",
+          "lineNumber": 71
+        },
+        {
+          "caller": "test_missing_robots_allows",
+          "callee": "_client",
+          "lineNumber": 76
+        },
+        {
+          "caller": "test_missing_robots_allows",
+          "callee": "httpx.Response",
+          "lineNumber": 76
+        },
+        {
+          "caller": "test_missing_robots_allows",
+          "callee": "client.get",
+          "lineNumber": 77
+        },
+        {
+          "caller": "test_robots_forbidden_means_disallow_all",
+          "callee": "_client",
+          "lineNumber": 81
+        },
+        {
+          "caller": "test_robots_forbidden_means_disallow_all",
+          "callee": "httpx.Response",
+          "lineNumber": 81
+        },
+        {
+          "caller": "test_robots_forbidden_means_disallow_all",
+          "callee": "httpx.Response",
+          "lineNumber": 81
+        },
+        {
+          "caller": "test_robots_forbidden_means_disallow_all",
+          "callee": "pytest.raises",
+          "lineNumber": 82
+        },
+        {
+          "caller": "test_robots_forbidden_means_disallow_all",
+          "callee": "client.get",
+          "lineNumber": 83
+        },
+        {
+          "caller": "test_block_raises_without_retry",
+          "callee": "_client",
+          "lineNumber": 88
+        },
+        {
+          "caller": "test_block_raises_without_retry",
+          "callee": "httpx.Response",
+          "lineNumber": 88
+        },
+        {
+          "caller": "test_block_raises_without_retry",
+          "callee": "pytest.raises",
+          "lineNumber": 89
+        },
+        {
+          "caller": "test_block_raises_without_retry",
+          "callee": "str",
+          "lineNumber": 89
+        },
+        {
+          "caller": "test_block_raises_without_retry",
+          "callee": "client.get",
+          "lineNumber": 90
+        },
+        {
+          "caller": "test_block_raises_without_retry",
+          "callee": "len",
+          "lineNumber": 91
+        },
+        {
+          "caller": "test_other_http_errors_raise",
+          "callee": "_client",
+          "lineNumber": 95
+        },
+        {
+          "caller": "test_other_http_errors_raise",
+          "callee": "httpx.Response",
+          "lineNumber": 95
+        },
+        {
+          "caller": "test_other_http_errors_raise",
+          "callee": "pytest.raises",
+          "lineNumber": 96
+        },
+        {
+          "caller": "test_other_http_errors_raise",
+          "callee": "client.get",
+          "lineNumber": 97
+        },
+        {
+          "caller": "test_apis_skip_robots",
+          "callee": "_client",
+          "lineNumber": 101
+        },
+        {
+          "caller": "test_apis_skip_robots",
+          "callee": "httpx.Response",
+          "lineNumber": 101
+        },
+        {
+          "caller": "test_apis_skip_robots",
+          "callee": "client.get",
+          "lineNumber": 102
+        },
+        {
+          "caller": "handler",
+          "callee": "seen.append",
+          "lineNumber": 116
+        },
+        {
+          "caller": "handler",
+          "callee": "min",
+          "lineNumber": 117
+        },
+        {
+          "caller": "handler",
+          "callee": "len",
+          "lineNumber": 117
+        },
+        {
+          "caller": "handler",
+          "callee": "len",
+          "lineNumber": 117
+        },
+        {
+          "caller": "handler",
+          "callee": "isinstance",
+          "lineNumber": 118
+        },
+        {
+          "caller": "_scripted",
+          "callee": "FakeClock",
+          "lineNumber": 122
+        },
+        {
+          "caller": "_scripted",
+          "callee": "PoliteClient",
+          "lineNumber": 123
+        },
+        {
+          "caller": "_scripted",
+          "callee": "httpx.MockTransport",
+          "lineNumber": 125
+        },
+        {
+          "caller": "test_overload_not_retried_by_default",
+          "callee": "_scripted",
+          "lineNumber": 132
+        },
+        {
+          "caller": "test_overload_not_retried_by_default",
+          "callee": "httpx.Response",
+          "lineNumber": 132
+        },
+        {
+          "caller": "test_overload_not_retried_by_default",
+          "callee": "httpx.Response",
+          "lineNumber": 132
+        },
+        {
+          "caller": "test_overload_not_retried_by_default",
+          "callee": "pytest.raises",
+          "lineNumber": 133
+        },
+        {
+          "caller": "test_overload_not_retried_by_default",
+          "callee": "client.get",
+          "lineNumber": 134
+        },
+        {
+          "caller": "test_overload_not_retried_by_default",
+          "callee": "len",
+          "lineNumber": 135
+        },
+        {
+          "caller": "test_overload_retried_with_growing_backoff",
+          "callee": "_scripted",
+          "lineNumber": 140
+        },
+        {
+          "caller": "test_overload_retried_with_growing_backoff",
+          "callee": "httpx.Response",
+          "lineNumber": 140
+        },
+        {
+          "caller": "test_overload_retried_with_growing_backoff",
+          "callee": "httpx.Response",
+          "lineNumber": 140
+        },
+        {
+          "caller": "test_overload_retried_with_growing_backoff",
+          "callee": "httpx.Response",
+          "lineNumber": 140
+        },
+        {
+          "caller": "test_overload_retried_with_growing_backoff",
+          "callee": "client.get",
+          "lineNumber": 141
+        },
+        {
+          "caller": "test_overload_retried_with_growing_backoff",
+          "callee": "len",
+          "lineNumber": 142
+        },
+        {
+          "caller": "test_overload_retries_are_bounded",
+          "callee": "_scripted",
+          "lineNumber": 146
+        },
+        {
+          "caller": "test_overload_retries_are_bounded",
+          "callee": "httpx.Response",
+          "lineNumber": 146
+        },
+        {
+          "caller": "test_overload_retries_are_bounded",
+          "callee": "pytest.raises",
+          "lineNumber": 147
+        },
+        {
+          "caller": "test_overload_retries_are_bounded",
+          "callee": "client.get",
+          "lineNumber": 148
+        },
+        {
+          "caller": "test_overload_retries_are_bounded",
+          "callee": "len",
+          "lineNumber": 149
+        },
+        {
+          "caller": "test_timeout_retried_then_raised",
+          "callee": "_scripted",
+          "lineNumber": 153
+        },
+        {
+          "caller": "test_timeout_retried_then_raised",
+          "callee": "httpx.ReadTimeout",
+          "lineNumber": 153
+        },
+        {
+          "caller": "test_timeout_retried_then_raised",
+          "callee": "pytest.raises",
+          "lineNumber": 154
+        },
+        {
+          "caller": "test_timeout_retried_then_raised",
+          "callee": "client.get",
+          "lineNumber": 155
+        },
+        {
+          "caller": "test_timeout_retried_then_raised",
+          "callee": "len",
+          "lineNumber": 156
+        },
+        {
+          "caller": "test_retry_after_longer_than_backoff_is_honoured",
+          "callee": "_scripted",
+          "lineNumber": 160
+        },
+        {
+          "caller": "test_retry_after_longer_than_backoff_is_honoured",
+          "callee": "httpx.Response",
+          "lineNumber": 160
+        },
+        {
+          "caller": "test_retry_after_longer_than_backoff_is_honoured",
+          "callee": "httpx.Response",
+          "lineNumber": 160
+        },
+        {
+          "caller": "test_retry_after_longer_than_backoff_is_honoured",
+          "callee": "client.get",
+          "lineNumber": 161
+        },
+        {
+          "caller": "test_get_with_raw_returns_bytes_as_transferred_and_decoded_content",
+          "callee": "gzip.compress",
+          "lineNumber": 168
+        },
+        {
+          "caller": "test_get_with_raw_returns_bytes_as_transferred_and_decoded_content",
+          "callee": "httpx.Response",
+          "lineNumber": 171
+        },
+        {
+          "caller": "test_get_with_raw_returns_bytes_as_transferred_and_decoded_content",
+          "callee": "httpx.ByteStream",
+          "lineNumber": 171
+        },
+        {
+          "caller": "test_get_with_raw_returns_bytes_as_transferred_and_decoded_content",
+          "callee": "_client",
+          "lineNumber": 172
+        },
+        {
+          "caller": "test_get_with_raw_returns_bytes_as_transferred_and_decoded_content",
+          "callee": "client.get_with_raw",
+          "lineNumber": 173
+        },
+        {
+          "caller": "test_get_with_raw_returns_bytes_as_transferred_and_decoded_content",
+          "callee": "str",
+          "lineNumber": 175
+        },
+        {
+          "caller": "test_get_with_raw_still_stops_on_a_block",
+          "callee": "_client",
+          "lineNumber": 179
+        },
+        {
+          "caller": "test_get_with_raw_still_stops_on_a_block",
+          "callee": "httpx.Response",
+          "lineNumber": 179
+        },
+        {
+          "caller": "test_get_with_raw_still_stops_on_a_block",
+          "callee": "httpx.ByteStream",
+          "lineNumber": 179
+        },
+        {
+          "caller": "test_get_with_raw_still_stops_on_a_block",
+          "callee": "pytest.raises",
+          "lineNumber": 180
+        },
+        {
+          "caller": "test_get_with_raw_still_stops_on_a_block",
+          "callee": "client.get_with_raw",
+          "lineNumber": 181
+        },
+        {
+          "caller": "test_block_never_retried_even_when_retries_enabled",
+          "callee": "_scripted",
+          "lineNumber": 186
+        },
+        {
+          "caller": "test_block_never_retried_even_when_retries_enabled",
+          "callee": "httpx.Response",
+          "lineNumber": 186
+        },
+        {
+          "caller": "test_block_never_retried_even_when_retries_enabled",
+          "callee": "httpx.Response",
+          "lineNumber": 186
+        },
+        {
+          "caller": "test_block_never_retried_even_when_retries_enabled",
+          "callee": "pytest.raises",
+          "lineNumber": 187
+        },
+        {
+          "caller": "test_block_never_retried_even_when_retries_enabled",
+          "callee": "client.get",
+          "lineNumber": 188
+        },
+        {
+          "caller": "test_block_never_retried_even_when_retries_enabled",
+          "callee": "len",
+          "lineNumber": 189
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 20,
+        "functionCount": 19,
+        "classCount": 1
+      }
+    },
+    {
+      "path": "tests/test_nse_bhavcopy_parser.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 132,
+      "nonEmptyLines": 98,
+      "functions": [
+        {
+          "name": "_data",
+          "startLine": 26,
+          "endLine": 27,
+          "params": [
+            "lines"
+          ]
+        },
+        {
+          "name": "_row_number",
+          "startLine": 30,
+          "endLine": 35,
+          "params": [
+            "symbol"
+          ]
+        },
+        {
+          "name": "_replace",
+          "startLine": 38,
+          "endLine": 42,
+          "params": [
+            "lines",
+            "row_number"
+          ]
+        },
+        {
+          "name": "test_recorded_bhavcopy_unzips_and_parses",
+          "startLine": 48,
+          "endLine": 53,
+          "params": []
+        },
+        {
+          "name": "test_raw_csv_without_the_zip_wrapper_parses_identically",
+          "startLine": 56,
+          "endLine": 57,
+          "params": []
+        },
+        {
+          "name": "test_reliance_row_matches_the_real_market_data",
+          "startLine": 60,
+          "endLine": 65,
+          "params": []
+        },
+        {
+          "name": "test_be_series_row_is_kept",
+          "startLine": 68,
+          "endLine": 70,
+          "params": []
+        },
+        {
+          "name": "test_non_equity_rows_are_filtered_not_quarantined",
+          "startLine": 73,
+          "endLine": 77,
+          "params": []
+        },
+        {
+          "name": "test_whole_file_rejected",
+          "startLine": 95,
+          "endLine": 98,
+          "params": [
+            "data",
+            "reason"
+          ]
+        },
+        {
+          "name": "test_bad_row_quarantined_and_the_rest_kept",
+          "startLine": 101,
+          "endLine": 107,
+          "params": []
+        },
+        {
+          "name": "test_malformed_numeric_field_quarantined_with_partial_identity",
+          "startLine": 110,
+          "endLine": 114,
+          "params": []
+        },
+        {
+          "name": "test_row_with_wrong_field_count_quarantined_without_identity",
+          "startLine": 117,
+          "endLine": 122,
+          "params": []
+        },
+        {
+          "name": "test_duplicate_isin_series_in_one_file_quarantines_the_later_row",
+          "startLine": 125,
+          "endLine": 132,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "_data",
+          "line": 26,
+          "isDefault": false
+        },
+        {
+          "name": "_row_number",
+          "line": 30,
+          "isDefault": false
+        },
+        {
+          "name": "_replace",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "test_recorded_bhavcopy_unzips_and_parses",
+          "line": 48,
+          "isDefault": false
+        },
+        {
+          "name": "test_raw_csv_without_the_zip_wrapper_parses_identically",
+          "line": 56,
+          "isDefault": false
+        },
+        {
+          "name": "test_reliance_row_matches_the_real_market_data",
+          "line": 60,
+          "isDefault": false
+        },
+        {
+          "name": "test_be_series_row_is_kept",
+          "line": 68,
+          "isDefault": false
+        },
+        {
+          "name": "test_non_equity_rows_are_filtered_not_quarantined",
+          "line": 73,
+          "isDefault": false
+        },
+        {
+          "name": "test_whole_file_rejected",
+          "line": 80,
+          "isDefault": false
+        },
+        {
+          "name": "test_bad_row_quarantined_and_the_rest_kept",
+          "line": 101,
+          "isDefault": false
+        },
+        {
+          "name": "test_malformed_numeric_field_quarantined_with_partial_identity",
+          "line": 110,
+          "isDefault": false
+        },
+        {
+          "name": "test_row_with_wrong_field_count_quarantined_without_identity",
+          "line": 117,
+          "isDefault": false
+        },
+        {
+          "name": "test_duplicate_isin_series_in_one_file_quarantines_the_later_row",
+          "line": 125,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "_data",
+          "callee": "(\"\\n\".join(lines) + \"\\n\").encode",
+          "lineNumber": 27
+        },
+        {
+          "caller": "_data",
+          "callee": "\"\\n\".join",
+          "lineNumber": 27
+        },
+        {
+          "caller": "_row_number",
+          "callee": "HEADER.index",
+          "lineNumber": 31
+        },
+        {
+          "caller": "_row_number",
+          "callee": "enumerate",
+          "lineNumber": 32
+        },
+        {
+          "caller": "_row_number",
+          "callee": "next",
+          "lineNumber": 33
+        },
+        {
+          "caller": "_row_number",
+          "callee": "csv.reader",
+          "lineNumber": 33
+        },
+        {
+          "caller": "_row_number",
+          "callee": "ValueError",
+          "lineNumber": 35
+        },
+        {
+          "caller": "_replace",
+          "callee": "next",
+          "lineNumber": 39
+        },
+        {
+          "caller": "_replace",
+          "callee": "csv.reader",
+          "lineNumber": 39
+        },
+        {
+          "caller": "_replace",
+          "callee": "fields.items",
+          "lineNumber": 40
+        },
+        {
+          "caller": "_replace",
+          "callee": "HEADER.index",
+          "lineNumber": 41
+        },
+        {
+          "caller": "_replace",
+          "callee": "\",\".join",
+          "lineNumber": 42
+        },
+        {
+          "caller": "test_recorded_bhavcopy_unzips_and_parses",
+          "callee": "parse_bhavcopy",
+          "lineNumber": 49
+        },
+        {
+          "caller": "test_recorded_bhavcopy_unzips_and_parses",
+          "callee": "date",
+          "lineNumber": 50
+        },
+        {
+          "caller": "test_recorded_bhavcopy_unzips_and_parses",
+          "callee": "len",
+          "lineNumber": 51
+        },
+        {
+          "caller": "test_recorded_bhavcopy_unzips_and_parses",
+          "callee": "all",
+          "lineNumber": 53
+        },
+        {
+          "caller": "test_raw_csv_without_the_zip_wrapper_parses_identically",
+          "callee": "parse_bhavcopy",
+          "lineNumber": 57
+        },
+        {
+          "caller": "test_raw_csv_without_the_zip_wrapper_parses_identically",
+          "callee": "parse_bhavcopy",
+          "lineNumber": 57
+        },
+        {
+          "caller": "test_reliance_row_matches_the_real_market_data",
+          "callee": "parse_bhavcopy",
+          "lineNumber": 61
+        },
+        {
+          "caller": "test_reliance_row_matches_the_real_market_data",
+          "callee": "is_valid_isin",
+          "lineNumber": 63
+        },
+        {
+          "caller": "test_be_series_row_is_kept",
+          "callee": "parse_bhavcopy",
+          "lineNumber": 69
+        },
+        {
+          "caller": "test_non_equity_rows_are_filtered_not_quarantined",
+          "callee": "parse_bhavcopy",
+          "lineNumber": 75
+        },
+        {
+          "caller": "test_non_equity_rows_are_filtered_not_quarantined",
+          "callee": "len",
+          "lineNumber": 76
+        },
+        {
+          "caller": "test_non_equity_rows_are_filtered_not_quarantined",
+          "callee": "len",
+          "lineNumber": 76
+        },
+        {
+          "caller": "test_whole_file_rejected",
+          "callee": "pytest.raises",
+          "lineNumber": 96
+        },
+        {
+          "caller": "test_whole_file_rejected",
+          "callee": "parse_bhavcopy",
+          "lineNumber": 97
+        },
+        {
+          "caller": "test_bad_row_quarantined_and_the_rest_kept",
+          "callee": "str",
+          "lineNumber": 102
+        },
+        {
+          "caller": "test_bad_row_quarantined_and_the_rest_kept",
+          "callee": "int",
+          "lineNumber": 102
+        },
+        {
+          "caller": "test_bad_row_quarantined_and_the_rest_kept",
+          "callee": "parse_bhavcopy",
+          "lineNumber": 103
+        },
+        {
+          "caller": "test_bad_row_quarantined_and_the_rest_kept",
+          "callee": "_data",
+          "lineNumber": 103
+        },
+        {
+          "caller": "test_bad_row_quarantined_and_the_rest_kept",
+          "callee": "_replace",
+          "lineNumber": 103
+        },
+        {
+          "caller": "test_bad_row_quarantined_and_the_rest_kept",
+          "callee": "len",
+          "lineNumber": 106
+        },
+        {
+          "caller": "test_malformed_numeric_field_quarantined_with_partial_identity",
+          "callee": "parse_bhavcopy",
+          "lineNumber": 111
+        },
+        {
+          "caller": "test_malformed_numeric_field_quarantined_with_partial_identity",
+          "callee": "_data",
+          "lineNumber": 111
+        },
+        {
+          "caller": "test_malformed_numeric_field_quarantined_with_partial_identity",
+          "callee": "_replace",
+          "lineNumber": 111
+        },
+        {
+          "caller": "test_row_with_wrong_field_count_quarantined_without_identity",
+          "callee": "list",
+          "lineNumber": 118
+        },
+        {
+          "caller": "test_row_with_wrong_field_count_quarantined_without_identity",
+          "callee": "parse_bhavcopy",
+          "lineNumber": 120
+        },
+        {
+          "caller": "test_row_with_wrong_field_count_quarantined_without_identity",
+          "callee": "_data",
+          "lineNumber": 120
+        },
+        {
+          "caller": "test_duplicate_isin_series_in_one_file_quarantines_the_later_row",
+          "callee": "_row_number",
+          "lineNumber": 126
+        },
+        {
+          "caller": "test_duplicate_isin_series_in_one_file_quarantines_the_later_row",
+          "callee": "_replace",
+          "lineNumber": 128
+        },
+        {
+          "caller": "test_duplicate_isin_series_in_one_file_quarantines_the_later_row",
+          "callee": "parse_bhavcopy",
+          "lineNumber": 129
+        },
+        {
+          "caller": "test_duplicate_isin_series_in_one_file_quarantines_the_later_row",
+          "callee": "_data",
+          "lineNumber": 129
+        }
+      ],
+      "metrics": {
+        "importCount": 3,
+        "exportCount": 13,
+        "functionCount": 13,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/test_nse_indices_parser.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 122,
+      "nonEmptyLines": 96,
+      "functions": [
+        {
+          "name": "test_recorded_lists_parse_without_issues",
+          "startLine": 25,
+          "endLine": 27,
+          "params": [
+            "name",
+            "index_code",
+            "count"
+          ]
+        },
+        {
+          "name": "test_recorded_2016_list_first_row",
+          "startLine": 30,
+          "endLine": 35,
+          "params": []
+        },
+        {
+          "name": "_lines",
+          "startLine": 38,
+          "endLine": 39,
+          "params": []
+        },
+        {
+          "name": "_data",
+          "startLine": 42,
+          "endLine": 43,
+          "params": [
+            "lines"
+          ]
+        },
+        {
+          "name": "_replace",
+          "startLine": 46,
+          "endLine": 50,
+          "params": [
+            "lines",
+            "row_number"
+          ]
+        },
+        {
+          "name": "test_bom_crlf_and_blank_lines_are_tolerated",
+          "startLine": 53,
+          "endLine": 55,
+          "params": []
+        },
+        {
+          "name": "test_whole_file_rejected",
+          "startLine": 70,
+          "endLine": 73,
+          "params": [
+            "data",
+            "reason"
+          ]
+        },
+        {
+          "name": "test_bad_row_quarantined_and_the_rest_kept",
+          "startLine": 89,
+          "endLine": 94,
+          "params": [
+            "fields",
+            "reason"
+          ]
+        },
+        {
+          "name": "test_be_series_is_accepted_alongside_eq",
+          "startLine": 97,
+          "endLine": 101,
+          "params": []
+        },
+        {
+          "name": "test_row_with_wrong_field_count_quarantined",
+          "startLine": 104,
+          "endLine": 108,
+          "params": []
+        },
+        {
+          "name": "test_index_for_url",
+          "startLine": 121,
+          "endLine": 122,
+          "params": [
+            "url",
+            "index_code"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "test_recorded_lists_parse_without_issues",
+          "line": 16,
+          "isDefault": false
+        },
+        {
+          "name": "test_recorded_2016_list_first_row",
+          "line": 30,
+          "isDefault": false
+        },
+        {
+          "name": "_lines",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "_data",
+          "line": 42,
+          "isDefault": false
+        },
+        {
+          "name": "_replace",
+          "line": 46,
+          "isDefault": false
+        },
+        {
+          "name": "test_bom_crlf_and_blank_lines_are_tolerated",
+          "line": 53,
+          "isDefault": false
+        },
+        {
+          "name": "test_whole_file_rejected",
+          "line": 58,
+          "isDefault": false
+        },
+        {
+          "name": "test_bad_row_quarantined_and_the_rest_kept",
+          "line": 76,
+          "isDefault": false
+        },
+        {
+          "name": "test_be_series_is_accepted_alongside_eq",
+          "line": 97,
+          "isDefault": false
+        },
+        {
+          "name": "test_row_with_wrong_field_count_quarantined",
+          "line": 104,
+          "isDefault": false
+        },
+        {
+          "name": "test_index_for_url",
+          "line": 111,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "test_recorded_lists_parse_without_issues",
+          "callee": "parse_constituent_list",
+          "lineNumber": 26
+        },
+        {
+          "caller": "test_recorded_lists_parse_without_issues",
+          "callee": "(FIXTURES / name).read_bytes",
+          "lineNumber": 26
+        },
+        {
+          "caller": "test_recorded_lists_parse_without_issues",
+          "callee": "len",
+          "lineNumber": 27
+        },
+        {
+          "caller": "test_recorded_2016_list_first_row",
+          "callee": "parse_constituent_list",
+          "lineNumber": 31
+        },
+        {
+          "caller": "test_recorded_2016_list_first_row",
+          "callee": "(FIXTURES / \"ind_nifty50list_20160310050302.csv\").read_bytes",
+          "lineNumber": 31
+        },
+        {
+          "caller": "_lines",
+          "callee": "NOW.decode().splitlines",
+          "lineNumber": 39
+        },
+        {
+          "caller": "_lines",
+          "callee": "NOW.decode",
+          "lineNumber": 39
+        },
+        {
+          "caller": "_data",
+          "callee": "(\"\\n\".join(lines) + \"\\n\").encode",
+          "lineNumber": 43
+        },
+        {
+          "caller": "_data",
+          "callee": "\"\\n\".join",
+          "lineNumber": 43
+        },
+        {
+          "caller": "_replace",
+          "callee": "next",
+          "lineNumber": 47
+        },
+        {
+          "caller": "_replace",
+          "callee": "csv.reader",
+          "lineNumber": 47
+        },
+        {
+          "caller": "_replace",
+          "callee": "fields.items",
+          "lineNumber": 48
+        },
+        {
+          "caller": "_replace",
+          "callee": "FIELDS.index",
+          "lineNumber": 49
+        },
+        {
+          "caller": "_replace",
+          "callee": "\",\".join",
+          "lineNumber": 50
+        },
+        {
+          "caller": "test_bom_crlf_and_blank_lines_are_tolerated",
+          "callee": "NOW.replace",
+          "lineNumber": 54
+        },
+        {
+          "caller": "test_bom_crlf_and_blank_lines_are_tolerated",
+          "callee": "parse_constituent_list",
+          "lineNumber": 55
+        },
+        {
+          "caller": "test_bom_crlf_and_blank_lines_are_tolerated",
+          "callee": "parse_constituent_list",
+          "lineNumber": 55
+        },
+        {
+          "caller": "test_whole_file_rejected",
+          "callee": "pytest.raises",
+          "lineNumber": 71
+        },
+        {
+          "caller": "test_whole_file_rejected",
+          "callee": "parse_constituent_list",
+          "lineNumber": 72
+        },
+        {
+          "caller": "test_bad_row_quarantined_and_the_rest_kept",
+          "callee": "parse_constituent_list",
+          "lineNumber": 90
+        },
+        {
+          "caller": "test_bad_row_quarantined_and_the_rest_kept",
+          "callee": "_data",
+          "lineNumber": 90
+        },
+        {
+          "caller": "test_bad_row_quarantined_and_the_rest_kept",
+          "callee": "_replace",
+          "lineNumber": 90
+        },
+        {
+          "caller": "test_bad_row_quarantined_and_the_rest_kept",
+          "callee": "_lines",
+          "lineNumber": 90
+        },
+        {
+          "caller": "test_bad_row_quarantined_and_the_rest_kept",
+          "callee": "len",
+          "lineNumber": 93
+        },
+        {
+          "caller": "test_be_series_is_accepted_alongside_eq",
+          "callee": "parse_constituent_list",
+          "lineNumber": 99
+        },
+        {
+          "caller": "test_be_series_is_accepted_alongside_eq",
+          "callee": "_data",
+          "lineNumber": 99
+        },
+        {
+          "caller": "test_be_series_is_accepted_alongside_eq",
+          "callee": "_replace",
+          "lineNumber": 99
+        },
+        {
+          "caller": "test_be_series_is_accepted_alongside_eq",
+          "callee": "_lines",
+          "lineNumber": 99
+        },
+        {
+          "caller": "test_be_series_is_accepted_alongside_eq",
+          "callee": "len",
+          "lineNumber": 100
+        },
+        {
+          "caller": "test_row_with_wrong_field_count_quarantined",
+          "callee": "_lines",
+          "lineNumber": 105
+        },
+        {
+          "caller": "test_row_with_wrong_field_count_quarantined",
+          "callee": "parse_constituent_list",
+          "lineNumber": 107
+        },
+        {
+          "caller": "test_row_with_wrong_field_count_quarantined",
+          "callee": "_data",
+          "lineNumber": 107
+        },
+        {
+          "caller": "test_index_for_url",
+          "callee": "index_for_url",
+          "lineNumber": 122
+        }
+      ],
+      "metrics": {
+        "importCount": 2,
+        "exportCount": 11,
+        "functionCount": 11,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/test_wayback_cdx.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 71,
+      "nonEmptyLines": 53,
+      "functions": [
+        {
+          "name": "recorded_cdx",
+          "startLine": 14,
+          "endLine": 17,
+          "params": []
+        },
+        {
+          "name": "test_recorded_cdx_response_parses",
+          "startLine": 20,
+          "endLine": 24,
+          "params": []
+        },
+        {
+          "name": "test_empty_cdx_response",
+          "startLine": 27,
+          "endLine": 28,
+          "params": []
+        },
+        {
+          "name": "test_cdx_shape_change_fails_loudly",
+          "startLine": 41,
+          "endLine": 43,
+          "params": [
+            "rows"
+          ]
+        },
+        {
+          "name": "_capture",
+          "startLine": 46,
+          "endLine": 47,
+          "params": [
+            "timestamp",
+            "digest"
+          ]
+        },
+        {
+          "name": "test_run_boundaries_keeps_first_and_last_of_each_identical_run",
+          "startLine": 50,
+          "endLine": 60,
+          "params": []
+        },
+        {
+          "name": "test_recorded_captures_match_their_archive_digests",
+          "startLine": 70,
+          "endLine": 71,
+          "params": [
+            "name",
+            "digest"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "recorded_cdx",
+          "line": 14,
+          "isDefault": false
+        },
+        {
+          "name": "test_recorded_cdx_response_parses",
+          "line": 20,
+          "isDefault": false
+        },
+        {
+          "name": "test_empty_cdx_response",
+          "line": 27,
+          "isDefault": false
+        },
+        {
+          "name": "test_cdx_shape_change_fails_loudly",
+          "line": 31,
+          "isDefault": false
+        },
+        {
+          "name": "_capture",
+          "line": 46,
+          "isDefault": false
+        },
+        {
+          "name": "test_run_boundaries_keeps_first_and_last_of_each_identical_run",
+          "line": 50,
+          "isDefault": false
+        },
+        {
+          "name": "test_recorded_captures_match_their_archive_digests",
+          "line": 63,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "recorded_cdx",
+          "callee": "json.loads",
+          "lineNumber": 16
+        },
+        {
+          "caller": "recorded_cdx",
+          "callee": "(FIXTURES / \"cdx_niftyindices_ind_nifty50list.json\").read_bytes",
+          "lineNumber": 16
+        },
+        {
+          "caller": "test_recorded_cdx_response_parses",
+          "callee": "parse_cdx",
+          "lineNumber": 21
+        },
+        {
+          "caller": "test_recorded_cdx_response_parses",
+          "callee": "json.dumps(recorded_cdx()).encode",
+          "lineNumber": 21
+        },
+        {
+          "caller": "test_recorded_cdx_response_parses",
+          "callee": "json.dumps",
+          "lineNumber": 21
+        },
+        {
+          "caller": "test_recorded_cdx_response_parses",
+          "callee": "recorded_cdx",
+          "lineNumber": 21
+        },
+        {
+          "caller": "test_recorded_cdx_response_parses",
+          "callee": "len",
+          "lineNumber": 22
+        },
+        {
+          "caller": "test_recorded_cdx_response_parses",
+          "callee": "datetime",
+          "lineNumber": 23
+        },
+        {
+          "caller": "test_empty_cdx_response",
+          "callee": "parse_cdx",
+          "lineNumber": 28
+        },
+        {
+          "caller": "test_cdx_shape_change_fails_loudly",
+          "callee": "pytest.raises",
+          "lineNumber": 42
+        },
+        {
+          "caller": "test_cdx_shape_change_fails_loudly",
+          "callee": "parse_cdx",
+          "lineNumber": 43
+        },
+        {
+          "caller": "test_cdx_shape_change_fails_loudly",
+          "callee": "json.dumps(rows).encode",
+          "lineNumber": 43
+        },
+        {
+          "caller": "test_cdx_shape_change_fails_loudly",
+          "callee": "json.dumps",
+          "lineNumber": 43
+        },
+        {
+          "caller": "_capture",
+          "callee": "CdxCapture",
+          "lineNumber": 47
+        },
+        {
+          "caller": "test_run_boundaries_keeps_first_and_last_of_each_identical_run",
+          "callee": "_capture",
+          "lineNumber": 52
+        },
+        {
+          "caller": "test_run_boundaries_keeps_first_and_last_of_each_identical_run",
+          "callee": "_capture",
+          "lineNumber": 53
+        },
+        {
+          "caller": "test_run_boundaries_keeps_first_and_last_of_each_identical_run",
+          "callee": "_capture",
+          "lineNumber": 54
+        },
+        {
+          "caller": "test_run_boundaries_keeps_first_and_last_of_each_identical_run",
+          "callee": "_capture",
+          "lineNumber": 55
+        },
+        {
+          "caller": "test_run_boundaries_keeps_first_and_last_of_each_identical_run",
+          "callee": "_capture",
+          "lineNumber": 56
+        },
+        {
+          "caller": "test_run_boundaries_keeps_first_and_last_of_each_identical_run",
+          "callee": "run_boundaries",
+          "lineNumber": 58
+        },
+        {
+          "caller": "test_recorded_captures_match_their_archive_digests",
+          "callee": "wayback_digest",
+          "lineNumber": 71
+        },
+        {
+          "caller": "test_recorded_captures_match_their_archive_digests",
+          "callee": "(FIXTURES / name).read_bytes",
+          "lineNumber": 71
+        }
+      ],
+      "metrics": {
+        "importCount": 1,
+        "exportCount": 7,
+        "functionCount": 7,
+        "classCount": 0
+      }
+    }
+  ]
+}

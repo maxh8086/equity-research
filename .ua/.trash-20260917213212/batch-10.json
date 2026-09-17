@@ -1,0 +1,124 @@
+{
+  "nodes": [
+    {
+      "id": "document:tests/fixtures/nse_indices/SOURCES.md",
+      "type": "document",
+      "name": "SOURCES.md",
+      "filePath": "tests/fixtures/nse_indices/SOURCES.md",
+      "summary": "Provenance record for all NSE index fixture files in this directory, listing each file's original URL, Wayback Machine capture timestamp, and content digest to enable deterministic test replay.",
+      "tags": ["documentation", "test-fixtures", "data-provenance", "index-membership"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json",
+      "type": "config",
+      "name": "cdx_niftyindices_ind_nifty50list.json",
+      "filePath": "tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json",
+      "summary": "Recorded Wayback Machine CDX API response listing 17 captures of the Nifty 50 constituent CSV from 2017 to 2026, used by ingest adapter tests to mock the CDX endpoint without network calls.",
+      "tags": ["test-fixtures", "wayback-machine", "index-membership", "nifty50", "configuration"],
+      "complexity": "simple",
+      "languageNotes": "CDX (Capture DeduX) JSON format: first row is the column header array; subsequent rows are capture records with timestamp, URL, mimetype, status code, content digest, and byte length."
+    },
+    {
+      "id": "file:tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv",
+      "type": "file",
+      "name": "ind_nifty50list_20160310050302.csv",
+      "filePath": "tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv",
+      "summary": "Point-in-time Nifty 50 constituent list captured from the Wayback Machine for 2016-03-10, containing 50 companies with Company Name, Industry, Symbol, Series, and ISIN Code columns; used as a historical fixture for index-membership tests.",
+      "tags": ["test-fixtures", "index-membership", "nifty50", "historical", "isin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv",
+      "type": "file",
+      "name": "ind_nifty50list_20171016083142.csv",
+      "filePath": "tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv",
+      "summary": "Point-in-time Nifty 50 constituent list captured from the Wayback Machine for 2017-10-16, containing 50 companies with the same schema as other constituent CSVs; provides a second historical snapshot for adapter and membership computation tests.",
+      "tags": ["test-fixtures", "index-membership", "nifty50", "historical", "isin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/fixtures/nse_indices/ind_nifty50list_20260915.csv",
+      "type": "file",
+      "name": "ind_nifty50list_20260915.csv",
+      "filePath": "tests/fixtures/nse_indices/ind_nifty50list_20260915.csv",
+      "summary": "Current Nifty 50 constituent list as of 2026-09-15, downloaded from the NSE archives with Last-Modified 2026-09-12, containing 50 companies keyed by ISIN; represents the present-day index composition for ingest adapter tests.",
+      "tags": ["test-fixtures", "index-membership", "nifty50", "isin"],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv",
+      "type": "file",
+      "name": "ind_niftynext50list_20260915.csv",
+      "filePath": "tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv",
+      "summary": "Current Nifty Next 50 constituent list as of 2026-09-15, downloaded from the NSE archives, containing 50 companies keyed by ISIN; completes the 100-company MVP universe fixture alongside the Nifty 50 list from the same date.",
+      "tags": ["test-fixtures", "index-membership", "niftynext50", "isin"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:tests/fixtures/nse_indices/SOURCES.md",
+      "target": "file:tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:tests/fixtures/nse_indices/SOURCES.md",
+      "target": "file:tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:tests/fixtures/nse_indices/SOURCES.md",
+      "target": "file:tests/fixtures/nse_indices/ind_nifty50list_20260915.csv",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:tests/fixtures/nse_indices/SOURCES.md",
+      "target": "file:tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:tests/fixtures/nse_indices/SOURCES.md",
+      "target": "config:tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json",
+      "target": "file:tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv",
+      "target": "file:tests/fixtures/nse_indices/ind_nifty50list_20260915.csv",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv",
+      "target": "file:tests/fixtures/nse_indices/ind_nifty50list_20260915.csv",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "file:tests/fixtures/nse_indices/ind_nifty50list_20260915.csv",
+      "target": "file:tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

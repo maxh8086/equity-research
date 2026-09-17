@@ -1,0 +1,139 @@
+{
+  "layers": [
+    {
+      "id": "layer:core-domain",
+      "name": "Core Domain",
+      "description": "Pure business logic, deterministic financial computations, ORM models, point-in-time DB access, blob storage interface, and shared utilities — no I/O side-effects in compute/, all table reads gated through pit.py.",
+      "nodeIds": [
+        "file:core/__init__.py",
+        "file:core/blob.py",
+        "file:core/compute/__init__.py",
+        "file:core/compute/hashing.py",
+        "file:core/compute/isin.py",
+        "file:core/compute/membership.py",
+        "file:core/config.py",
+        "file:core/db/__init__.py",
+        "file:core/db/base.py",
+        "file:core/db/models.py",
+        "file:core/db/pit.py",
+        "file:core/sources.py",
+        "file:core/timezones.py"
+      ]
+    },
+    {
+      "id": "layer:ingestion",
+      "name": "Ingestion Layer",
+      "description": "Source adapters for NSE bhavcopy, NSE indices, and HTTP utilities that fetch raw files, save them to blob storage, parse them with strict Pydantic schemas, and write structured rows to the database.",
+      "nodeIds": [
+        "file:ingest/__init__.py",
+        "file:ingest/__main__.py",
+        "file:ingest/base.py",
+        "file:ingest/http.py",
+        "file:ingest/nse_bhavcopy/__init__.py",
+        "file:ingest/nse_bhavcopy/adapters.py",
+        "file:ingest/nse_bhavcopy/parser.py",
+        "file:ingest/nse_indices/__init__.py",
+        "file:ingest/nse_indices/adapters.py",
+        "file:ingest/nse_indices/parser.py",
+        "file:ingest/registry.py",
+        "file:ingest/schema.py"
+      ]
+    },
+    {
+      "id": "layer:migrations",
+      "name": "Database Migrations",
+      "description": "Alembic migration scripts that evolve the Postgres schema for financial_facts, raw_source_file, entity/index snapshots, and bhavcopy tables, run as a separate one-shot step before the application starts.",
+      "nodeIds": [
+        "file:migrations/env.py",
+        "file:migrations/script.py.mako",
+        "file:migrations/versions/0001_financial_facts.py",
+        "file:migrations/versions/0002_raw_source_file.py",
+        "file:migrations/versions/0003_entity_and_index_snapshots.py",
+        "file:migrations/versions/0004_index_snapshot_rule_versioned.py",
+        "file:migrations/versions/0005_nse_bhavcopy.py"
+      ]
+    },
+    {
+      "id": "layer:tests",
+      "name": "Tests",
+      "description": "pytest test suite covering architecture rules, compute functions, ingestion adapters, parsers, point-in-time DB reads, blob storage, and HTTP utilities, plus shared fixtures, factories, fakes, and recorded response data.",
+      "nodeIds": [
+        "file:tests/__init__.py",
+        "file:tests/conftest.py",
+        "file:tests/factories.py",
+        "file:tests/fakes.py",
+        "file:tests/test_architecture.py",
+        "file:tests/test_blob_s3.py",
+        "file:tests/test_compute_isin.py",
+        "file:tests/test_compute_membership.py",
+        "file:tests/test_config.py",
+        "file:tests/test_financial_facts_schema.py",
+        "file:tests/test_http.py",
+        "file:tests/test_ingest_base.py",
+        "file:tests/test_nse_bhavcopy_adapters.py",
+        "file:tests/test_nse_bhavcopy_parser.py",
+        "file:tests/test_nse_indices_adapters.py",
+        "file:tests/test_nse_indices_parser.py",
+        "file:tests/test_pit.py",
+        "file:tests/test_raw_source_file.py",
+        "file:tests/test_wayback_cdx.py",
+        "document:tests/fixtures/nse_bhavcopy/SOURCES.md",
+        "config:tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json",
+        "file:tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv",
+        "file:tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv",
+        "file:tests/fixtures/nse_indices/ind_nifty50list_20260915.csv",
+        "file:tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv",
+        "document:tests/fixtures/nse_indices/SOURCES.md"
+      ]
+    },
+    {
+      "id": "layer:infrastructure",
+      "name": "Infrastructure",
+      "description": "Container image definition, multi-service Docker Compose topology (db, blob, migrate, test, blob-init), GitHub Actions CI pipeline, and the dockerignore file that controls build context.",
+      "nodeIds": [
+        "service:.dockerignore",
+        "pipeline:.github/workflows/ci.yml",
+        "service:docker-compose.yml:migrate",
+        "service:docker-compose.yml:test",
+        "service:docker-compose.yml:blob-init",
+        "service:docker-compose.yml:blob",
+        "service:docker-compose.yml:db",
+        "service:docker-compose.yml",
+        "service:Dockerfile"
+      ]
+    },
+    {
+      "id": "layer:configuration",
+      "name": "Configuration",
+      "description": "Project build settings, Alembic configuration, environment variable templates, git attributes, Obsidian workspace state, and UA analysis intermediate artifacts that configure tooling rather than the application runtime.",
+      "nodeIds": [
+        "config:.env.example",
+        "file:.gitattributes",
+        "config:.obsidian/app.json",
+        "config:.obsidian/appearance.json",
+        "config:.obsidian/backlink.json",
+        "config:.obsidian/core-plugins.json",
+        "config:.obsidian/graph.json",
+        "config:.obsidian/workspace.json",
+        "config:.ua/intermediate/scan-result.json",
+        "config:.ua/intermediate/ua-import-map-output.json",
+        "config:.ua/intermediate/ua-scan-files.json",
+        "config:alembic.ini",
+        "config:pyproject.toml"
+      ]
+    },
+    {
+      "id": "layer:documentation",
+      "name": "Documentation",
+      "description": "Project documentation covering system rules, temporal data model semantics, getting-started plans, pinned Python dependencies, and Obsidian-based knowledge notes for the equity research domain.",
+      "nodeIds": [
+        "document:CLAUDE.md",
+        "document:docs/temporal-model.md",
+        "document:getting-started-plan.md",
+        "document:README.md",
+        "document:requirements.txt",
+        "document:Welcome.md"
+      ]
+    }
+  ]
+}

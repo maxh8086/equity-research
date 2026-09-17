@@ -1,0 +1,360 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 6,
+  "filesSkipped": [
+    "alembic.ini",
+    "requirements.txt"
+  ],
+  "filesUnreadable": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 6,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 0,
+      "failed": 0,
+      "skipped": 6
+    }
+  },
+  "results": [
+    {
+      "path": ".env.example",
+      "language": "config",
+      "fileCategory": "config",
+      "totalLines": 19,
+      "nonEmptyLines": 16,
+      "definitions": [
+        {
+          "name": "EQUITY_DATABASE_URL",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 1,
+          "endLine": 1
+        },
+        {
+          "name": "EQUITY_TEST_DATABASE_URL",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 2,
+          "endLine": 2
+        },
+        {
+          "name": "EQUITY_BLOB_ENDPOINT_URL",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 5,
+          "endLine": 5
+        },
+        {
+          "name": "EQUITY_BLOB_ACCESS_KEY",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 6,
+          "endLine": 6
+        },
+        {
+          "name": "EQUITY_BLOB_SECRET_KEY",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 7,
+          "endLine": 7
+        },
+        {
+          "name": "EQUITY_DEPLOYMENT_MODE",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 11,
+          "endLine": 11
+        },
+        {
+          "name": "EQUITY_WEB_SCRAPING_ENABLED",
+          "kind": "variable",
+          "fields": [],
+          "startLine": 12,
+          "endLine": 12
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "definitionCount": 7
+      }
+    },
+    {
+      "path": "CLAUDE.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 493,
+      "nonEmptyLines": 438,
+      "sections": [
+        {
+          "heading": "Indian Equity Knowledge System",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Non-negotiable rules",
+          "level": 2,
+          "line": 6
+        },
+        {
+          "heading": "R1 — Deterministic where computable",
+          "level": 3,
+          "line": 11
+        },
+        {
+          "heading": "R2 — as_of on everything, never backfilled",
+          "level": 3,
+          "line": 22
+        },
+        {
+          "heading": "R3 — The model proposes, the data disposes",
+          "level": 3,
+          "line": 35
+        },
+        {
+          "heading": "Stack",
+          "level": 2,
+          "line": 41
+        },
+        {
+          "heading": "Deployment",
+          "level": 2,
+          "line": 61
+        },
+        {
+          "heading": "Data model",
+          "level": 2,
+          "line": 72
+        },
+        {
+          "heading": "Universe",
+          "level": 3,
+          "line": 84
+        },
+        {
+          "heading": "Knowledge stores",
+          "level": 3,
+          "line": 102
+        },
+        {
+          "heading": "Decision support (after the MVP)",
+          "level": 2,
+          "line": 173
+        },
+        {
+          "heading": "Ownership, index and corporate-action signals",
+          "level": 3,
+          "line": 216
+        },
+        {
+          "heading": "News, brokerage calls and scuttlebutt",
+          "level": 3,
+          "line": 271
+        },
+        {
+          "heading": "Integrations: brokers and MCP",
+          "level": 2,
+          "line": 318
+        },
+        {
+          "heading": "Data sources",
+          "level": 2,
+          "line": 332
+        },
+        {
+          "heading": "Code conventions",
+          "level": 2,
+          "line": 397
+        },
+        {
+          "heading": "Testing",
+          "level": 2,
+          "line": 443
+        },
+        {
+          "heading": "Current phase",
+          "level": 2,
+          "line": 451
+        },
+        {
+          "heading": "Things to push back on",
+          "level": 2,
+          "line": 474
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 19
+      }
+    },
+    {
+      "path": "README.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 93,
+      "nonEmptyLines": 77,
+      "sections": [
+        {
+          "heading": "Indian Equity Knowledge System",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Setup (Windows / PowerShell)",
+          "level": 2,
+          "line": 7
+        },
+        {
+          "heading": "Ingest adapters",
+          "level": 2,
+          "line": 23
+        },
+        {
+          "heading": "Layout",
+          "level": 2,
+          "line": 65
+        },
+        {
+          "heading": "Invariants enforced by the database, not by convention",
+          "level": 2,
+          "line": 83
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 5
+      }
+    },
+    {
+      "path": "Welcome.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 5,
+      "nonEmptyLines": 3,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 0
+      }
+    },
+    {
+      "path": "getting-started-plan.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 158,
+      "nonEmptyLines": 99,
+      "sections": [
+        {
+          "heading": "Getting Started — Build Plan",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Day 1 — Setup",
+          "level": 2,
+          "line": 7
+        },
+        {
+          "heading": "Week 1 — Substrate",
+          "level": 2,
+          "line": 41
+        },
+        {
+          "heading": "Week 2 — Financial facts",
+          "level": 2,
+          "line": 65
+        },
+        {
+          "heading": "Week 3 — First real signal",
+          "level": 2,
+          "line": 83
+        },
+        {
+          "heading": "Week 4 — The MVP",
+          "level": 2,
+          "line": 101
+        },
+        {
+          "heading": "Working rhythm",
+          "level": 2,
+          "line": 116
+        },
+        {
+          "heading": "Do not build yet",
+          "level": 2,
+          "line": 130
+        },
+        {
+          "heading": "After the MVP, in order",
+          "level": 2,
+          "line": 138
+        },
+        {
+          "heading": "The one thing to get right this week",
+          "level": 2,
+          "line": 154
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 10
+      }
+    },
+    {
+      "path": "pyproject.toml",
+      "language": "toml",
+      "fileCategory": "config",
+      "totalLines": 38,
+      "nonEmptyLines": 34,
+      "sections": [
+        {
+          "heading": "project",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "project.optional-dependencies",
+          "level": 2,
+          "line": 18
+        },
+        {
+          "heading": "build-system",
+          "level": 1,
+          "line": 24
+        },
+        {
+          "heading": "tool.setuptools.packages.find",
+          "level": 4,
+          "line": 28
+        },
+        {
+          "heading": "tool.pytest.ini_options",
+          "level": 3,
+          "line": 31
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 5
+      }
+    }
+  ]
+}

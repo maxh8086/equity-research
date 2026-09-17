@@ -1,0 +1,3664 @@
+{
+  "scriptCompleted": true,
+  "filesAnalyzed": 12,
+  "filesSkipped": [
+    ".gitattributes",
+    "migrations/script.py.mako"
+  ],
+  "filesUnreadable": [],
+  "analysisOutcomes": {
+    "structure": {
+      "succeeded": 12,
+      "failed": 0
+    },
+    "callGraph": {
+      "succeeded": 10,
+      "failed": 0,
+      "skipped": 2
+    }
+  },
+  "results": [
+    {
+      "path": "core/__init__.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 1,
+      "nonEmptyLines": 0,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "core/compute/__init__.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 5,
+      "nonEmptyLines": 4,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "core/db/__init__.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 1,
+      "nonEmptyLines": 0,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "docs/temporal-model.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 124,
+      "nonEmptyLines": 103,
+      "sections": [
+        {
+          "heading": "Temporal model",
+          "level": 1,
+          "line": 1
+        },
+        {
+          "heading": "Three times",
+          "level": 2,
+          "line": 9
+        },
+        {
+          "heading": "Nothing is updated",
+          "level": 2,
+          "line": 28
+        },
+        {
+          "heading": "Three timeline shapes",
+          "level": 2,
+          "line": 34
+        },
+        {
+          "heading": "Reparsing under a corrected rule (not a restatement)",
+          "level": 2,
+          "line": 65
+        },
+        {
+          "heading": "Hypotheses (R3)",
+          "level": 2,
+          "line": 95
+        },
+        {
+          "heading": "Live vs. replay",
+          "level": 2,
+          "line": 105
+        },
+        {
+          "heading": "Enforcement",
+          "level": 2,
+          "line": 115
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 8
+      }
+    },
+    {
+      "path": "migrations/versions/0001_financial_facts.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 119,
+      "nonEmptyLines": 108,
+      "functions": [
+        {
+          "name": "upgrade",
+          "startLine": 19,
+          "endLine": 112,
+          "params": []
+        },
+        {
+          "name": "downgrade",
+          "startLine": 115,
+          "endLine": 119,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "upgrade",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "downgrade",
+          "line": 115,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "upgrade",
+          "callee": "op.execute",
+          "lineNumber": 20
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.execute",
+          "lineNumber": 24
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_table",
+          "lineNumber": 34
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 36
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 36
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Identity",
+          "lineNumber": 36
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 37
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 37
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 38
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Enum",
+          "lineNumber": 40
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 43
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Enum",
+          "lineNumber": 44
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 46
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 46
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 47
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 47
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 48
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Date",
+          "lineNumber": 48
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 49
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Date",
+          "lineNumber": 49
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 50
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Numeric",
+          "lineNumber": 50
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 51
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 51
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 52
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 52
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 53
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 53
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 54
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 54
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 55
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 55
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 56
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 56
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 57
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 59
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.func.now",
+          "lineNumber": 61
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 63
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 66
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 70
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 74
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 77
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 81
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.UniqueConstraint",
+          "lineNumber": 82
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_index",
+          "lineNumber": 93
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.execute",
+          "lineNumber": 99
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.execute",
+          "lineNumber": 106
+        },
+        {
+          "caller": "downgrade",
+          "callee": "op.drop_table",
+          "lineNumber": 116
+        },
+        {
+          "caller": "downgrade",
+          "callee": "op.execute",
+          "lineNumber": 117
+        },
+        {
+          "caller": "downgrade",
+          "callee": "op.execute",
+          "lineNumber": 118
+        },
+        {
+          "caller": "downgrade",
+          "callee": "op.execute",
+          "lineNumber": 119
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "migrations/versions/0002_raw_source_file.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 68,
+      "nonEmptyLines": 59,
+      "functions": [
+        {
+          "name": "upgrade",
+          "startLine": 19,
+          "endLine": 64,
+          "params": []
+        },
+        {
+          "name": "downgrade",
+          "startLine": 67,
+          "endLine": 68,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "upgrade",
+          "line": 19,
+          "isDefault": false
+        },
+        {
+          "name": "downgrade",
+          "line": 67,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "upgrade",
+          "callee": "op.create_table",
+          "lineNumber": 20
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 22
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 22
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Identity",
+          "lineNumber": 22
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 23
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 23
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 24
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 24
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 25
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 25
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 26
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 26
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 27
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 27
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 28
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 28
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 29
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 29
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 30
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 30
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 31
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 33
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.func.now",
+          "lineNumber": 35
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 37
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 40
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 43
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 44
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.UniqueConstraint",
+          "lineNumber": 45
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_index",
+          "lineNumber": 49
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.execute",
+          "lineNumber": 51
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.execute",
+          "lineNumber": 58
+        },
+        {
+          "caller": "downgrade",
+          "callee": "op.drop_table",
+          "lineNumber": 68
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "migrations/versions/0003_entity_and_index_snapshots.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 209,
+      "nonEmptyLines": 190,
+      "functions": [
+        {
+          "name": "upgrade",
+          "startLine": 50,
+          "endLine": 200,
+          "params": []
+        },
+        {
+          "name": "downgrade",
+          "startLine": 203,
+          "endLine": 209,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "upgrade",
+          "line": 50,
+          "isDefault": false
+        },
+        {
+          "name": "downgrade",
+          "line": 203,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "upgrade",
+          "callee": "op.get_bind",
+          "lineNumber": 51
+        },
+        {
+          "caller": "upgrade",
+          "callee": "enum.create",
+          "lineNumber": 53
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_table",
+          "lineNumber": 55
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 57
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 57
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Identity",
+          "lineNumber": 57
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 58
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 58
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 59
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 59
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 60
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 60
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 61
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 61
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 62
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 62
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 63
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 63
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.func.now",
+          "lineNumber": 63
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 64
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 65
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_table",
+          "lineNumber": 68
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 70
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 70
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Identity",
+          "lineNumber": 70
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 71
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 71
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.ForeignKey",
+          "lineNumber": 71
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 72
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 72
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 73
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 74
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 74
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 75
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 75
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 76
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 76
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 77
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 77
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 78
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 78
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 79
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 79
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.func.now",
+          "lineNumber": 79
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 80
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 81
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 82
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.UniqueConstraint",
+          "lineNumber": 83
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_table",
+          "lineNumber": 86
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 88
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 88
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Identity",
+          "lineNumber": 88
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 89
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 90
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Integer",
+          "lineNumber": 90
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 91
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Integer",
+          "lineNumber": 91
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 92
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 92
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 93
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 93
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 94
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 94
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 95
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 95
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 96
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 96
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 97
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 97
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 98
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 98
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.func.now",
+          "lineNumber": 98
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 99
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 102
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 103
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.UniqueConstraint",
+          "lineNumber": 104
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_index",
+          "lineNumber": 108
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_table",
+          "lineNumber": 110
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 112
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 112
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Identity",
+          "lineNumber": 112
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 113
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 114
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.ForeignKey",
+          "lineNumber": 114
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 116
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 116
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 117
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 117
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 118
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 118
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 119
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 119
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 120
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 120
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 121
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Integer",
+          "lineNumber": 121
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 122
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 122
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 123
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 123
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 124
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 124
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 125
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 125
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 126
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 126
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 127
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 127
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.func.now",
+          "lineNumber": 127
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 128
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 129
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 130
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.UniqueConstraint",
+          "lineNumber": 131
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_table",
+          "lineNumber": 134
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 136
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 136
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Identity",
+          "lineNumber": 136
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 137
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 138
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.ForeignKey",
+          "lineNumber": 138
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 140
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 141
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Integer",
+          "lineNumber": 141
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 142
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 142
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 143
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 144
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 144
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 145
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 145
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 146
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 146
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 147
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 147
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 148
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 148
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 149
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 149
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 150
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 150
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 151
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 151
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.func.now",
+          "lineNumber": 151
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 152
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 156
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 157
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_index",
+          "lineNumber": 159
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.execute",
+          "lineNumber": 164
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.execute",
+          "lineNumber": 178
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.execute",
+          "lineNumber": 187
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.execute",
+          "lineNumber": 194
+        },
+        {
+          "caller": "downgrade",
+          "callee": "reversed",
+          "lineNumber": 204
+        },
+        {
+          "caller": "downgrade",
+          "callee": "op.drop_table",
+          "lineNumber": 205
+        },
+        {
+          "caller": "downgrade",
+          "callee": "op.execute",
+          "lineNumber": 206
+        },
+        {
+          "caller": "downgrade",
+          "callee": "op.get_bind",
+          "lineNumber": 207
+        },
+        {
+          "caller": "downgrade",
+          "callee": "enum.drop",
+          "lineNumber": 209
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "migrations/versions/0004_index_snapshot_rule_versioned.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 38,
+      "nonEmptyLines": 29,
+      "functions": [
+        {
+          "name": "upgrade",
+          "startLine": 25,
+          "endLine": 31,
+          "params": []
+        },
+        {
+          "name": "downgrade",
+          "startLine": 34,
+          "endLine": 38,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "upgrade",
+          "line": 25,
+          "isDefault": false
+        },
+        {
+          "name": "downgrade",
+          "line": 34,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "upgrade",
+          "callee": "op.drop_constraint",
+          "lineNumber": 26
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_unique_constraint",
+          "lineNumber": 27
+        },
+        {
+          "caller": "downgrade",
+          "callee": "op.drop_constraint",
+          "lineNumber": 35
+        },
+        {
+          "caller": "downgrade",
+          "callee": "op.create_unique_constraint",
+          "lineNumber": 36
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "migrations/versions/0005_nse_bhavcopy.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 130,
+      "nonEmptyLines": 115,
+      "functions": [
+        {
+          "name": "upgrade",
+          "startLine": 38,
+          "endLine": 123,
+          "params": []
+        },
+        {
+          "name": "downgrade",
+          "startLine": 126,
+          "endLine": 130,
+          "params": []
+        }
+      ],
+      "exports": [
+        {
+          "name": "upgrade",
+          "line": 38,
+          "isDefault": false
+        },
+        {
+          "name": "downgrade",
+          "line": 126,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "upgrade",
+          "callee": "op.get_bind",
+          "lineNumber": 39
+        },
+        {
+          "caller": "upgrade",
+          "callee": "QUARANTINE_REASON.create",
+          "lineNumber": 40
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_table",
+          "lineNumber": 42
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 44
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 44
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Identity",
+          "lineNumber": 44
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 45
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Date",
+          "lineNumber": 45
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 46
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 46
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 47
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 47
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 48
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 48
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 49
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Numeric",
+          "lineNumber": 49
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 50
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Numeric",
+          "lineNumber": 50
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 51
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Numeric",
+          "lineNumber": 51
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 52
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Numeric",
+          "lineNumber": 52
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 53
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Numeric",
+          "lineNumber": 53
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 54
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 54
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 55
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Numeric",
+          "lineNumber": 55
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 56
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 56
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 57
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 57
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 58
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 58
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 59
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 59
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 60
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 60
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 61
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 61
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 62
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 62
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 63
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 63
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.func.now",
+          "lineNumber": 63
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 64
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 65
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 69
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 70
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 73
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 74
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.UniqueConstraint",
+          "lineNumber": 75
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_index",
+          "lineNumber": 79
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_index",
+          "lineNumber": 80
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_table",
+          "lineNumber": 82
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 84
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.BigInteger",
+          "lineNumber": 84
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Identity",
+          "lineNumber": 84
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 85
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Date",
+          "lineNumber": 85
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 86
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Integer",
+          "lineNumber": 86
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 87
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 87
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 88
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 88
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 89
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 89
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 90
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 90
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 91
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 92
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 92
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 93
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 93
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 94
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 94
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 95
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CHAR",
+          "lineNumber": 95
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 96
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 96
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 97
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 97
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 98
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Text",
+          "lineNumber": 98
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.Column",
+          "lineNumber": 99
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.DateTime",
+          "lineNumber": 99
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.func.now",
+          "lineNumber": 99
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 100
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 104
+        },
+        {
+          "caller": "upgrade",
+          "callee": "sa.CheckConstraint",
+          "lineNumber": 105
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.create_index",
+          "lineNumber": 107
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.execute",
+          "lineNumber": 110
+        },
+        {
+          "caller": "upgrade",
+          "callee": "op.execute",
+          "lineNumber": 117
+        },
+        {
+          "caller": "downgrade",
+          "callee": "reversed",
+          "lineNumber": 127
+        },
+        {
+          "caller": "downgrade",
+          "callee": "op.drop_table",
+          "lineNumber": 128
+        },
+        {
+          "caller": "downgrade",
+          "callee": "op.get_bind",
+          "lineNumber": 129
+        },
+        {
+          "caller": "downgrade",
+          "callee": "QUARANTINE_REASON.drop",
+          "lineNumber": 130
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 2,
+        "functionCount": 2,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/__init__.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 1,
+      "nonEmptyLines": 0,
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0
+      }
+    },
+    {
+      "path": "tests/fixtures/nse_bhavcopy/SOURCES.md",
+      "language": "markdown",
+      "fileCategory": "docs",
+      "totalLines": 12,
+      "nonEmptyLines": 9,
+      "sections": [
+        {
+          "heading": "Recorded responses",
+          "level": 1,
+          "line": 1
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 0,
+        "functionCount": 0,
+        "classCount": 0,
+        "sectionCount": 1
+      }
+    },
+    {
+      "path": "tests/test_architecture.py",
+      "language": "python",
+      "fileCategory": "code",
+      "totalLines": 721,
+      "nonEmptyLines": 602,
+      "functions": [
+        {
+          "name": "repo_files",
+          "startLine": 156,
+          "endLine": 174,
+          "params": []
+        },
+        {
+          "name": "_dotted",
+          "startLine": 177,
+          "endLine": 183,
+          "params": [
+            "node"
+          ]
+        },
+        {
+          "name": "_terminal",
+          "startLine": 186,
+          "endLine": 191,
+          "params": [
+            "node"
+          ]
+        },
+        {
+          "name": "_matches",
+          "startLine": 194,
+          "endLine": 195,
+          "params": [
+            "module",
+            "prefix"
+          ]
+        },
+        {
+          "name": "_resolve_from",
+          "startLine": 198,
+          "endLine": 203,
+          "params": [
+            "sf",
+            "node"
+          ]
+        },
+        {
+          "name": "imports",
+          "startLine": 206,
+          "endLine": 222,
+          "params": [
+            "sf"
+          ]
+        },
+        {
+          "name": "check_gateway_imports",
+          "startLine": 230,
+          "endLine": 241,
+          "params": [
+            "files"
+          ]
+        },
+        {
+          "name": "check_provider_sdk_imports",
+          "startLine": 244,
+          "endLine": 255,
+          "params": [
+            "files"
+          ]
+        },
+        {
+          "name": "_mentions_float",
+          "startLine": 263,
+          "endLine": 274,
+          "params": [
+            "annotation"
+          ]
+        },
+        {
+          "name": "_is_mapped",
+          "startLine": 277,
+          "endLine": 283,
+          "params": [
+            "annotation"
+          ]
+        },
+        {
+          "name": "_is_money_name",
+          "startLine": 286,
+          "endLine": 287,
+          "params": [
+            "name"
+          ]
+        },
+        {
+          "name": "_annotations",
+          "startLine": 290,
+          "endLine": 300,
+          "params": [
+            "tree"
+          ]
+        },
+        {
+          "name": "check_no_float_money",
+          "startLine": 303,
+          "endLine": 335,
+          "params": [
+            "files"
+          ]
+        },
+        {
+          "name": "_class_index",
+          "startLine": 345,
+          "endLine": 351,
+          "params": [
+            "files"
+          ]
+        },
+        {
+          "name": "_body_assigns",
+          "startLine": 354,
+          "endLine": 363,
+          "params": []
+        },
+        {
+          "name": "_resolve_class",
+          "startLine": 366,
+          "endLine": 374,
+          "params": [
+            "index",
+            "sf",
+            "base"
+          ]
+        },
+        {
+          "name": "_fields",
+          "startLine": 377,
+          "endLine": 389,
+          "params": [
+            "index",
+            "key",
+            "seen"
+          ]
+        },
+        {
+          "name": "table_models",
+          "startLine": 392,
+          "endLine": 400,
+          "params": [
+            "files"
+          ]
+        },
+        {
+          "name": "check_provenance_columns",
+          "startLine": 403,
+          "endLine": 430,
+          "params": [
+            "files"
+          ]
+        },
+        {
+          "name": "_compute_import_ok",
+          "startLine": 438,
+          "endLine": 442,
+          "params": [
+            "imp"
+          ]
+        },
+        {
+          "name": "check_compute_is_pure",
+          "startLine": 445,
+          "endLine": 466,
+          "params": [
+            "files"
+          ]
+        },
+        {
+          "name": "check_reads_go_through_pit",
+          "startLine": 474,
+          "endLine": 510,
+          "params": [
+            "files"
+          ]
+        },
+        {
+          "name": "check_mcp_imports",
+          "startLine": 518,
+          "endLine": 529,
+          "params": [
+            "files"
+          ]
+        },
+        {
+          "name": "_valued_fields",
+          "startLine": 537,
+          "endLine": 545,
+          "params": [
+            "index",
+            "key",
+            "seen"
+          ]
+        },
+        {
+          "name": "check_ingest_modules_declare",
+          "startLine": 548,
+          "endLine": 567,
+          "params": [
+            "files"
+          ]
+        },
+        {
+          "name": "test_repo_obeys_rule",
+          "startLine": 587,
+          "endLine": 589,
+          "params": [
+            "rule"
+          ]
+        },
+        {
+          "name": "test_scan_is_not_vacuous",
+          "startLine": 592,
+          "endLine": 607,
+          "params": []
+        },
+        {
+          "name": "test_ingest_infra_list_matches_registry",
+          "startLine": 610,
+          "endLine": 613,
+          "params": []
+        },
+        {
+          "name": "test_orm_metadata_has_provenance_columns",
+          "startLine": 616,
+          "endLine": 623,
+          "params": []
+        },
+        {
+          "name": "_file",
+          "startLine": 631,
+          "endLine": 632,
+          "params": [
+            "rel",
+            "source"
+          ]
+        },
+        {
+          "name": "test_rule_detects",
+          "startLine": 719,
+          "endLine": 721,
+          "params": [
+            "rule",
+            "rel",
+            "source",
+            "expected"
+          ]
+        }
+      ],
+      "classes": [
+        {
+          "name": "SourceFile",
+          "startLine": 119,
+          "endLine": 138,
+          "methods": [
+            "is_package",
+            "module",
+            "under"
+          ],
+          "properties": [
+            "rel",
+            "tree"
+          ]
+        },
+        {
+          "name": "Import",
+          "startLine": 142,
+          "endLine": 149,
+          "methods": [
+            "targets"
+          ],
+          "properties": [
+            "line",
+            "module",
+            "names"
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "name": "SourceFile",
+          "line": 118,
+          "isDefault": false
+        },
+        {
+          "name": "Import",
+          "line": 141,
+          "isDefault": false
+        },
+        {
+          "name": "repo_files",
+          "line": 155,
+          "isDefault": false
+        },
+        {
+          "name": "_dotted",
+          "line": 177,
+          "isDefault": false
+        },
+        {
+          "name": "_terminal",
+          "line": 186,
+          "isDefault": false
+        },
+        {
+          "name": "_matches",
+          "line": 194,
+          "isDefault": false
+        },
+        {
+          "name": "_resolve_from",
+          "line": 198,
+          "isDefault": false
+        },
+        {
+          "name": "imports",
+          "line": 206,
+          "isDefault": false
+        },
+        {
+          "name": "check_gateway_imports",
+          "line": 230,
+          "isDefault": false
+        },
+        {
+          "name": "check_provider_sdk_imports",
+          "line": 244,
+          "isDefault": false
+        },
+        {
+          "name": "_mentions_float",
+          "line": 263,
+          "isDefault": false
+        },
+        {
+          "name": "_is_mapped",
+          "line": 277,
+          "isDefault": false
+        },
+        {
+          "name": "_is_money_name",
+          "line": 286,
+          "isDefault": false
+        },
+        {
+          "name": "_annotations",
+          "line": 290,
+          "isDefault": false
+        },
+        {
+          "name": "check_no_float_money",
+          "line": 303,
+          "isDefault": false
+        },
+        {
+          "name": "_class_index",
+          "line": 345,
+          "isDefault": false
+        },
+        {
+          "name": "_body_assigns",
+          "line": 354,
+          "isDefault": false
+        },
+        {
+          "name": "_resolve_class",
+          "line": 366,
+          "isDefault": false
+        },
+        {
+          "name": "_fields",
+          "line": 377,
+          "isDefault": false
+        },
+        {
+          "name": "table_models",
+          "line": 392,
+          "isDefault": false
+        },
+        {
+          "name": "check_provenance_columns",
+          "line": 403,
+          "isDefault": false
+        },
+        {
+          "name": "_compute_import_ok",
+          "line": 438,
+          "isDefault": false
+        },
+        {
+          "name": "check_compute_is_pure",
+          "line": 445,
+          "isDefault": false
+        },
+        {
+          "name": "check_reads_go_through_pit",
+          "line": 474,
+          "isDefault": false
+        },
+        {
+          "name": "check_mcp_imports",
+          "line": 518,
+          "isDefault": false
+        },
+        {
+          "name": "_valued_fields",
+          "line": 537,
+          "isDefault": false
+        },
+        {
+          "name": "check_ingest_modules_declare",
+          "line": 548,
+          "isDefault": false
+        },
+        {
+          "name": "test_repo_obeys_rule",
+          "line": 586,
+          "isDefault": false
+        },
+        {
+          "name": "test_scan_is_not_vacuous",
+          "line": 592,
+          "isDefault": false
+        },
+        {
+          "name": "test_ingest_infra_list_matches_registry",
+          "line": 610,
+          "isDefault": false
+        },
+        {
+          "name": "test_orm_metadata_has_provenance_columns",
+          "line": 616,
+          "isDefault": false
+        },
+        {
+          "name": "_file",
+          "line": 631,
+          "isDefault": false
+        },
+        {
+          "name": "test_rule_detects",
+          "line": 714,
+          "isDefault": false
+        }
+      ],
+      "callGraph": [
+        {
+          "caller": "module",
+          "callee": "list",
+          "lineNumber": 129
+        },
+        {
+          "caller": "module",
+          "callee": "self.rel.with_suffix",
+          "lineNumber": 129
+        },
+        {
+          "caller": "module",
+          "callee": "parts.pop",
+          "lineNumber": 131
+        },
+        {
+          "caller": "module",
+          "callee": "\".\".join",
+          "lineNumber": 132
+        },
+        {
+          "caller": "under",
+          "callee": "any",
+          "lineNumber": 135
+        },
+        {
+          "caller": "under",
+          "callee": "len",
+          "lineNumber": 136
+        },
+        {
+          "caller": "under",
+          "callee": "PurePosixPath",
+          "lineNumber": 136
+        },
+        {
+          "caller": "under",
+          "callee": "PurePosixPath",
+          "lineNumber": 136
+        },
+        {
+          "caller": "repo_files",
+          "callee": "os.walk",
+          "lineNumber": 158
+        },
+        {
+          "caller": "repo_files",
+          "callee": "Path",
+          "lineNumber": 159
+        },
+        {
+          "caller": "repo_files",
+          "callee": "sorted",
+          "lineNumber": 160
+        },
+        {
+          "caller": "repo_files",
+          "callee": "d.startswith",
+          "lineNumber": 163
+        },
+        {
+          "caller": "repo_files",
+          "callee": "d.endswith",
+          "lineNumber": 165
+        },
+        {
+          "caller": "repo_files",
+          "callee": "(here / d / \"pyvenv.cfg\").exists",
+          "lineNumber": 166
+        },
+        {
+          "caller": "repo_files",
+          "callee": "sorted",
+          "lineNumber": 168
+        },
+        {
+          "caller": "repo_files",
+          "callee": "name.endswith",
+          "lineNumber": 169
+        },
+        {
+          "caller": "repo_files",
+          "callee": "PurePosixPath",
+          "lineNumber": 171
+        },
+        {
+          "caller": "repo_files",
+          "callee": "path.relative_to(ROOT).as_posix",
+          "lineNumber": 171
+        },
+        {
+          "caller": "repo_files",
+          "callee": "path.relative_to",
+          "lineNumber": 171
+        },
+        {
+          "caller": "repo_files",
+          "callee": "ast.parse",
+          "lineNumber": 172
+        },
+        {
+          "caller": "repo_files",
+          "callee": "path.read_text",
+          "lineNumber": 172
+        },
+        {
+          "caller": "repo_files",
+          "callee": "str",
+          "lineNumber": 172
+        },
+        {
+          "caller": "repo_files",
+          "callee": "files.append",
+          "lineNumber": 173
+        },
+        {
+          "caller": "repo_files",
+          "callee": "SourceFile",
+          "lineNumber": 173
+        },
+        {
+          "caller": "repo_files",
+          "callee": "tuple",
+          "lineNumber": 174
+        },
+        {
+          "caller": "_dotted",
+          "callee": "isinstance",
+          "lineNumber": 178
+        },
+        {
+          "caller": "_dotted",
+          "callee": "isinstance",
+          "lineNumber": 180
+        },
+        {
+          "caller": "_dotted",
+          "callee": "_dotted",
+          "lineNumber": 181
+        },
+        {
+          "caller": "_terminal",
+          "callee": "isinstance",
+          "lineNumber": 187
+        },
+        {
+          "caller": "_terminal",
+          "callee": "isinstance",
+          "lineNumber": 189
+        },
+        {
+          "caller": "_matches",
+          "callee": "module.startswith",
+          "lineNumber": 195
+        },
+        {
+          "caller": "_resolve_from",
+          "callee": "sf.module.split",
+          "lineNumber": 201
+        },
+        {
+          "caller": "_resolve_from",
+          "callee": "sf.module.split",
+          "lineNumber": 201
+        },
+        {
+          "caller": "_resolve_from",
+          "callee": "len",
+          "lineNumber": 202
+        },
+        {
+          "caller": "_resolve_from",
+          "callee": "\".\".join",
+          "lineNumber": 203
+        },
+        {
+          "caller": "imports",
+          "callee": "ast.walk",
+          "lineNumber": 207
+        },
+        {
+          "caller": "imports",
+          "callee": "isinstance",
+          "lineNumber": 208
+        },
+        {
+          "caller": "imports",
+          "callee": "Import",
+          "lineNumber": 210
+        },
+        {
+          "caller": "imports",
+          "callee": "isinstance",
+          "lineNumber": 211
+        },
+        {
+          "caller": "imports",
+          "callee": "Import",
+          "lineNumber": 212
+        },
+        {
+          "caller": "imports",
+          "callee": "_resolve_from",
+          "lineNumber": 212
+        },
+        {
+          "caller": "imports",
+          "callee": "tuple",
+          "lineNumber": 212
+        },
+        {
+          "caller": "imports",
+          "callee": "isinstance",
+          "lineNumber": 213
+        },
+        {
+          "caller": "imports",
+          "callee": "_dotted",
+          "lineNumber": 213
+        },
+        {
+          "caller": "imports",
+          "callee": "isinstance",
+          "lineNumber": 219
+        },
+        {
+          "caller": "imports",
+          "callee": "isinstance",
+          "lineNumber": 219
+        },
+        {
+          "caller": "imports",
+          "callee": "Import",
+          "lineNumber": 220
+        },
+        {
+          "caller": "imports",
+          "callee": "Import",
+          "lineNumber": 222
+        },
+        {
+          "caller": "check_gateway_imports",
+          "callee": "sf.under",
+          "lineNumber": 233
+        },
+        {
+          "caller": "check_gateway_imports",
+          "callee": "imports",
+          "lineNumber": 235
+        },
+        {
+          "caller": "check_gateway_imports",
+          "callee": "any",
+          "lineNumber": 236
+        },
+        {
+          "caller": "check_gateway_imports",
+          "callee": "_matches",
+          "lineNumber": 236
+        },
+        {
+          "caller": "check_gateway_imports",
+          "callee": "imp.targets",
+          "lineNumber": 236
+        },
+        {
+          "caller": "check_gateway_imports",
+          "callee": "violations.append",
+          "lineNumber": 237
+        },
+        {
+          "caller": "check_gateway_imports",
+          "callee": "'/, '.join",
+          "lineNumber": 239
+        },
+        {
+          "caller": "check_provider_sdk_imports",
+          "callee": "sf.under",
+          "lineNumber": 247
+        },
+        {
+          "caller": "check_provider_sdk_imports",
+          "callee": "imports",
+          "lineNumber": 249
+        },
+        {
+          "caller": "check_provider_sdk_imports",
+          "callee": "any",
+          "lineNumber": 250
+        },
+        {
+          "caller": "check_provider_sdk_imports",
+          "callee": "_matches",
+          "lineNumber": 250
+        },
+        {
+          "caller": "check_provider_sdk_imports",
+          "callee": "violations.append",
+          "lineNumber": 251
+        },
+        {
+          "caller": "_mentions_float",
+          "callee": "ast.walk",
+          "lineNumber": 264
+        },
+        {
+          "caller": "_mentions_float",
+          "callee": "_terminal",
+          "lineNumber": 265
+        },
+        {
+          "caller": "_mentions_float",
+          "callee": "isinstance",
+          "lineNumber": 267
+        },
+        {
+          "caller": "_mentions_float",
+          "callee": "isinstance",
+          "lineNumber": 267
+        },
+        {
+          "caller": "_mentions_float",
+          "callee": "ast.parse",
+          "lineNumber": 269
+        },
+        {
+          "caller": "_mentions_float",
+          "callee": "_mentions_float",
+          "lineNumber": 272
+        },
+        {
+          "caller": "_is_mapped",
+          "callee": "isinstance",
+          "lineNumber": 278
+        },
+        {
+          "caller": "_is_mapped",
+          "callee": "isinstance",
+          "lineNumber": 278
+        },
+        {
+          "caller": "_is_mapped",
+          "callee": "ast.parse",
+          "lineNumber": 280
+        },
+        {
+          "caller": "_is_mapped",
+          "callee": "isinstance",
+          "lineNumber": 283
+        },
+        {
+          "caller": "_is_mapped",
+          "callee": "_terminal",
+          "lineNumber": 283
+        },
+        {
+          "caller": "_is_money_name",
+          "callee": "any",
+          "lineNumber": 287
+        },
+        {
+          "caller": "_is_money_name",
+          "callee": "name.lower().split",
+          "lineNumber": 287
+        },
+        {
+          "caller": "_is_money_name",
+          "callee": "name.lower",
+          "lineNumber": 287
+        },
+        {
+          "caller": "_annotations",
+          "callee": "ast.walk",
+          "lineNumber": 291
+        },
+        {
+          "caller": "_annotations",
+          "callee": "isinstance",
+          "lineNumber": 292
+        },
+        {
+          "caller": "_annotations",
+          "callee": "_terminal",
+          "lineNumber": 293
+        },
+        {
+          "caller": "_annotations",
+          "callee": "isinstance",
+          "lineNumber": 294
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "sf.under",
+          "lineNumber": 306
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "sf.under",
+          "lineNumber": 308
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "_annotations",
+          "lineNumber": 309
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "_mentions_float",
+          "lineNumber": 310
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "violations.append",
+          "lineNumber": 313
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "_is_mapped",
+          "lineNumber": 314
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "violations.append",
+          "lineNumber": 315
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "_is_money_name",
+          "lineNumber": 316
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "violations.append",
+          "lineNumber": 317
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "any",
+          "lineNumber": 319
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "_matches",
+          "lineNumber": 319
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "imports",
+          "lineNumber": 319
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "ast.walk",
+          "lineNumber": 321
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "isinstance",
+          "lineNumber": 322
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "_terminal",
+          "lineNumber": 322
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "violations.append",
+          "lineNumber": 323
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "_terminal",
+          "lineNumber": 323
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "isinstance",
+          "lineNumber": 325
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "(_terminal(node.func) or \"\").upper",
+          "lineNumber": 326
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "_terminal",
+          "lineNumber": 326
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "any",
+          "lineNumber": 327
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "isinstance",
+          "lineNumber": 329
+        },
+        {
+          "caller": "check_no_float_money",
+          "callee": "violations.append",
+          "lineNumber": 334
+        },
+        {
+          "caller": "_class_index",
+          "callee": "isinstance",
+          "lineNumber": 350
+        },
+        {
+          "caller": "_body_assigns",
+          "callee": "isinstance",
+          "lineNumber": 357
+        },
+        {
+          "caller": "_body_assigns",
+          "callee": "isinstance",
+          "lineNumber": 357
+        },
+        {
+          "caller": "_body_assigns",
+          "callee": "isinstance",
+          "lineNumber": 359
+        },
+        {
+          "caller": "_body_assigns",
+          "callee": "isinstance",
+          "lineNumber": 361
+        },
+        {
+          "caller": "_resolve_class",
+          "callee": "_terminal",
+          "lineNumber": 367
+        },
+        {
+          "caller": "_resolve_class",
+          "callee": "imports",
+          "lineNumber": 370
+        },
+        {
+          "caller": "_resolve_class",
+          "callee": "len",
+          "lineNumber": 374
+        },
+        {
+          "caller": "_fields",
+          "callee": "frozenset",
+          "lineNumber": 377
+        },
+        {
+          "caller": "_fields",
+          "callee": "set",
+          "lineNumber": 380
+        },
+        {
+          "caller": "_fields",
+          "callee": "_body_assigns",
+          "lineNumber": 380
+        },
+        {
+          "caller": "_fields",
+          "callee": "set",
+          "lineNumber": 380
+        },
+        {
+          "caller": "_fields",
+          "callee": "_resolve_class",
+          "lineNumber": 382
+        },
+        {
+          "caller": "_fields",
+          "callee": "unresolved.add",
+          "lineNumber": 384
+        },
+        {
+          "caller": "_fields",
+          "callee": "ast.unparse",
+          "lineNumber": 384
+        },
+        {
+          "caller": "_fields",
+          "callee": "_fields",
+          "lineNumber": 386
+        },
+        {
+          "caller": "table_models",
+          "callee": "_class_index",
+          "lineNumber": 393
+        },
+        {
+          "caller": "table_models",
+          "callee": "index.items",
+          "lineNumber": 394
+        },
+        {
+          "caller": "table_models",
+          "callee": "_body_assigns",
+          "lineNumber": 395
+        },
+        {
+          "caller": "table_models",
+          "callee": "assigns.get",
+          "lineNumber": 396
+        },
+        {
+          "caller": "table_models",
+          "callee": "isinstance",
+          "lineNumber": 397
+        },
+        {
+          "caller": "table_models",
+          "callee": "_fields",
+          "lineNumber": 400
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "tuple",
+          "lineNumber": 405
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "sf.under",
+          "lineNumber": 405
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "table_models",
+          "lineNumber": 407
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "', '.join",
+          "lineNumber": 409
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "sorted",
+          "lineNumber": 409
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "violations.append",
+          "lineNumber": 410
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "sorted",
+          "lineNumber": 411
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "ast.walk",
+          "lineNumber": 416
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "isinstance",
+          "lineNumber": 417
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "_terminal",
+          "lineNumber": 417
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "isinstance",
+          "lineNumber": 422
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "_terminal",
+          "lineNumber": 423
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "isinstance",
+          "lineNumber": 425
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "ast.unparse",
+          "lineNumber": 428
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "violations.append",
+          "lineNumber": 429
+        },
+        {
+          "caller": "check_provenance_columns",
+          "callee": "sorted",
+          "lineNumber": 429
+        },
+        {
+          "caller": "ok",
+          "callee": "module.split",
+          "lineNumber": 440
+        },
+        {
+          "caller": "ok",
+          "callee": "_matches",
+          "lineNumber": 440
+        },
+        {
+          "caller": "_compute_import_ok",
+          "callee": "ok",
+          "lineNumber": 442
+        },
+        {
+          "caller": "_compute_import_ok",
+          "callee": "bool",
+          "lineNumber": 442
+        },
+        {
+          "caller": "_compute_import_ok",
+          "callee": "all",
+          "lineNumber": 442
+        },
+        {
+          "caller": "_compute_import_ok",
+          "callee": "ok",
+          "lineNumber": 442
+        },
+        {
+          "caller": "check_compute_is_pure",
+          "callee": "sf.under",
+          "lineNumber": 448
+        },
+        {
+          "caller": "check_compute_is_pure",
+          "callee": "imports",
+          "lineNumber": 450
+        },
+        {
+          "caller": "check_compute_is_pure",
+          "callee": "_compute_import_ok",
+          "lineNumber": 451
+        },
+        {
+          "caller": "check_compute_is_pure",
+          "callee": "violations.append",
+          "lineNumber": 452
+        },
+        {
+          "caller": "check_compute_is_pure",
+          "callee": "ast.walk",
+          "lineNumber": 456
+        },
+        {
+          "caller": "check_compute_is_pure",
+          "callee": "isinstance",
+          "lineNumber": 457
+        },
+        {
+          "caller": "check_compute_is_pure",
+          "callee": "isinstance",
+          "lineNumber": 459
+        },
+        {
+          "caller": "check_compute_is_pure",
+          "callee": "violations.append",
+          "lineNumber": 460
+        },
+        {
+          "caller": "check_compute_is_pure",
+          "callee": "isinstance",
+          "lineNumber": 461
+        },
+        {
+          "caller": "check_compute_is_pure",
+          "callee": "violations.append",
+          "lineNumber": 462
+        },
+        {
+          "caller": "check_compute_is_pure",
+          "callee": "ast.unparse",
+          "lineNumber": 464
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "set",
+          "lineNumber": 475
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "set",
+          "lineNumber": 475
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "table_models",
+          "lineNumber": 476
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "tuple",
+          "lineNumber": 476
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "sf.under",
+          "lineNumber": 476
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "models.add",
+          "lineNumber": 477
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "_body_assigns(cls).get",
+          "lineNumber": 478
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "_body_assigns",
+          "lineNumber": 478
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "isinstance",
+          "lineNumber": 479
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "isinstance",
+          "lineNumber": 479
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "tables.add",
+          "lineNumber": 480
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "re.compile",
+          "lineNumber": 482
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "'|'.join",
+          "lineNumber": 482
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "map",
+          "lineNumber": 482
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "sorted",
+          "lineNumber": 482
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "sf.under",
+          "lineNumber": 489
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "ast.walk",
+          "lineNumber": 491
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "isinstance",
+          "lineNumber": 492
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "_terminal",
+          "lineNumber": 494
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "_terminal",
+          "lineNumber": 497
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "ast.walk",
+          "lineNumber": 497
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "violations.append",
+          "lineNumber": 498
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "', '.join",
+          "lineNumber": 499
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "sorted",
+          "lineNumber": 499
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "isinstance",
+          "lineNumber": 504
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "isinstance",
+          "lineNumber": 504
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "table_sql.search",
+          "lineNumber": 505
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "violations.append",
+          "lineNumber": 506
+        },
+        {
+          "caller": "check_reads_go_through_pit",
+          "callee": "match.group",
+          "lineNumber": 507
+        },
+        {
+          "caller": "check_mcp_imports",
+          "callee": "sf.under",
+          "lineNumber": 521
+        },
+        {
+          "caller": "check_mcp_imports",
+          "callee": "imports",
+          "lineNumber": 523
+        },
+        {
+          "caller": "check_mcp_imports",
+          "callee": "any",
+          "lineNumber": 524
+        },
+        {
+          "caller": "check_mcp_imports",
+          "callee": "_matches",
+          "lineNumber": 524
+        },
+        {
+          "caller": "check_mcp_imports",
+          "callee": "violations.append",
+          "lineNumber": 525
+        },
+        {
+          "caller": "check_mcp_imports",
+          "callee": "'/, '.join",
+          "lineNumber": 527
+        },
+        {
+          "caller": "_valued_fields",
+          "callee": "frozenset",
+          "lineNumber": 537
+        },
+        {
+          "caller": "_valued_fields",
+          "callee": "_body_assigns(cls).items",
+          "lineNumber": 540
+        },
+        {
+          "caller": "_valued_fields",
+          "callee": "_body_assigns",
+          "lineNumber": 540
+        },
+        {
+          "caller": "_valued_fields",
+          "callee": "_resolve_class",
+          "lineNumber": 542
+        },
+        {
+          "caller": "_valued_fields",
+          "callee": "_valued_fields",
+          "lineNumber": 544
+        },
+        {
+          "caller": "check_ingest_modules_declare",
+          "callee": "_class_index",
+          "lineNumber": 549
+        },
+        {
+          "caller": "check_ingest_modules_declare",
+          "callee": "sf.under",
+          "lineNumber": 552
+        },
+        {
+          "caller": "check_ingest_modules_declare",
+          "callee": "str",
+          "lineNumber": 552
+        },
+        {
+          "caller": "check_ingest_modules_declare",
+          "callee": "units.setdefault(\"/\".join(sf.rel.parts[:2]), []).append",
+          "lineNumber": 553
+        },
+        {
+          "caller": "check_ingest_modules_declare",
+          "callee": "units.setdefault",
+          "lineNumber": 553
+        },
+        {
+          "caller": "check_ingest_modules_declare",
+          "callee": "\"/\".join",
+          "lineNumber": 553
+        },
+        {
+          "caller": "check_ingest_modules_declare",
+          "callee": "sorted",
+          "lineNumber": 556
+        },
+        {
+          "caller": "check_ingest_modules_declare",
+          "callee": "units.items",
+          "lineNumber": 556
+        },
+        {
+          "caller": "check_ingest_modules_declare",
+          "callee": "any",
+          "lineNumber": 557
+        },
+        {
+          "caller": "check_ingest_modules_declare",
+          "callee": "_valued_fields",
+          "lineNumber": 558
+        },
+        {
+          "caller": "check_ingest_modules_declare",
+          "callee": "isinstance",
+          "lineNumber": 561
+        },
+        {
+          "caller": "check_ingest_modules_declare",
+          "callee": "violations.append",
+          "lineNumber": 564
+        },
+        {
+          "caller": "check_ingest_modules_declare",
+          "callee": "sorted",
+          "lineNumber": 565
+        },
+        {
+          "caller": "test_repo_obeys_rule",
+          "callee": "repo_files",
+          "lineNumber": 588
+        },
+        {
+          "caller": "test_repo_obeys_rule",
+          "callee": "\"\\n\".join",
+          "lineNumber": 589
+        },
+        {
+          "caller": "test_scan_is_not_vacuous",
+          "callee": "str",
+          "lineNumber": 593
+        },
+        {
+          "caller": "test_scan_is_not_vacuous",
+          "callee": "repo_files",
+          "lineNumber": 593
+        },
+        {
+          "caller": "test_scan_is_not_vacuous",
+          "callee": "any",
+          "lineNumber": 598
+        },
+        {
+          "caller": "test_scan_is_not_vacuous",
+          "callee": "r.startswith",
+          "lineNumber": 598
+        },
+        {
+          "caller": "test_scan_is_not_vacuous",
+          "callee": "table_models",
+          "lineNumber": 604
+        },
+        {
+          "caller": "test_scan_is_not_vacuous",
+          "callee": "repo_files",
+          "lineNumber": 604
+        },
+        {
+          "caller": "test_scan_is_not_vacuous",
+          "callee": "set",
+          "lineNumber": 605
+        },
+        {
+          "caller": "test_scan_is_not_vacuous",
+          "callee": "set",
+          "lineNumber": 605
+        },
+        {
+          "caller": "test_ingest_infra_list_matches_registry",
+          "callee": "m.replace",
+          "lineNumber": 613
+        },
+        {
+          "caller": "test_orm_metadata_has_provenance_columns",
+          "callee": "set",
+          "lineNumber": 623
+        },
+        {
+          "caller": "test_orm_metadata_has_provenance_columns",
+          "callee": "table.c.keys",
+          "lineNumber": 623
+        },
+        {
+          "caller": "_file",
+          "callee": "SourceFile",
+          "lineNumber": 632
+        },
+        {
+          "caller": "_file",
+          "callee": "PurePosixPath",
+          "lineNumber": 632
+        },
+        {
+          "caller": "_file",
+          "callee": "ast.parse",
+          "lineNumber": 632
+        },
+        {
+          "caller": "_file",
+          "callee": "textwrap.dedent",
+          "lineNumber": 632
+        },
+        {
+          "caller": "test_rule_detects",
+          "callee": "_file",
+          "lineNumber": 720
+        },
+        {
+          "caller": "test_rule_detects",
+          "callee": "len",
+          "lineNumber": 721
+        }
+      ],
+      "metrics": {
+        "importCount": 0,
+        "exportCount": 33,
+        "functionCount": 31,
+        "classCount": 2
+      }
+    }
+  ]
+}

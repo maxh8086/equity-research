@@ -1,0 +1,6681 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "8e6b76c4d000cdb850b822e631b7c8c630ad7683",
+  "generatedAt": "2026-09-17T16:01:50.438Z",
+  "files": {
+    ".dockerignore": {
+      "filePath": ".dockerignore",
+      "contentHash": "7a083c5cef3aa7e3851f2a7d1e7258c0ce1eb06b41057e7d94bd1fcb658d33b6",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 10,
+      "hasStructuralAnalysis": false
+    },
+    ".env.example": {
+      "filePath": ".env.example",
+      "contentHash": "45cec6109a5e3e97213c25f7a46c7aec8ff5fa057e5aeb18dd4189baaeb0a829",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 20,
+      "hasStructuralAnalysis": false
+    },
+    ".gitattributes": {
+      "filePath": ".gitattributes",
+      "contentHash": "cdf361dfc9953e2eb196ff6364633b34a8b803fc6476dc9db1166c0d55ef7038",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 7,
+      "hasStructuralAnalysis": false
+    },
+    ".github/workflows/ci.yml": {
+      "filePath": ".github/workflows/ci.yml",
+      "contentHash": "a94344e439c4692a9460c9e81d21edd8ec274e05507e197a1d78d4ec55a40f30",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 32,
+      "hasStructuralAnalysis": false
+    },
+    ".obsidian/app.json": {
+      "filePath": ".obsidian/app.json",
+      "contentHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": false
+    },
+    ".obsidian/appearance.json": {
+      "filePath": ".obsidian/appearance.json",
+      "contentHash": "fe066426ce3c43e2bb9cab96f200b436b00aa72789be5e5c02a3d770f6553a0c",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 3,
+      "hasStructuralAnalysis": false
+    },
+    ".obsidian/backlink.json": {
+      "filePath": ".obsidian/backlink.json",
+      "contentHash": "55b3d1b176a5c14c2307aea23fa66ba6d69a7920ccb67d11b0c7abed95b1c93b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 3,
+      "hasStructuralAnalysis": false
+    },
+    ".obsidian/core-plugins.json": {
+      "filePath": ".obsidian/core-plugins.json",
+      "contentHash": "763cf20a921fd9955735b278006820b90b207b2fc04d9e79ca648279c7c14276",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 33,
+      "hasStructuralAnalysis": false
+    },
+    ".obsidian/graph.json": {
+      "filePath": ".obsidian/graph.json",
+      "contentHash": "7c1722e19075e22ba81712bff467018c4b9243d5c85c5ba40f49edd2b349628e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 22,
+      "hasStructuralAnalysis": false
+    },
+    ".obsidian/workspace.json": {
+      "filePath": ".obsidian/workspace.json",
+      "contentHash": "876d17677a860b664e909ec384ca5507bbca496c7fabbc84ae087b8dd8baad6b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 192,
+      "hasStructuralAnalysis": false
+    },
+    ".ua/intermediate/scan-result.json": {
+      "filePath": ".ua/intermediate/scan-result.json",
+      "contentHash": "c21d45b7deb49c1e3ac57f06031e695773b6d732d7b994ff5455c37a4c6d5d85",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 837,
+      "hasStructuralAnalysis": false
+    },
+    ".ua/intermediate/ua-import-map-output.json": {
+      "filePath": ".ua/intermediate/ua-import-map-output.json",
+      "contentHash": "c8b8ac3218133898e117e74def7372c2b51f6f35f1f0122d5c128809c3cc67e4",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 223,
+      "hasStructuralAnalysis": false
+    },
+    ".ua/intermediate/ua-scan-files.json": {
+      "filePath": ".ua/intermediate/ua-scan-files.json",
+      "contentHash": "3ac31bdc97a02d71ffe55a0338f2b7a84919ea423d59806288fe3235f16bb010",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 466,
+      "hasStructuralAnalysis": false
+    },
+    "CLAUDE.md": {
+      "filePath": "CLAUDE.md",
+      "contentHash": "ddc640cef2ac338024cb9bb3a9a16a6865b8ed3d5b699fede514f9ddf06f5d6b",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 494,
+      "hasStructuralAnalysis": false
+    },
+    "Dockerfile": {
+      "filePath": "Dockerfile",
+      "contentHash": "246fa6711daf6c8f3f1f2d30330c504e8de2a5d61d8aa657e3ece5a0a44250e5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 26,
+      "hasStructuralAnalysis": false
+    },
+    "README.md": {
+      "filePath": "README.md",
+      "contentHash": "79be74b4a97c4eb0f7ed00a4a05e1db45ff3c81fe5a5bf485ea2ab3174111878",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 94,
+      "hasStructuralAnalysis": false
+    },
+    "Welcome.md": {
+      "filePath": "Welcome.md",
+      "contentHash": "ecd0dfb6b21143ff52cfe36f93636df57e5b21773c101491b86f10ce17556ca8",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 5,
+      "hasStructuralAnalysis": false
+    },
+    "alembic.ini": {
+      "filePath": "alembic.ini",
+      "contentHash": "123f2c4a03a828fe846b8ee96158165fd0c076fe3cd4cba58c84591771571207",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 41,
+      "hasStructuralAnalysis": false
+    },
+    "core/__init__.py": {
+      "filePath": "core/__init__.py",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "core/blob.py": {
+      "filePath": "core/blob.py",
+      "contentHash": "8da11e3b2cc53b10515debe56942c55358445488802dc2eca8fa750598f90ed9",
+      "functions": [
+        {
+          "name": "object_key",
+          "params": [
+            "key"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "_error_code",
+          "params": [
+            "exc"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "s3_blob_store",
+          "params": [
+            "settings",
+            "bucket"
+          ],
+          "returnType": "S3BlobStore",
+          "exported": true,
+          "lineCount": 12
+        }
+      ],
+      "classes": [
+        {
+          "name": "BlobIntegrityError",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "BlobStore",
+          "methods": [
+            "put",
+            "get",
+            "exists"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "S3BlobStore",
+          "methods": [
+            "__init__",
+            "put",
+            "get",
+            "exists"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 36
+        }
+      ],
+      "imports": [
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "Protocol"
+          ]
+        },
+        {
+          "source": "boto3",
+          "specifiers": [
+            "boto3"
+          ]
+        },
+        {
+          "source": "botocore.config",
+          "specifiers": [
+            "BotoConfig"
+          ]
+        },
+        {
+          "source": "botocore.exceptions",
+          "specifiers": [
+            "ClientError"
+          ]
+        },
+        {
+          "source": "core.compute.hashing",
+          "specifiers": [
+            "content_hash"
+          ]
+        },
+        {
+          "source": "core.config",
+          "specifiers": [
+            "Settings"
+          ]
+        }
+      ],
+      "exports": [
+        "BlobIntegrityError",
+        "BlobStore",
+        "object_key",
+        "_error_code",
+        "S3BlobStore",
+        "s3_blob_store"
+      ],
+      "totalLines": 98,
+      "hasStructuralAnalysis": true
+    },
+    "core/compute/__init__.py": {
+      "filePath": "core/compute/__init__.py",
+      "contentHash": "a9e799593b74049cf96e9887ee982b560b9490512c668c68bbaabc18f433239f",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": true
+    },
+    "core/compute/hashing.py": {
+      "filePath": "core/compute/hashing.py",
+      "contentHash": "e93c21569ff9c64f6fa9864c58cce41356b5b6e16f865a81650b50a8c3e7777b",
+      "functions": [
+        {
+          "name": "content_hash",
+          "params": [
+            "data"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "hashlib",
+          "specifiers": [
+            "hashlib"
+          ]
+        }
+      ],
+      "exports": [
+        "content_hash"
+      ],
+      "totalLines": 7,
+      "hasStructuralAnalysis": true
+    },
+    "core/compute/isin.py": {
+      "filePath": "core/compute/isin.py",
+      "contentHash": "a3f10610fc93b46a46d09278a3822fda34af6d90048acd4d2a427ead50376a5e",
+      "functions": [
+        {
+          "name": "isin_check_digit",
+          "params": [
+            "body"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "is_valid_isin",
+          "params": [
+            "value"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        }
+      ],
+      "exports": [
+        "isin_check_digit",
+        "is_valid_isin"
+      ],
+      "totalLines": 33,
+      "hasStructuralAnalysis": true
+    },
+    "core/compute/membership.py": {
+      "filePath": "core/compute/membership.py",
+      "contentHash": "066a28591b87e7cb1c8b8776f82ba953f2ffb6987275cd5c1eb002d60cfafb29",
+      "functions": [
+        {
+          "name": "_check_simultaneous",
+          "params": [
+            "snapshots"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "observed_intervals",
+          "params": [
+            "snapshots"
+          ],
+          "returnType": "list[ObservedInterval]",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "membership_on",
+          "params": [
+            "intervals",
+            "at"
+          ],
+          "returnType": "Membership",
+          "exported": true,
+          "lineCount": 12
+        }
+      ],
+      "classes": [
+        {
+          "name": "Snapshot",
+          "methods": [],
+          "properties": [
+            "observed_at",
+            "isins",
+            "complete"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "ObservedInterval",
+          "methods": [],
+          "properties": [
+            "isin",
+            "first_seen",
+            "last_seen",
+            "absent_before",
+            "absent_after"
+          ],
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "Membership",
+          "methods": [],
+          "properties": [
+            "members",
+            "uncertain"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "ConflictingSnapshots",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "imports": [
+        {
+          "source": "collections",
+          "specifiers": [
+            "defaultdict"
+          ]
+        },
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Iterable"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime"
+          ]
+        }
+      ],
+      "exports": [
+        "Snapshot",
+        "ObservedInterval",
+        "Membership",
+        "ConflictingSnapshots",
+        "_check_simultaneous",
+        "observed_intervals",
+        "membership_on"
+      ],
+      "totalLines": 107,
+      "hasStructuralAnalysis": true
+    },
+    "core/config.py": {
+      "filePath": "core/config.py",
+      "contentHash": "037a859863dac09431749ff80b55a8c4aabf8c1837c2b6370881640a3500ff2e",
+      "functions": [
+        {
+          "name": "parse_source_switches",
+          "params": [
+            "environ"
+          ],
+          "returnType": "dict[str, bool]",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "get_settings",
+          "params": [],
+          "returnType": "Settings",
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [
+        {
+          "name": "Settings",
+          "methods": [],
+          "properties": [
+            "database_url",
+            "test_database_url",
+            "deployment_mode",
+            "web_scraping_enabled",
+            "source_switches",
+            "blob_endpoint_url",
+            "blob_region",
+            "blob_access_key",
+            "blob_secret_key",
+            "blob_bucket",
+            "test_blob_bucket",
+            "drop_folder",
+            "http_user_agent",
+            "nse_indices_archive_base_url",
+            "nse_indices_min_interval_seconds",
+            "wayback_cdx_url",
+            "wayback_capture_url",
+            "wayback_min_interval_seconds",
+            "wayback_timeout_seconds",
+            "wayback_overload_retries",
+            "wayback_retry_backoff_seconds",
+            "wayback_list_locations",
+            "nse_bhavcopy_archive_url_template",
+            "nse_bhavcopy_min_interval_seconds"
+          ],
+          "exported": true,
+          "lineCount": 60
+        }
+      ],
+      "imports": [
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Mapping"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "dotenv",
+          "specifiers": [
+            "dotenv_values"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "Field",
+            "SecretStr",
+            "TypeAdapter"
+          ]
+        },
+        {
+          "source": "pydantic_settings",
+          "specifiers": [
+            "BaseSettings",
+            "SettingsConfigDict"
+          ]
+        },
+        {
+          "source": "core.sources",
+          "specifiers": [
+            "DeploymentMode"
+          ]
+        }
+      ],
+      "exports": [
+        "Settings",
+        "parse_source_switches",
+        "get_settings"
+      ],
+      "totalLines": 92,
+      "hasStructuralAnalysis": true
+    },
+    "core/db/__init__.py": {
+      "filePath": "core/db/__init__.py",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "core/db/base.py": {
+      "filePath": "core/db/base.py",
+      "contentHash": "2ed84437736ae9858b88b5da71931dfc7561e81730f820f4ae64b9a26444c688",
+      "functions": [],
+      "classes": [
+        {
+          "name": "Base",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "ProvenanceMixin",
+          "methods": [
+            "_validate_as_of"
+          ],
+          "properties": [
+            "as_of",
+            "content_hash",
+            "source_url",
+            "extracted_by",
+            "model_version",
+            "ingested_at"
+          ],
+          "exported": true,
+          "lineCount": 13
+        }
+      ],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "CHAR",
+            "DateTime",
+            "Text",
+            "func"
+          ]
+        },
+        {
+          "source": "sqlalchemy.orm",
+          "specifiers": [
+            "DeclarativeBase",
+            "Mapped",
+            "mapped_column",
+            "validates"
+          ]
+        },
+        {
+          "source": "core.timezones",
+          "specifiers": [
+            "require_aware"
+          ]
+        }
+      ],
+      "exports": [
+        "Base",
+        "ProvenanceMixin"
+      ],
+      "totalLines": 39,
+      "hasStructuralAnalysis": true
+    },
+    "core/db/models.py": {
+      "filePath": "core/db/models.py",
+      "contentHash": "c4eace585729caa50e592f75aa71d44dc60260ee98d408c2c744438ff9c2ce91",
+      "functions": [
+        {
+          "name": "_pg_enum",
+          "params": [
+            "enum_cls",
+            "name"
+          ],
+          "returnType": "Enum",
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "classes": [
+        {
+          "name": "Consolidation",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "FactKind",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "FinancialFact",
+          "methods": [],
+          "properties": [
+            "id",
+            "isin",
+            "consolidation",
+            "fact_kind",
+            "line_item",
+            "xbrl_element",
+            "period_start",
+            "period_end",
+            "value",
+            "unit"
+          ],
+          "exported": true,
+          "lineCount": 65
+        },
+        {
+          "name": "RawSourceFile",
+          "methods": [
+            "_validate_fetched_at"
+          ],
+          "properties": [
+            "id",
+            "fetched_at",
+            "byte_size",
+            "media_type"
+          ],
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "IndexCode",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "EntityLinkBasis",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "QuarantineReason",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "Entity",
+          "methods": [],
+          "properties": [
+            "id"
+          ],
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "EntityIsin",
+          "methods": [],
+          "properties": [
+            "id",
+            "entity_id",
+            "isin",
+            "basis"
+          ],
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "IndexSnapshot",
+          "methods": [],
+          "properties": [
+            "id",
+            "index_code",
+            "constituent_count",
+            "quarantined_rows",
+            "rule_version"
+          ],
+          "exported": true,
+          "lineCount": 31
+        },
+        {
+          "name": "IndexSnapshotConstituent",
+          "methods": [],
+          "properties": [
+            "id",
+            "snapshot_id",
+            "isin",
+            "symbol",
+            "series",
+            "company_name",
+            "industry",
+            "row_number"
+          ],
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "IndexSnapshotQuarantine",
+          "methods": [],
+          "properties": [
+            "id",
+            "snapshot_id",
+            "index_code",
+            "row_number",
+            "raw_row",
+            "reason",
+            "detail",
+            "rule_version"
+          ],
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "BhavcopyQuarantineReason",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "NseBhavcopyRow",
+          "methods": [],
+          "properties": [
+            "id",
+            "trade_date",
+            "isin",
+            "symbol",
+            "series",
+            "open",
+            "high",
+            "low",
+            "close",
+            "prev_close",
+            "volume",
+            "turnover",
+            "trades",
+            "rule_version"
+          ],
+          "exported": true,
+          "lineCount": 50
+        },
+        {
+          "name": "NseBhavcopyQuarantine",
+          "methods": [],
+          "properties": [
+            "id",
+            "trade_date",
+            "row_number",
+            "isin",
+            "symbol",
+            "series",
+            "raw_row",
+            "reason",
+            "detail",
+            "rule_version"
+          ],
+          "exported": true,
+          "lineCount": 32
+        }
+      ],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date",
+            "datetime"
+          ]
+        },
+        {
+          "source": "decimal",
+          "specifiers": [
+            "Decimal"
+          ]
+        },
+        {
+          "source": "enum",
+          "specifiers": [
+            "StrEnum"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "BigInteger",
+            "CheckConstraint",
+            "Date",
+            "DateTime",
+            "Enum",
+            "ForeignKey",
+            "Identity",
+            "Index",
+            "Integer",
+            "Numeric",
+            "Text",
+            "UniqueConstraint",
+            "CHAR"
+          ]
+        },
+        {
+          "source": "sqlalchemy.orm",
+          "specifiers": [
+            "Mapped",
+            "mapped_column",
+            "validates"
+          ]
+        },
+        {
+          "source": "core.db.base",
+          "specifiers": [
+            "Base",
+            "ProvenanceMixin"
+          ]
+        },
+        {
+          "source": "core.timezones",
+          "specifiers": [
+            "require_aware"
+          ]
+        }
+      ],
+      "exports": [
+        "Consolidation",
+        "FactKind",
+        "_pg_enum",
+        "FinancialFact",
+        "RawSourceFile",
+        "IndexCode",
+        "EntityLinkBasis",
+        "QuarantineReason",
+        "Entity",
+        "EntityIsin",
+        "IndexSnapshot",
+        "IndexSnapshotConstituent",
+        "IndexSnapshotQuarantine",
+        "BhavcopyQuarantineReason",
+        "NseBhavcopyRow",
+        "NseBhavcopyQuarantine"
+      ],
+      "totalLines": 417,
+      "hasStructuralAnalysis": true
+    },
+    "core/db/pit.py": {
+      "filePath": "core/db/pit.py",
+      "contentHash": "d6ae2d416b4f75ab46d722feefe8286fe9c0b4b6babd136017e8590647d82faa",
+      "functions": [
+        {
+          "name": "facts_as_of",
+          "params": [
+            "session",
+            "isin",
+            "consolidation",
+            "as_of",
+            "line_items"
+          ],
+          "returnType": "list[FinancialFact]",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "raw_source_files_as_of",
+          "params": [
+            "session",
+            "extracted_by",
+            "as_of"
+          ],
+          "returnType": "list[RawSourceFile]",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "entity_isin_earliest_links_as_of",
+          "params": [
+            "session",
+            "isins",
+            "as_of"
+          ],
+          "returnType": "dict[str, EntityIsin]",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "index_snapshots_as_of",
+          "params": [
+            "session",
+            "index_code",
+            "as_of"
+          ],
+          "returnType": "list[Snapshot]",
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "index_membership_as_of",
+          "params": [
+            "session",
+            "index_code",
+            "as_of"
+          ],
+          "returnType": "list[ObservedInterval]",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "index_members_on",
+          "params": [
+            "session",
+            "index_code",
+            "on",
+            "as_of"
+          ],
+          "returnType": "Membership",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "index_snapshot_keys_as_of",
+          "params": [
+            "session",
+            "source_url",
+            "rule_version",
+            "as_of"
+          ],
+          "returnType": "set[tuple[IndexCode, datetime]]",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "index_list_sources_settled_as_of",
+          "params": [
+            "session",
+            "extracted_by",
+            "rule_version",
+            "as_of"
+          ],
+          "returnType": "set[str]",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "index_snapshot_quarantine_as_of",
+          "params": [
+            "session",
+            "as_of"
+          ],
+          "returnType": "list[IndexSnapshotQuarantine]",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "index_quarantine_review_as_of",
+          "params": [
+            "session",
+            "as_of"
+          ],
+          "returnType": "list[QuarantineEntry]",
+          "exported": true,
+          "lineCount": 45
+        },
+        {
+          "name": "bhavcopy_sources_settled_as_of",
+          "params": [
+            "session",
+            "extracted_by",
+            "rule_version",
+            "as_of"
+          ],
+          "returnType": "set[str]",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "bhavcopy_source_loaded_as_of",
+          "params": [
+            "session",
+            "source_url",
+            "extracted_by",
+            "rule_version",
+            "as_of"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "bhavcopy_latest_trade_date_as_of",
+          "params": [
+            "session",
+            "extracted_by",
+            "as_of"
+          ],
+          "returnType": "date | None",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "bhavcopy_rows_as_of",
+          "params": [
+            "session",
+            "isin",
+            "start",
+            "end",
+            "as_of"
+          ],
+          "returnType": "list[NseBhavcopyRow]",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "symbol_to_isin_as_of",
+          "params": [
+            "session",
+            "symbol",
+            "on",
+            "as_of"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "bhavcopy_quarantine_as_of",
+          "params": [
+            "session",
+            "as_of"
+          ],
+          "returnType": "list[NseBhavcopyQuarantine]",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "bhavcopy_quarantine_review_as_of",
+          "params": [
+            "session",
+            "as_of"
+          ],
+          "returnType": "list[BhavcopyQuarantineEntry]",
+          "exported": true,
+          "lineCount": 30
+        }
+      ],
+      "classes": [
+        {
+          "name": "QuarantineEntry",
+          "methods": [
+            "needs_review"
+          ],
+          "properties": [
+            "row",
+            "superseded_by"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "BhavcopyQuarantineEntry",
+          "methods": [
+            "needs_review"
+          ],
+          "properties": [
+            "row",
+            "resolved"
+          ],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "imports": [
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Collection",
+            "Sequence"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date",
+            "datetime"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "select"
+          ]
+        },
+        {
+          "source": "sqlalchemy.orm",
+          "specifiers": [
+            "Session"
+          ]
+        },
+        {
+          "source": "core.compute.membership",
+          "specifiers": [
+            "Membership",
+            "ObservedInterval",
+            "Snapshot",
+            "membership_on",
+            "observed_intervals"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "Consolidation",
+            "EntityIsin",
+            "FinancialFact",
+            "IndexCode",
+            "IndexSnapshot",
+            "IndexSnapshotConstituent",
+            "IndexSnapshotQuarantine",
+            "NseBhavcopyQuarantine",
+            "NseBhavcopyRow",
+            "RawSourceFile"
+          ]
+        },
+        {
+          "source": "core.timezones",
+          "specifiers": [
+            "require_aware"
+          ]
+        }
+      ],
+      "exports": [
+        "facts_as_of",
+        "raw_source_files_as_of",
+        "entity_isin_earliest_links_as_of",
+        "index_snapshots_as_of",
+        "index_membership_as_of",
+        "index_members_on",
+        "index_snapshot_keys_as_of",
+        "index_list_sources_settled_as_of",
+        "index_snapshot_quarantine_as_of",
+        "QuarantineEntry",
+        "index_quarantine_review_as_of",
+        "bhavcopy_sources_settled_as_of",
+        "bhavcopy_source_loaded_as_of",
+        "bhavcopy_latest_trade_date_as_of",
+        "bhavcopy_rows_as_of",
+        "symbol_to_isin_as_of",
+        "bhavcopy_quarantine_as_of",
+        "BhavcopyQuarantineEntry",
+        "bhavcopy_quarantine_review_as_of"
+      ],
+      "totalLines": 437,
+      "hasStructuralAnalysis": true
+    },
+    "core/sources.py": {
+      "filePath": "core/sources.py",
+      "contentHash": "1a68ce05a04c8836a3b24a68cc6e0430b9e5d66e6688152749252b63be57ea8a",
+      "functions": [],
+      "classes": [
+        {
+          "name": "SourceClass",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "DeploymentMode",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "imports": [
+        {
+          "source": "enum",
+          "specifiers": [
+            "StrEnum"
+          ]
+        }
+      ],
+      "exports": [
+        "SourceClass",
+        "DeploymentMode"
+      ],
+      "totalLines": 20,
+      "hasStructuralAnalysis": true
+    },
+    "core/timezones.py": {
+      "filePath": "core/timezones.py",
+      "contentHash": "e70a890e15e0a9e05ab0a17cc8a5b2c5285e1354086ad192d22a5d09654aa36f",
+      "functions": [
+        {
+          "name": "require_aware",
+          "params": [
+            "value",
+            "name"
+          ],
+          "returnType": "datetime",
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime"
+          ]
+        },
+        {
+          "source": "zoneinfo",
+          "specifiers": [
+            "ZoneInfo"
+          ]
+        }
+      ],
+      "exports": [
+        "require_aware"
+      ],
+      "totalLines": 12,
+      "hasStructuralAnalysis": true
+    },
+    "docker-compose.yml": {
+      "filePath": "docker-compose.yml",
+      "contentHash": "081e0cd7ca9610ed0d2058eb24a36d1582d1893f5aea1f723e514a42424bb7ea",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 95,
+      "hasStructuralAnalysis": false
+    },
+    "docs/temporal-model.md": {
+      "filePath": "docs/temporal-model.md",
+      "contentHash": "6068d2ad63548f9ebab51c26621f14af0712f5f6ccf9f1b22a8deb669cf37bf3",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 125,
+      "hasStructuralAnalysis": false
+    },
+    "getting-started-plan.md": {
+      "filePath": "getting-started-plan.md",
+      "contentHash": "b120d5cd2beeff5bd63293f03658b7af61790fdd4088858e66bcdd3c47d6a878",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 159,
+      "hasStructuralAnalysis": false
+    },
+    "ingest/__init__.py": {
+      "filePath": "ingest/__init__.py",
+      "contentHash": "359e53c4674fb2c724ef7f759dc5ab970352e744dd19527c46f605701564401d",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 6,
+      "hasStructuralAnalysis": true
+    },
+    "ingest/__main__.py": {
+      "filePath": "ingest/__main__.py",
+      "contentHash": "f0698c708c8245be18de4df8d4f1b1740d11409d73ec546789717e4348300204",
+      "functions": [
+        {
+          "name": "main",
+          "params": [
+            "argv"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 54
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "argparse",
+          "specifiers": [
+            "argparse"
+          ]
+        },
+        {
+          "source": "sys",
+          "specifiers": [
+            "sys"
+          ]
+        },
+        {
+          "source": "traceback",
+          "specifiers": [
+            "traceback"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "create_engine"
+          ]
+        },
+        {
+          "source": "sqlalchemy.orm",
+          "specifiers": [
+            "Session"
+          ]
+        },
+        {
+          "source": "core.blob",
+          "specifiers": [
+            "s3_blob_store"
+          ]
+        },
+        {
+          "source": "core.config",
+          "specifiers": [
+            "get_settings"
+          ]
+        },
+        {
+          "source": "core.timezones",
+          "specifiers": [
+            "IST"
+          ]
+        },
+        {
+          "source": "ingest.base",
+          "specifiers": [
+            "AdapterContext",
+            "RunStatus"
+          ]
+        },
+        {
+          "source": "ingest.registry",
+          "specifiers": [
+            "StartupRefused",
+            "check_startup",
+            "discover"
+          ]
+        }
+      ],
+      "exports": [
+        "main"
+      ],
+      "totalLines": 83,
+      "hasStructuralAnalysis": true
+    },
+    "ingest/base.py": {
+      "filePath": "ingest/base.py",
+      "contentHash": "f663fb61889baa7468da72fc351a231e8fd1afde6a980185eaf3b11639c624f2",
+      "functions": [],
+      "classes": [
+        {
+          "name": "RunStatus",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "CanaryStatus",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "RunResult",
+          "methods": [],
+          "properties": [
+            "adapter",
+            "status",
+            "detail",
+            "raw_files",
+            "rows_written",
+            "quarantined"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "CanaryResult",
+          "methods": [],
+          "properties": [
+            "adapter",
+            "status",
+            "detail"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "RawDocument",
+          "methods": [],
+          "properties": [
+            "data",
+            "content_hash",
+            "source_url",
+            "as_of",
+            "fetched_at",
+            "media_type"
+          ],
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "AdapterContext",
+          "methods": [],
+          "properties": [
+            "session",
+            "blob",
+            "settings",
+            "now"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "Adapter",
+          "methods": [
+            "extracted_by",
+            "switch_name",
+            "disabled_reason",
+            "run",
+            "reparse",
+            "_reparse",
+            "canary",
+            "ingest",
+            "check_shape",
+            "store_raw"
+          ],
+          "properties": [
+            "name",
+            "source_class",
+            "target_stores"
+          ],
+          "exported": true,
+          "lineCount": 86
+        },
+        {
+          "name": "DropFileError",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "DropFileMeta",
+          "methods": [],
+          "properties": [
+            "source_url",
+            "published_at",
+            "media_type"
+          ],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "DropFolderAdapter",
+          "methods": [
+            "drop_dir",
+            "pending",
+            "drop_files",
+            "check_shape"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 47
+        }
+      ],
+      "imports": [
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "abc",
+          "specifiers": [
+            "ABC",
+            "abstractmethod"
+          ]
+        },
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Callable",
+            "Iterator"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime"
+          ]
+        },
+        {
+          "source": "enum",
+          "specifiers": [
+            "StrEnum"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "typing",
+          "specifiers": [
+            "ClassVar"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "AwareDatetime"
+          ]
+        },
+        {
+          "source": "sqlalchemy.orm",
+          "specifiers": [
+            "Session"
+          ]
+        },
+        {
+          "source": "core.blob",
+          "specifiers": [
+            "BlobStore"
+          ]
+        },
+        {
+          "source": "core.config",
+          "specifiers": [
+            "Settings"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "RawSourceFile"
+          ]
+        },
+        {
+          "source": "core.sources",
+          "specifiers": [
+            "SourceClass"
+          ]
+        },
+        {
+          "source": "core.timezones",
+          "specifiers": [
+            "require_aware"
+          ]
+        },
+        {
+          "source": "ingest.schema",
+          "specifiers": [
+            "StrictModel"
+          ]
+        }
+      ],
+      "exports": [
+        "RunStatus",
+        "CanaryStatus",
+        "RunResult",
+        "CanaryResult",
+        "RawDocument",
+        "AdapterContext",
+        "Adapter",
+        "DropFileError",
+        "DropFileMeta",
+        "DropFolderAdapter"
+      ],
+      "totalLines": 245,
+      "hasStructuralAnalysis": true
+    },
+    "ingest/http.py": {
+      "filePath": "ingest/http.py",
+      "contentHash": "0895e13c6088e152e2c29bf07eae5b804865e4cde4d70d2bb9ad824303f14a44",
+      "functions": [
+        {
+          "name": "_retry_after",
+          "params": [
+            "response"
+          ],
+          "returnType": "float",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "_decode",
+          "params": [
+            "raw",
+            "content_encoding"
+          ],
+          "returnType": "bytes",
+          "exported": true,
+          "lineCount": 16
+        }
+      ],
+      "classes": [
+        {
+          "name": "AccessBlocked",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "PoliteClient",
+          "methods": [
+            "__init__",
+            "__enter__",
+            "__exit__",
+            "close",
+            "get",
+            "get_with_raw",
+            "_get",
+            "_throttled_get",
+            "_robots_for"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 142
+        }
+      ],
+      "imports": [
+        {
+          "source": "gzip",
+          "specifiers": [
+            "gzip"
+          ]
+        },
+        {
+          "source": "time",
+          "specifiers": [
+            "time"
+          ]
+        },
+        {
+          "source": "urllib.robotparser",
+          "specifiers": [
+            "urllib.robotparser"
+          ]
+        },
+        {
+          "source": "zlib",
+          "specifiers": [
+            "zlib"
+          ]
+        },
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Callable",
+            "Mapping"
+          ]
+        },
+        {
+          "source": "urllib.parse",
+          "specifiers": [
+            "urlsplit"
+          ]
+        },
+        {
+          "source": "httpx",
+          "specifiers": [
+            "httpx"
+          ]
+        }
+      ],
+      "exports": [
+        "AccessBlocked",
+        "PoliteClient",
+        "_retry_after",
+        "_decode"
+      ],
+      "totalLines": 197,
+      "hasStructuralAnalysis": true
+    },
+    "ingest/nse_bhavcopy/__init__.py": {
+      "filePath": "ingest/nse_bhavcopy/__init__.py",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "ingest/nse_bhavcopy/adapters.py": {
+      "filePath": "ingest/nse_bhavcopy/adapters.py",
+      "contentHash": "d0d95d77b562f5a0bbfcc5af0061694f37bd67e088e74bc9884f5ed0fca80dd6",
+      "functions": [
+        {
+          "name": "_provenance",
+          "params": [
+            "adapter",
+            "doc"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "load_bhavcopy",
+          "params": [
+            "adapter",
+            "ctx",
+            "doc",
+            "tally"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 40
+        },
+        {
+          "name": "reparse_stored_bhavcopy",
+          "params": [
+            "adapter",
+            "ctx"
+          ],
+          "returnType": "RunResult",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "_media_type",
+          "params": [
+            "response"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_day_end_ist",
+          "params": [
+            "day"
+          ],
+          "returnType": "datetime",
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "classes": [
+        {
+          "name": "Tally",
+          "methods": [
+            "result"
+          ],
+          "properties": [
+            "raw_files",
+            "rows_written",
+            "quarantined",
+            "rejected_files",
+            "skipped",
+            "problems"
+          ],
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "NseBhavcopy",
+          "methods": [
+            "__init__",
+            "_client",
+            "_url",
+            "ingest",
+            "check_shape",
+            "_reparse"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 86
+        },
+        {
+          "name": "NseBhavcopyDrop",
+          "methods": [
+            "ingest",
+            "check_shape",
+            "_reparse"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 23
+        }
+      ],
+      "imports": [
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass",
+            "field"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date",
+            "datetime",
+            "timedelta"
+          ]
+        },
+        {
+          "source": "httpx",
+          "specifiers": [
+            "httpx"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "NseBhavcopyQuarantine",
+            "NseBhavcopyRow"
+          ]
+        },
+        {
+          "source": "core.db.pit",
+          "specifiers": [
+            "bhavcopy_latest_trade_date_as_of",
+            "bhavcopy_source_loaded_as_of",
+            "bhavcopy_sources_settled_as_of",
+            "raw_source_files_as_of"
+          ]
+        },
+        {
+          "source": "core.sources",
+          "specifiers": [
+            "SourceClass"
+          ]
+        },
+        {
+          "source": "core.timezones",
+          "specifiers": [
+            "IST"
+          ]
+        },
+        {
+          "source": "ingest.base",
+          "specifiers": [
+            "Adapter",
+            "AdapterContext",
+            "DropFolderAdapter",
+            "RawDocument",
+            "RunResult",
+            "RunStatus"
+          ]
+        },
+        {
+          "source": "ingest.http",
+          "specifiers": [
+            "AccessBlocked",
+            "PoliteClient"
+          ]
+        },
+        {
+          "source": "ingest.nse_bhavcopy.parser",
+          "specifiers": [
+            "RULE_VERSION",
+            "UDIFF_START_DATE",
+            "BhavcopyRejected",
+            "parse_bhavcopy"
+          ]
+        }
+      ],
+      "exports": [
+        "Tally",
+        "_provenance",
+        "load_bhavcopy",
+        "reparse_stored_bhavcopy",
+        "_media_type",
+        "_day_end_ist",
+        "NseBhavcopy",
+        "NseBhavcopyDrop"
+      ],
+      "totalLines": 265,
+      "hasStructuralAnalysis": true
+    },
+    "ingest/nse_bhavcopy/parser.py": {
+      "filePath": "ingest/nse_bhavcopy/parser.py",
+      "contentHash": "d70847942091ffa88ea086a19ec5f2e2b7df972782bec72bbb98c907c9410703",
+      "functions": [
+        {
+          "name": "_extract_csv",
+          "params": [
+            "data"
+          ],
+          "returnType": "bytes",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "_fields",
+          "params": [
+            "line"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "parse_bhavcopy",
+          "params": [
+            "data"
+          ],
+          "returnType": "ParsedBhavcopy",
+          "exported": true,
+          "lineCount": 109
+        }
+      ],
+      "classes": [
+        {
+          "name": "BhavcopyRawRow",
+          "methods": [],
+          "properties": [
+            "isin",
+            "symbol",
+            "series",
+            "open",
+            "high",
+            "low",
+            "close",
+            "prev_close",
+            "volume",
+            "turnover",
+            "trades"
+          ],
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "BhavcopyRow",
+          "methods": [],
+          "properties": [
+            "row_number",
+            "trade_date",
+            "isin",
+            "symbol",
+            "series",
+            "open",
+            "high",
+            "low",
+            "close",
+            "prev_close",
+            "volume",
+            "turnover",
+            "trades"
+          ],
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "RowIssue",
+          "methods": [],
+          "properties": [
+            "row_number",
+            "raw_row",
+            "reason",
+            "detail",
+            "isin",
+            "symbol",
+            "series"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "ParsedBhavcopy",
+          "methods": [],
+          "properties": [
+            "trade_date",
+            "rows",
+            "issues"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "BhavcopyRejected",
+          "methods": [
+            "__init__"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "imports": [
+        {
+          "source": "csv",
+          "specifiers": [
+            "csv"
+          ]
+        },
+        {
+          "source": "io",
+          "specifiers": [
+            "io"
+          ]
+        },
+        {
+          "source": "zipfile",
+          "specifiers": [
+            "zipfile"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date",
+            "datetime"
+          ]
+        },
+        {
+          "source": "decimal",
+          "specifiers": [
+            "Decimal"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "Field",
+            "ValidationError"
+          ]
+        },
+        {
+          "source": "core.compute.isin",
+          "specifiers": [
+            "is_valid_isin"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "BhavcopyQuarantineReason"
+          ]
+        },
+        {
+          "source": "ingest.schema",
+          "specifiers": [
+            "StrictModel"
+          ]
+        }
+      ],
+      "exports": [
+        "BhavcopyRawRow",
+        "BhavcopyRow",
+        "RowIssue",
+        "ParsedBhavcopy",
+        "BhavcopyRejected",
+        "_extract_csv",
+        "_fields",
+        "parse_bhavcopy"
+      ],
+      "totalLines": 252,
+      "hasStructuralAnalysis": true
+    },
+    "ingest/nse_indices/__init__.py": {
+      "filePath": "ingest/nse_indices/__init__.py",
+      "contentHash": "7fe5f4dd69bd995e34dd278c22a2213b016a50ebc7791eaf844b14124040b96a",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 2,
+      "hasStructuralAnalysis": true
+    },
+    "ingest/nse_indices/adapters.py": {
+      "filePath": "ingest/nse_indices/adapters.py",
+      "contentHash": "a3bb57d293ca00c4186dbe6102780693922e0e88977eeb457d8d7ad74e1736e2",
+      "functions": [
+        {
+          "name": "_provenance",
+          "params": [
+            "adapter",
+            "doc"
+          ],
+          "returnType": "dict",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "wayback_digest",
+          "params": [
+            "data"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "load_list",
+          "params": [
+            "adapter",
+            "ctx",
+            "doc",
+            "tally",
+            "expected_digest",
+            "archived_payload"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 86
+        },
+        {
+          "name": "_link_entities",
+          "params": [
+            "adapter",
+            "ctx",
+            "doc",
+            "isins"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "reparse_stored_lists",
+          "params": [
+            "adapter",
+            "ctx"
+          ],
+          "returnType": "RunResult",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "_media_type",
+          "params": [
+            "response"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "parse_cdx",
+          "params": [
+            "data"
+          ],
+          "returnType": "list[CdxCapture]",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "run_boundaries",
+          "params": [
+            "captures"
+          ],
+          "returnType": "list[CdxCapture]",
+          "exported": true,
+          "lineCount": 15
+        }
+      ],
+      "classes": [
+        {
+          "name": "Tally",
+          "methods": [
+            "result"
+          ],
+          "properties": [
+            "raw_files",
+            "snapshots",
+            "rows_written",
+            "quarantined",
+            "rejected_files",
+            "skipped",
+            "problems"
+          ],
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "_RunStopped",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "NseIndicesConstituents",
+          "methods": [
+            "__init__",
+            "_client",
+            "_urls",
+            "ingest",
+            "check_shape",
+            "_reparse"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 49
+        },
+        {
+          "name": "NseIndicesConstituentsDrop",
+          "methods": [
+            "ingest",
+            "check_shape",
+            "_reparse"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "CdxShapeError",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "CdxCapture",
+          "methods": [
+            "captured_at"
+          ],
+          "properties": [
+            "timestamp",
+            "original",
+            "mimetype",
+            "statuscode",
+            "digest"
+          ],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "WaybackIndexConstituents",
+          "methods": [
+            "__init__",
+            "_client",
+            "_cdx",
+            "_capture_url",
+            "_fetch_capture",
+            "ingest",
+            "check_shape",
+            "_reparse"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 101
+        }
+      ],
+      "imports": [
+        {
+          "source": "base64",
+          "specifiers": [
+            "base64"
+          ]
+        },
+        {
+          "source": "hashlib",
+          "specifiers": [
+            "hashlib"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass",
+            "field"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "httpx",
+          "specifiers": [
+            "httpx"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "Field"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "Entity",
+            "EntityIsin",
+            "EntityLinkBasis",
+            "IndexSnapshot",
+            "IndexSnapshotConstituent",
+            "IndexSnapshotQuarantine",
+            "QuarantineReason"
+          ]
+        },
+        {
+          "source": "core.db.pit",
+          "specifiers": [
+            "entity_isin_earliest_links_as_of",
+            "index_list_sources_settled_as_of",
+            "index_snapshot_keys_as_of",
+            "raw_source_files_as_of"
+          ]
+        },
+        {
+          "source": "core.sources",
+          "specifiers": [
+            "SourceClass"
+          ]
+        },
+        {
+          "source": "ingest.base",
+          "specifiers": [
+            "Adapter",
+            "AdapterContext",
+            "DropFolderAdapter",
+            "RawDocument",
+            "RunResult",
+            "RunStatus"
+          ]
+        },
+        {
+          "source": "ingest.http",
+          "specifiers": [
+            "AccessBlocked",
+            "PoliteClient"
+          ]
+        },
+        {
+          "source": "ingest.nse_indices.parser",
+          "specifiers": [
+            "LIST_FILES",
+            "RULE_VERSION",
+            "ListRejected",
+            "index_for_url",
+            "parse_constituent_list"
+          ]
+        },
+        {
+          "source": "ingest.schema",
+          "specifiers": [
+            "StrictModel"
+          ]
+        }
+      ],
+      "exports": [
+        "Tally",
+        "_provenance",
+        "wayback_digest",
+        "load_list",
+        "_link_entities",
+        "reparse_stored_lists",
+        "_media_type",
+        "_RunStopped",
+        "NseIndicesConstituents",
+        "NseIndicesConstituentsDrop",
+        "CdxShapeError",
+        "CdxCapture",
+        "parse_cdx",
+        "run_boundaries",
+        "WaybackIndexConstituents"
+      ],
+      "totalLines": 490,
+      "hasStructuralAnalysis": true
+    },
+    "ingest/nse_indices/parser.py": {
+      "filePath": "ingest/nse_indices/parser.py",
+      "contentHash": "2e5494671d12e346bb092fa09c6149843fdf56c389e0579ceb3eee1bf068c844",
+      "functions": [
+        {
+          "name": "index_for_url",
+          "params": [
+            "url"
+          ],
+          "returnType": "IndexCode | None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "_fields",
+          "params": [
+            "line"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "parse_constituent_list",
+          "params": [
+            "data",
+            "index_code"
+          ],
+          "returnType": "ParsedList",
+          "exported": true,
+          "lineCount": 52
+        }
+      ],
+      "classes": [
+        {
+          "name": "ConstituentRow",
+          "methods": [],
+          "properties": [
+            "company_name",
+            "industry",
+            "symbol",
+            "series",
+            "isin"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "Constituent",
+          "methods": [],
+          "properties": [
+            "row_number",
+            "row"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "RowIssue",
+          "methods": [],
+          "properties": [
+            "row_number",
+            "raw_row",
+            "reason",
+            "detail"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "ParsedList",
+          "methods": [],
+          "properties": [
+            "index_code",
+            "constituents",
+            "issues"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "ListRejected",
+          "methods": [
+            "__init__"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "imports": [
+        {
+          "source": "csv",
+          "specifiers": [
+            "csv"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "urllib.parse",
+          "specifiers": [
+            "urlsplit"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "Field",
+            "ValidationError"
+          ]
+        },
+        {
+          "source": "core.compute.isin",
+          "specifiers": [
+            "is_valid_isin"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "IndexCode",
+            "QuarantineReason"
+          ]
+        },
+        {
+          "source": "ingest.schema",
+          "specifiers": [
+            "StrictModel"
+          ]
+        }
+      ],
+      "exports": [
+        "ConstituentRow",
+        "Constituent",
+        "RowIssue",
+        "ParsedList",
+        "ListRejected",
+        "index_for_url",
+        "_fields",
+        "parse_constituent_list"
+      ],
+      "totalLines": 155,
+      "hasStructuralAnalysis": true
+    },
+    "ingest/registry.py": {
+      "filePath": "ingest/registry.py",
+      "contentHash": "501cb1b199a8e566e91c985ffb5676fe6a4330c3748f7f769b71d41e1639367c",
+      "functions": [
+        {
+          "name": "validate_declaration",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "index_adapters",
+          "params": [
+            "classes"
+          ],
+          "returnType": "dict[str, type[Adapter]]",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_concrete_subclasses",
+          "params": [],
+          "returnType": "Iterator[type]",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "discover",
+          "params": [],
+          "returnType": "dict[str, type[Adapter]]",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "source_class_by_extracted_by",
+          "params": [
+            "adapters"
+          ],
+          "returnType": "dict[str, SourceClass]",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "check_startup",
+          "params": [
+            "settings",
+            "adapters"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 18
+        }
+      ],
+      "classes": [
+        {
+          "name": "AdapterDeclarationError",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "StartupRefused",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "imports": [
+        {
+          "source": "importlib",
+          "specifiers": [
+            "importlib"
+          ]
+        },
+        {
+          "source": "inspect",
+          "specifiers": [
+            "inspect"
+          ]
+        },
+        {
+          "source": "pkgutil",
+          "specifiers": [
+            "pkgutil"
+          ]
+        },
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Iterable",
+            "Iterator",
+            "Mapping"
+          ]
+        },
+        {
+          "source": "ingest",
+          "specifiers": [
+            "ingest"
+          ]
+        },
+        {
+          "source": "core.config",
+          "specifiers": [
+            "Settings"
+          ]
+        },
+        {
+          "source": "core.sources",
+          "specifiers": [
+            "DeploymentMode",
+            "SourceClass"
+          ]
+        },
+        {
+          "source": "ingest.base",
+          "specifiers": [
+            "NAME_RE",
+            "Adapter"
+          ]
+        }
+      ],
+      "exports": [
+        "AdapterDeclarationError",
+        "StartupRefused",
+        "validate_declaration",
+        "index_adapters",
+        "_concrete_subclasses",
+        "discover",
+        "source_class_by_extracted_by",
+        "check_startup"
+      ],
+      "totalLines": 92,
+      "hasStructuralAnalysis": true
+    },
+    "ingest/schema.py": {
+      "filePath": "ingest/schema.py",
+      "contentHash": "164a1dd392ae7e74ab094b849a7207a6a24a0a3da5ef2f1e687545b7d5a7a96d",
+      "functions": [],
+      "classes": [
+        {
+          "name": "StrictModel",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "imports": [
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "BaseModel",
+            "ConfigDict"
+          ]
+        }
+      ],
+      "exports": [
+        "StrictModel"
+      ],
+      "totalLines": 8,
+      "hasStructuralAnalysis": true
+    },
+    "migrations/env.py": {
+      "filePath": "migrations/env.py",
+      "contentHash": "107f29ec9b8319e35027d718b2adb079823e6091a80b49682aad447a5861a427",
+      "functions": [
+        {
+          "name": "_url",
+          "params": [],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "run_migrations_offline",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "run_migrations_online",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "logging.config",
+          "specifiers": [
+            "fileConfig"
+          ]
+        },
+        {
+          "source": "alembic",
+          "specifiers": [
+            "context"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "create_engine",
+            "pool"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "core.db.models"
+          ]
+        },
+        {
+          "source": "core.config",
+          "specifiers": [
+            "get_settings"
+          ]
+        },
+        {
+          "source": "core.db.base",
+          "specifiers": [
+            "Base"
+          ]
+        }
+      ],
+      "exports": [
+        "_url",
+        "run_migrations_offline",
+        "run_migrations_online"
+      ],
+      "totalLines": 39,
+      "hasStructuralAnalysis": true
+    },
+    "migrations/script.py.mako": {
+      "filePath": "migrations/script.py.mako",
+      "contentHash": "8f04eceacc65e51e5371acb08200412129d28d866c44cf9c8d87b91f6e5474f5",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 26,
+      "hasStructuralAnalysis": false
+    },
+    "migrations/versions/0001_financial_facts.py": {
+      "filePath": "migrations/versions/0001_financial_facts.py",
+      "contentHash": "cde5884bb6fd72369f8c02c8ccdd7083fa044242aa2489a6445513186ddb513a",
+      "functions": [
+        {
+          "name": "upgrade",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 94
+        },
+        {
+          "name": "downgrade",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Sequence"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "sa"
+          ]
+        },
+        {
+          "source": "alembic",
+          "specifiers": [
+            "op"
+          ]
+        }
+      ],
+      "exports": [
+        "upgrade",
+        "downgrade"
+      ],
+      "totalLines": 120,
+      "hasStructuralAnalysis": true
+    },
+    "migrations/versions/0002_raw_source_file.py": {
+      "filePath": "migrations/versions/0002_raw_source_file.py",
+      "contentHash": "4442f615fee5f17d5d5a3a97844d4e501320fe494da4c66194947b8fa0ed25f8",
+      "functions": [
+        {
+          "name": "upgrade",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 46
+        },
+        {
+          "name": "downgrade",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Sequence"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "sa"
+          ]
+        },
+        {
+          "source": "alembic",
+          "specifiers": [
+            "op"
+          ]
+        }
+      ],
+      "exports": [
+        "upgrade",
+        "downgrade"
+      ],
+      "totalLines": 69,
+      "hasStructuralAnalysis": true
+    },
+    "migrations/versions/0003_entity_and_index_snapshots.py": {
+      "filePath": "migrations/versions/0003_entity_and_index_snapshots.py",
+      "contentHash": "2f568e238184166a9c73d73d47910e60d5a33271f05f91a0bb4d53a9e305fd21",
+      "functions": [
+        {
+          "name": "upgrade",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 151
+        },
+        {
+          "name": "downgrade",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Sequence"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "sa"
+          ]
+        },
+        {
+          "source": "alembic",
+          "specifiers": [
+            "op"
+          ]
+        },
+        {
+          "source": "sqlalchemy.dialects",
+          "specifiers": [
+            "postgresql"
+          ]
+        }
+      ],
+      "exports": [
+        "upgrade",
+        "downgrade"
+      ],
+      "totalLines": 210,
+      "hasStructuralAnalysis": true
+    },
+    "migrations/versions/0004_index_snapshot_rule_versioned.py": {
+      "filePath": "migrations/versions/0004_index_snapshot_rule_versioned.py",
+      "contentHash": "478eaf55d9e1d063fd64e17b5312413434dc681d9f9e0d4076717fdb80a0da60",
+      "functions": [
+        {
+          "name": "upgrade",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "downgrade",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Sequence"
+          ]
+        },
+        {
+          "source": "alembic",
+          "specifiers": [
+            "op"
+          ]
+        }
+      ],
+      "exports": [
+        "upgrade",
+        "downgrade"
+      ],
+      "totalLines": 39,
+      "hasStructuralAnalysis": true
+    },
+    "migrations/versions/0005_nse_bhavcopy.py": {
+      "filePath": "migrations/versions/0005_nse_bhavcopy.py",
+      "contentHash": "35cf5c399bd08743e91632d2d4fa2aa0f1fe72c15a0935df345beffd877b05ae",
+      "functions": [
+        {
+          "name": "upgrade",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 86
+        },
+        {
+          "name": "downgrade",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Sequence"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "sa"
+          ]
+        },
+        {
+          "source": "alembic",
+          "specifiers": [
+            "op"
+          ]
+        },
+        {
+          "source": "sqlalchemy.dialects",
+          "specifiers": [
+            "postgresql"
+          ]
+        }
+      ],
+      "exports": [
+        "upgrade",
+        "downgrade"
+      ],
+      "totalLines": 131,
+      "hasStructuralAnalysis": true
+    },
+    "pyproject.toml": {
+      "filePath": "pyproject.toml",
+      "contentHash": "56ebede03233798daf3c7c0ac8c6d6876f883d446f7d1b71560908bbfeca7235",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 39,
+      "hasStructuralAnalysis": false
+    },
+    "requirements.txt": {
+      "filePath": "requirements.txt",
+      "contentHash": "3746f36f5aea0f6d4d6da46b99516bfd2ac7c22fd60785684b67c1b3193c8c87",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 37,
+      "hasStructuralAnalysis": false
+    },
+    "tests/__init__.py": {
+      "filePath": "tests/__init__.py",
+      "contentHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 1,
+      "hasStructuralAnalysis": true
+    },
+    "tests/conftest.py": {
+      "filePath": "tests/conftest.py",
+      "contentHash": "a1097e43b09994b499dc24390fab2ae9dbece1b4a173761efa49af103a6c86e4",
+      "functions": [
+        {
+          "name": "_alembic_config",
+          "params": [
+            "url"
+          ],
+          "returnType": "Config",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_recreate_database",
+          "params": [
+            "url"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "engine",
+          "params": [],
+          "returnType": "Engine",
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "s3_store",
+          "params": [],
+          "returnType": "S3BlobStore",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "session",
+          "params": [
+            "engine"
+          ],
+          "returnType": "Session",
+          "exported": true,
+          "lineCount": 14
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "alembic",
+          "specifiers": [
+            "command"
+          ]
+        },
+        {
+          "source": "alembic.config",
+          "specifiers": [
+            "Config"
+          ]
+        },
+        {
+          "source": "botocore.exceptions",
+          "specifiers": [
+            "BotoCoreError",
+            "ClientError"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "Engine",
+            "create_engine",
+            "text"
+          ]
+        },
+        {
+          "source": "sqlalchemy.engine",
+          "specifiers": [
+            "make_url"
+          ]
+        },
+        {
+          "source": "sqlalchemy.exc",
+          "specifiers": [
+            "OperationalError"
+          ]
+        },
+        {
+          "source": "sqlalchemy.orm",
+          "specifiers": [
+            "Session"
+          ]
+        },
+        {
+          "source": "core.blob",
+          "specifiers": [
+            "S3BlobStore",
+            "s3_blob_store"
+          ]
+        },
+        {
+          "source": "core.config",
+          "specifiers": [
+            "get_settings"
+          ]
+        }
+      ],
+      "exports": [
+        "_alembic_config",
+        "_recreate_database",
+        "engine",
+        "s3_store",
+        "session"
+      ],
+      "totalLines": 86,
+      "hasStructuralAnalysis": true
+    },
+    "tests/factories.py": {
+      "filePath": "tests/factories.py",
+      "contentHash": "3d48a69ef0b4b24020235bab745ce11cb09e076333e97a31a75aed92820b8faa",
+      "functions": [
+        {
+          "name": "make_fact",
+          "params": [
+            "**overrides"
+          ],
+          "returnType": "FinancialFact",
+          "exported": true,
+          "lineCount": 19
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date",
+            "datetime"
+          ]
+        },
+        {
+          "source": "decimal",
+          "specifiers": [
+            "Decimal"
+          ]
+        },
+        {
+          "source": "core.compute.hashing",
+          "specifiers": [
+            "content_hash"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "Consolidation",
+            "FactKind",
+            "FinancialFact"
+          ]
+        },
+        {
+          "source": "core.timezones",
+          "specifiers": [
+            "IST"
+          ]
+        }
+      ],
+      "exports": [
+        "make_fact"
+      ],
+      "totalLines": 30,
+      "hasStructuralAnalysis": true
+    },
+    "tests/fakes.py": {
+      "filePath": "tests/fakes.py",
+      "contentHash": "40402ce6b7d50d768ecd042a533e64101aa9a762c4f9d442f8358d26d91c3a9c",
+      "functions": [],
+      "classes": [
+        {
+          "name": "MemoryBlobStore",
+          "methods": [
+            "__init__",
+            "put",
+            "get",
+            "exists"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "FailingBlobStore",
+          "methods": [
+            "put"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "imports": [
+        {
+          "source": "core.compute.hashing",
+          "specifiers": [
+            "content_hash"
+          ]
+        }
+      ],
+      "exports": [
+        "MemoryBlobStore",
+        "FailingBlobStore"
+      ],
+      "totalLines": 25,
+      "hasStructuralAnalysis": true
+    },
+    "tests/fixtures/nse_bhavcopy/SOURCES.md": {
+      "filePath": "tests/fixtures/nse_bhavcopy/SOURCES.md",
+      "contentHash": "354ae77ea6972c4d7697aa54d9b5a097b1c36cb2fa6bd3e5c1bc703809e62cca",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 13,
+      "hasStructuralAnalysis": false
+    },
+    "tests/fixtures/nse_indices/SOURCES.md": {
+      "filePath": "tests/fixtures/nse_indices/SOURCES.md",
+      "contentHash": "84cc67a8a7bafbc178f93d3e84de01dc100ef056a985c76b01cd4b9bf03f7281",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 17,
+      "hasStructuralAnalysis": false
+    },
+    "tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json": {
+      "filePath": "tests/fixtures/nse_indices/cdx_niftyindices_ind_nifty50list.json",
+      "contentHash": "ab21ed8bc586609f3127d6e00c7d4bbf91e65a3cf785461f59d0825f364e2cc1",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 19,
+      "hasStructuralAnalysis": false
+    },
+    "tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv": {
+      "filePath": "tests/fixtures/nse_indices/ind_nifty50list_20160310050302.csv",
+      "contentHash": "9a96dcedf1298ec49784075537dccf4a1e9c407803447382b02f9f20d0b86231",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": false
+    },
+    "tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv": {
+      "filePath": "tests/fixtures/nse_indices/ind_nifty50list_20171016083142.csv",
+      "contentHash": "684f58aad740079458d5f204a250ac0eec98de6180d2b3121dc469ba697f0f88",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": false
+    },
+    "tests/fixtures/nse_indices/ind_nifty50list_20260915.csv": {
+      "filePath": "tests/fixtures/nse_indices/ind_nifty50list_20260915.csv",
+      "contentHash": "9fb8832853c279448d2bc05f0e7dd5f460ed2ff35332fea8c40fc1250362ad28",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": false
+    },
+    "tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv": {
+      "filePath": "tests/fixtures/nse_indices/ind_niftynext50list_20260915.csv",
+      "contentHash": "e4654c80b911e3eaeb8044ec3a9e61d89b9db0702cc98b80e5a8fe86fbf83d5e",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [],
+      "totalLines": 52,
+      "hasStructuralAnalysis": false
+    },
+    "tests/test_architecture.py": {
+      "filePath": "tests/test_architecture.py",
+      "contentHash": "b1ab2ce73ca86f04ae620596939ad9c47b2e4861690101cd27236e6ee9255b7e",
+      "functions": [
+        {
+          "name": "repo_files",
+          "params": [],
+          "returnType": "tuple[SourceFile, ...]",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "_dotted",
+          "params": [
+            "node"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_terminal",
+          "params": [
+            "node"
+          ],
+          "returnType": "str | None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_matches",
+          "params": [
+            "module",
+            "prefix"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_resolve_from",
+          "params": [
+            "sf",
+            "node"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "imports",
+          "params": [
+            "sf"
+          ],
+          "returnType": "Iterator[Import]",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "check_gateway_imports",
+          "params": [
+            "files"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "check_provider_sdk_imports",
+          "params": [
+            "files"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "_mentions_float",
+          "params": [
+            "annotation"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "_is_mapped",
+          "params": [
+            "annotation"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_is_money_name",
+          "params": [
+            "name"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_annotations",
+          "params": [
+            "tree"
+          ],
+          "returnType": "Iterator[tuple[str | None, int, ast.expr]]",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "check_no_float_money",
+          "params": [
+            "files"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "_class_index",
+          "params": [
+            "files"
+          ],
+          "returnType": "dict[ClassKey, tuple[SourceFile, ast.ClassDef]]",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "_body_assigns",
+          "params": [],
+          "returnType": "dict[str, ast.expr | None]",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "_resolve_class",
+          "params": [
+            "index",
+            "sf",
+            "base"
+          ],
+          "returnType": "ClassKey | None",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "_fields",
+          "params": [
+            "index",
+            "key",
+            "seen"
+          ],
+          "returnType": "tuple[set[str], set[str]]",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "table_models",
+          "params": [
+            "files"
+          ],
+          "returnType": "Iterator[tuple[SourceFile, ast.ClassDef, set[str], set[str]]]",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "check_provenance_columns",
+          "params": [
+            "files"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "_compute_import_ok",
+          "params": [
+            "imp"
+          ],
+          "returnType": "bool",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "check_compute_is_pure",
+          "params": [
+            "files"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "check_reads_go_through_pit",
+          "params": [
+            "files"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 37
+        },
+        {
+          "name": "check_mcp_imports",
+          "params": [
+            "files"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "_valued_fields",
+          "params": [
+            "index",
+            "key",
+            "seen"
+          ],
+          "returnType": "set[str]",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "check_ingest_modules_declare",
+          "params": [
+            "files"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "test_repo_obeys_rule",
+          "params": [
+            "rule"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_scan_is_not_vacuous",
+          "params": [],
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "test_ingest_infra_list_matches_registry",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_orm_metadata_has_provenance_columns",
+          "params": [],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "_file",
+          "params": [
+            "rel",
+            "source"
+          ],
+          "returnType": "SourceFile",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_rule_detects",
+          "params": [
+            "rule",
+            "rel",
+            "source",
+            "expected"
+          ],
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [
+        {
+          "name": "SourceFile",
+          "methods": [
+            "is_package",
+            "module",
+            "under"
+          ],
+          "properties": [
+            "rel",
+            "tree"
+          ],
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "Import",
+          "methods": [
+            "targets"
+          ],
+          "properties": [
+            "line",
+            "module",
+            "names"
+          ],
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "imports": [
+        {
+          "source": "ast",
+          "specifiers": [
+            "ast"
+          ]
+        },
+        {
+          "source": "os",
+          "specifiers": [
+            "os"
+          ]
+        },
+        {
+          "source": "re",
+          "specifiers": [
+            "re"
+          ]
+        },
+        {
+          "source": "textwrap",
+          "specifiers": [
+            "textwrap"
+          ]
+        },
+        {
+          "source": "collections.abc",
+          "specifiers": [
+            "Callable",
+            "Iterator"
+          ]
+        },
+        {
+          "source": "dataclasses",
+          "specifiers": [
+            "dataclass"
+          ]
+        },
+        {
+          "source": "functools",
+          "specifiers": [
+            "cache"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path",
+            "PurePosixPath"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        }
+      ],
+      "exports": [
+        "SourceFile",
+        "Import",
+        "repo_files",
+        "_dotted",
+        "_terminal",
+        "_matches",
+        "_resolve_from",
+        "imports",
+        "check_gateway_imports",
+        "check_provider_sdk_imports",
+        "_mentions_float",
+        "_is_mapped",
+        "_is_money_name",
+        "_annotations",
+        "check_no_float_money",
+        "_class_index",
+        "_body_assigns",
+        "_resolve_class",
+        "_fields",
+        "table_models",
+        "check_provenance_columns",
+        "_compute_import_ok",
+        "check_compute_is_pure",
+        "check_reads_go_through_pit",
+        "check_mcp_imports",
+        "_valued_fields",
+        "check_ingest_modules_declare",
+        "test_repo_obeys_rule",
+        "test_scan_is_not_vacuous",
+        "test_ingest_infra_list_matches_registry",
+        "test_orm_metadata_has_provenance_columns",
+        "_file",
+        "test_rule_detects"
+      ],
+      "totalLines": 722,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_blob_s3.py": {
+      "filePath": "tests/test_blob_s3.py",
+      "contentHash": "ef8fc6e9bd84b1948f2266a2db55e9b3f8e28f6496f8d1d959307305c8d52778",
+      "functions": [
+        {
+          "name": "test_round_trip_keyed_by_content_hash",
+          "params": [
+            "s3_store"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_putting_same_bytes_again_is_a_no_op",
+          "params": [
+            "s3_store"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_missing_key",
+          "params": [
+            "s3_store"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_existing_object_cannot_be_replaced",
+          "params": [
+            "s3_store"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_bucket_has_object_lock_with_default_retention",
+          "params": [
+            "s3_store"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_malformed_key_rejected",
+          "params": [
+            "s3_store"
+          ],
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "botocore.exceptions",
+          "specifiers": [
+            "ClientError"
+          ]
+        },
+        {
+          "source": "core.blob",
+          "specifiers": [
+            "object_key"
+          ]
+        },
+        {
+          "source": "core.compute.hashing",
+          "specifiers": [
+            "content_hash"
+          ]
+        }
+      ],
+      "exports": [
+        "test_round_trip_keyed_by_content_hash",
+        "test_putting_same_bytes_again_is_a_no_op",
+        "test_missing_key",
+        "test_existing_object_cannot_be_replaced",
+        "test_bucket_has_object_lock_with_default_retention",
+        "test_malformed_key_rejected"
+      ],
+      "totalLines": 50,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_compute_isin.py": {
+      "filePath": "tests/test_compute_isin.py",
+      "contentHash": "0859966f09c2041f1764814dc816b15a715029932d654fac595bfed60b38b79d",
+      "functions": [
+        {
+          "name": "test_known_isins_are_valid",
+          "params": [
+            "isin"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_malformed_or_wrong_check_digit_rejected",
+          "params": [
+            "isin"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_exactly_one_check_digit_validates",
+          "params": [
+            "body"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_bad_body_raises",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "string",
+          "specifiers": [
+            "string"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "hypothesis",
+          "specifiers": [
+            "given"
+          ]
+        },
+        {
+          "source": "hypothesis",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "core.compute.isin",
+          "specifiers": [
+            "is_valid_isin",
+            "isin_check_digit"
+          ]
+        }
+      ],
+      "exports": [
+        "test_known_isins_are_valid",
+        "test_malformed_or_wrong_check_digit_rejected",
+        "test_exactly_one_check_digit_validates",
+        "test_bad_body_raises"
+      ],
+      "totalLines": 48,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_compute_membership.py": {
+      "filePath": "tests/test_compute_membership.py",
+      "contentHash": "2e86325e877d6a90744c4477ad88d7a1780abeee6432c3e1188077307d46be94",
+      "functions": [
+        {
+          "name": "at",
+          "params": [
+            "days"
+          ],
+          "returnType": "datetime",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "snap",
+          "params": [
+            "days",
+            "complete"
+          ],
+          "returnType": "Snapshot",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "members",
+          "params": [
+            "uncertain"
+          ],
+          "returnType": "Membership",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_runs_are_membership_and_the_edges_between_snapshots_are_uncertain",
+          "params": [],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_before_the_first_snapshot_nobody_is_a_member",
+          "params": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_after_the_last_snapshot_open_intervals_are_uncertain",
+          "params": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_absence_from_an_incomplete_snapshot_does_not_end_a_run",
+          "params": [],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_leaving_and_rejoining_makes_two_intervals",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_complete_snapshots_at_one_instant_must_agree",
+          "params": [
+            "second"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_an_incomplete_snapshot_may_list_fewer_at_the_same_instant",
+          "params": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_a_snapshot_reads_back_at_its_own_instant",
+          "params": [
+            "snapshots"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_members_and_uncertain_are_disjoint_and_come_from_snapshots",
+          "params": [
+            "snapshots",
+            "day"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_input_order_does_not_matter",
+          "params": [
+            "pair"
+          ],
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timedelta",
+            "timezone"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "hypothesis",
+          "specifiers": [
+            "given"
+          ]
+        },
+        {
+          "source": "hypothesis",
+          "specifiers": [
+            "st"
+          ]
+        },
+        {
+          "source": "core.compute.membership",
+          "specifiers": [
+            "ConflictingSnapshots",
+            "Membership",
+            "ObservedInterval",
+            "Snapshot",
+            "membership_on",
+            "observed_intervals"
+          ]
+        }
+      ],
+      "exports": [
+        "at",
+        "snap",
+        "members",
+        "test_runs_are_membership_and_the_edges_between_snapshots_are_uncertain",
+        "test_before_the_first_snapshot_nobody_is_a_member",
+        "test_after_the_last_snapshot_open_intervals_are_uncertain",
+        "test_absence_from_an_incomplete_snapshot_does_not_end_a_run",
+        "test_leaving_and_rejoining_makes_two_intervals",
+        "test_complete_snapshots_at_one_instant_must_agree",
+        "test_an_incomplete_snapshot_may_list_fewer_at_the_same_instant",
+        "test_a_snapshot_reads_back_at_its_own_instant",
+        "test_members_and_uncertain_are_disjoint_and_come_from_snapshots",
+        "test_input_order_does_not_matter"
+      ],
+      "totalLines": 113,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_config.py": {
+      "filePath": "tests/test_config.py",
+      "contentHash": "c7953777a8e0bb87b8891660eb653a32bc836eb92565586b5ad11ad46f7d8e34",
+      "functions": [
+        {
+          "name": "test_source_switches_parsed_from_env_names",
+          "params": [],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_source_switch_names_are_case_insensitive",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_non_boolean_switch_value_fails_loudly",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "clean_env",
+          "params": [
+            "monkeypatch",
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_defaults_are_personal_with_everything_off",
+          "params": [
+            "clean_env"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_settings_read_switches_from_environment_and_env_file",
+          "params": [
+            "clean_env",
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_environment_overrides_env_file",
+          "params": [
+            "clean_env",
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "ValidationError"
+          ]
+        },
+        {
+          "source": "core.config",
+          "specifiers": [
+            "get_settings",
+            "parse_source_switches"
+          ]
+        },
+        {
+          "source": "core.sources",
+          "specifiers": [
+            "DeploymentMode"
+          ]
+        }
+      ],
+      "exports": [
+        "test_source_switches_parsed_from_env_names",
+        "test_source_switch_names_are_case_insensitive",
+        "test_non_boolean_switch_value_fails_loudly",
+        "clean_env",
+        "test_defaults_are_personal_with_everything_off",
+        "test_settings_read_switches_from_environment_and_env_file",
+        "test_environment_overrides_env_file"
+      ],
+      "totalLines": 59,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_financial_facts_schema.py": {
+      "filePath": "tests/test_financial_facts_schema.py",
+      "contentHash": "5b253d976df3a7c19a6eaafe082bce857b24cd88f4e7539bebf0824b3b4c68b2",
+      "functions": [
+        {
+          "name": "_assert_rejected",
+          "params": [
+            "session",
+            "fact",
+            "exc"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_models_match_migrations",
+          "params": [
+            "engine"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_valid_fact_round_trips_decimal_exactly",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_naive_as_of_rejected_before_reaching_db",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_as_of_on_period_end_day_in_ist_rejected",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_as_of_boundary_is_evaluated_in_ist_not_utc",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "test_non_indian_or_malformed_isin_rejected",
+          "params": [
+            "session",
+            "isin"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_period_start_after_end_rejected",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_reported_fact_requires_xbrl_element",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_computed_fact_must_not_claim_xbrl_element",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_model_version_forbidden",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_bad_content_hash_rejected",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_duplicate_version_rejected_including_null_period_start",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_store_is_append_only",
+          "params": [
+            "session",
+            "sql"
+          ],
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date",
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "decimal",
+          "specifiers": [
+            "Decimal"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "alembic.autogenerate",
+          "specifiers": [
+            "compare_metadata"
+          ]
+        },
+        {
+          "source": "alembic.migration",
+          "specifiers": [
+            "MigrationContext"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "select",
+            "text"
+          ]
+        },
+        {
+          "source": "sqlalchemy.exc",
+          "specifiers": [
+            "DBAPIError",
+            "IntegrityError"
+          ]
+        },
+        {
+          "source": "core.db.base",
+          "specifiers": [
+            "Base"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "FactKind",
+            "FinancialFact"
+          ]
+        },
+        {
+          "source": "core.timezones",
+          "specifiers": [
+            "IST"
+          ]
+        },
+        {
+          "source": "tests.factories",
+          "specifiers": [
+            "make_fact"
+          ]
+        }
+      ],
+      "exports": [
+        "_assert_rejected",
+        "test_models_match_migrations",
+        "test_valid_fact_round_trips_decimal_exactly",
+        "test_naive_as_of_rejected_before_reaching_db",
+        "test_as_of_on_period_end_day_in_ist_rejected",
+        "test_as_of_boundary_is_evaluated_in_ist_not_utc",
+        "test_non_indian_or_malformed_isin_rejected",
+        "test_period_start_after_end_rejected",
+        "test_reported_fact_requires_xbrl_element",
+        "test_computed_fact_must_not_claim_xbrl_element",
+        "test_model_version_forbidden",
+        "test_bad_content_hash_rejected",
+        "test_duplicate_version_rejected_including_null_period_start",
+        "test_store_is_append_only"
+      ],
+      "totalLines": 110,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_http.py": {
+      "filePath": "tests/test_http.py",
+      "contentHash": "316181a51ad324549bc9141f40284f935fe4c309dd71d32a94c213096a56da8a",
+      "functions": [
+        {
+          "name": "_client",
+          "params": [
+            "routes",
+            "respect_robots",
+            "clock"
+          ],
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "test_identifies_itself",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_throttles_per_host",
+          "params": [],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_robots_disallow_stops_before_requesting",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_robots_fetched_once_per_origin",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_missing_robots_allows",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_robots_forbidden_means_disallow_all",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_block_raises_without_retry",
+          "params": [
+            "status"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_other_http_errors_raise",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_apis_skip_robots",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "_scripted",
+          "params": [
+            "answers",
+            "retries"
+          ],
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "test_overload_not_retried_by_default",
+          "params": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_overload_retried_with_growing_backoff",
+          "params": [
+            "status"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_overload_retries_are_bounded",
+          "params": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_timeout_retried_then_raised",
+          "params": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_retry_after_longer_than_backoff_is_honoured",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_get_with_raw_returns_bytes_as_transferred_and_decoded_content",
+          "params": [
+            "encoding"
+          ],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_get_with_raw_still_stops_on_a_block",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_block_never_retried_even_when_retries_enabled",
+          "params": [
+            "status"
+          ],
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [
+        {
+          "name": "FakeClock",
+          "methods": [
+            "__init__",
+            "monotonic",
+            "sleep"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "imports": [
+        {
+          "source": "gzip",
+          "specifiers": [
+            "gzip"
+          ]
+        },
+        {
+          "source": "httpx",
+          "specifiers": [
+            "httpx"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "ingest.http",
+          "specifiers": [
+            "AccessBlocked",
+            "PoliteClient"
+          ]
+        }
+      ],
+      "exports": [
+        "FakeClock",
+        "_client",
+        "test_identifies_itself",
+        "test_throttles_per_host",
+        "test_robots_disallow_stops_before_requesting",
+        "test_robots_fetched_once_per_origin",
+        "test_missing_robots_allows",
+        "test_robots_forbidden_means_disallow_all",
+        "test_block_raises_without_retry",
+        "test_other_http_errors_raise",
+        "test_apis_skip_robots",
+        "_scripted",
+        "test_overload_not_retried_by_default",
+        "test_overload_retried_with_growing_backoff",
+        "test_overload_retries_are_bounded",
+        "test_timeout_retried_then_raised",
+        "test_retry_after_longer_than_backoff_is_honoured",
+        "test_get_with_raw_returns_bytes_as_transferred_and_decoded_content",
+        "test_get_with_raw_still_stops_on_a_block",
+        "test_block_never_retried_even_when_retries_enabled"
+      ],
+      "totalLines": 190,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_ingest_base.py": {
+      "filePath": "tests/test_ingest_base.py",
+      "contentHash": "5538056088850c36c8e0c40afe344d11d908da126876008a5fbd95814eb68c95",
+      "functions": [
+        {
+          "name": "_ctx",
+          "params": [
+            "**settings"
+          ],
+          "returnType": "AdapterContext",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_web_scrape_adapter_disabled_unless_both_switches_on",
+          "params": [
+            "settings",
+            "reason"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_web_scrape_adapter_runs_with_both_switches_on",
+          "params": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_master_scraping_switch_does_not_affect_official_sources",
+          "params": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_adapter_without_a_switch_is_disabled",
+          "params": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_canary_skipped_when_disabled_and_run_when_enabled",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_extracted_by_is_the_adapter_import_path",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_declared",
+          "params": [
+            "**attrs"
+          ],
+          "returnType": "type[Adapter]",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_invalid_declarations_rejected",
+          "params": [
+            "attrs"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_duplicate_adapter_names_rejected",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_discovered_adapters_are_valid",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_every_discovered_web_scrape_adapter_is_disabled_by_its_switch",
+          "params": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_startup_refused",
+          "params": [
+            "settings"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_startup_allowed",
+          "params": [
+            "settings"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_cli_refuses_commercial_mode_with_scraping",
+          "params": [
+            "monkeypatch",
+            "tmp_path",
+            "capsys"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_cli_exits_1_when_an_adapter_reports_failure",
+          "params": [
+            "monkeypatch",
+            "tmp_path",
+            "capsys"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_default_reparse_is_a_no_op",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_reparse_respects_the_disabled_switch",
+          "params": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_cli_reparse_dispatches_to_adapter",
+          "params": [
+            "monkeypatch",
+            "tmp_path",
+            "capsys"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_cli_reparse_with_no_names_covers_every_adapter",
+          "params": [
+            "monkeypatch",
+            "tmp_path",
+            "capsys"
+          ],
+          "exported": true,
+          "lineCount": 9
+        }
+      ],
+      "classes": [
+        {
+          "name": "_Recording",
+          "methods": [
+            "__init__",
+            "ingest",
+            "check_shape"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "FakeScrape",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "FakeApi",
+          "methods": [],
+          "properties": [],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "FakeFailing",
+          "methods": [
+            "ingest"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "imports": [
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "core.config",
+          "specifiers": [
+            "Settings"
+          ]
+        },
+        {
+          "source": "core.sources",
+          "specifiers": [
+            "DeploymentMode",
+            "SourceClass"
+          ]
+        },
+        {
+          "source": "ingest",
+          "specifiers": [
+            "cli"
+          ]
+        },
+        {
+          "source": "ingest.base",
+          "specifiers": [
+            "Adapter",
+            "AdapterContext",
+            "CanaryStatus",
+            "RunResult",
+            "RunStatus"
+          ]
+        },
+        {
+          "source": "ingest.registry",
+          "specifiers": [
+            "AdapterDeclarationError",
+            "StartupRefused",
+            "check_startup",
+            "discover",
+            "index_adapters",
+            "source_class_by_extracted_by",
+            "validate_declaration"
+          ]
+        },
+        {
+          "source": "tests.fakes",
+          "specifiers": [
+            "MemoryBlobStore"
+          ]
+        }
+      ],
+      "exports": [
+        "_Recording",
+        "FakeScrape",
+        "FakeApi",
+        "_ctx",
+        "test_web_scrape_adapter_disabled_unless_both_switches_on",
+        "test_web_scrape_adapter_runs_with_both_switches_on",
+        "test_master_scraping_switch_does_not_affect_official_sources",
+        "test_adapter_without_a_switch_is_disabled",
+        "test_canary_skipped_when_disabled_and_run_when_enabled",
+        "test_extracted_by_is_the_adapter_import_path",
+        "_declared",
+        "test_invalid_declarations_rejected",
+        "test_duplicate_adapter_names_rejected",
+        "test_discovered_adapters_are_valid",
+        "test_every_discovered_web_scrape_adapter_is_disabled_by_its_switch",
+        "test_startup_refused",
+        "test_startup_allowed",
+        "test_cli_refuses_commercial_mode_with_scraping",
+        "FakeFailing",
+        "test_cli_exits_1_when_an_adapter_reports_failure",
+        "test_default_reparse_is_a_no_op",
+        "test_reparse_respects_the_disabled_switch",
+        "test_cli_reparse_dispatches_to_adapter",
+        "test_cli_reparse_with_no_names_covers_every_adapter"
+      ],
+      "totalLines": 245,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_nse_bhavcopy_adapters.py": {
+      "filePath": "tests/test_nse_bhavcopy_adapters.py",
+      "contentHash": "4a20b664be3b0e9ffbaef32a85b037fe6d3c99a8c68d4442524d2f45e3aec45f",
+      "functions": [
+        {
+          "name": "_row",
+          "params": [
+            "trade_date",
+            "isin",
+            "symbol",
+            "series"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_bhavcopy",
+          "params": [
+            "trade_date"
+          ],
+          "returnType": "bytes",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_url",
+          "params": [
+            "day"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "page",
+          "params": [
+            "content",
+            "status",
+            "headers"
+          ],
+          "returnType": "tuple",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_tiny_bounds",
+          "params": [
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_ctx",
+          "params": [
+            "session",
+            "now",
+            "blob",
+            "**settings"
+          ],
+          "returnType": "AdapterContext",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_all",
+          "params": [
+            "session",
+            "model"
+          ],
+          "returnType": "list",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_ingest_walks_forward_storing_rows_and_skipping_holidays",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "test_rerun_only_rechecks_the_current_holiday_streak",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_symbol_resolves_to_the_isin_it_traded_under_on_that_date",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_blocked_source_stops_the_run_and_keeps_what_was_loaded",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_check_shape_finds_the_latest_available_day_without_storing",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_check_shape_raises_when_nothing_found_in_ten_days",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_whole_file_quarantine_is_resolved_by_reparse_after_bounds_relax",
+          "params": [
+            "session",
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "test_row_quarantine_keeps_the_rest_of_the_file",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_reparse_of_an_already_current_file_changes_nothing",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_dropped_bhavcopy_is_dated_by_its_sidecar_and_loaded_once",
+          "params": [
+            "session",
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 18
+        }
+      ],
+      "classes": [
+        {
+          "name": "Web",
+          "methods": [
+            "__init__",
+            "set",
+            "__call__",
+            "transport"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 18
+        }
+      ],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date",
+            "datetime",
+            "timedelta"
+          ]
+        },
+        {
+          "source": "httpx",
+          "specifiers": [
+            "httpx"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "select"
+          ]
+        },
+        {
+          "source": "core.config",
+          "specifiers": [
+            "Settings"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "BhavcopyQuarantineReason",
+            "NseBhavcopyQuarantine",
+            "NseBhavcopyRow"
+          ]
+        },
+        {
+          "source": "core.db.pit",
+          "specifiers": [
+            "bhavcopy_quarantine_review_as_of",
+            "symbol_to_isin_as_of"
+          ]
+        },
+        {
+          "source": "core.timezones",
+          "specifiers": [
+            "IST"
+          ]
+        },
+        {
+          "source": "ingest.base",
+          "specifiers": [
+            "AdapterContext",
+            "RunStatus"
+          ]
+        },
+        {
+          "source": "ingest.nse_bhavcopy",
+          "specifiers": [
+            "adapters"
+          ]
+        },
+        {
+          "source": "ingest.nse_bhavcopy",
+          "specifiers": [
+            "parser_module"
+          ]
+        },
+        {
+          "source": "ingest.nse_bhavcopy.adapters",
+          "specifiers": [
+            "NseBhavcopy",
+            "NseBhavcopyDrop"
+          ]
+        },
+        {
+          "source": "tests.fakes",
+          "specifiers": [
+            "MemoryBlobStore"
+          ]
+        }
+      ],
+      "exports": [
+        "_row",
+        "_bhavcopy",
+        "_url",
+        "Web",
+        "page",
+        "_tiny_bounds",
+        "_ctx",
+        "_all",
+        "test_ingest_walks_forward_storing_rows_and_skipping_holidays",
+        "test_rerun_only_rechecks_the_current_holiday_streak",
+        "test_symbol_resolves_to_the_isin_it_traded_under_on_that_date",
+        "test_blocked_source_stops_the_run_and_keeps_what_was_loaded",
+        "test_check_shape_finds_the_latest_available_day_without_storing",
+        "test_check_shape_raises_when_nothing_found_in_ten_days",
+        "test_whole_file_quarantine_is_resolved_by_reparse_after_bounds_relax",
+        "test_row_quarantine_keeps_the_rest_of_the_file",
+        "test_reparse_of_an_already_current_file_changes_nothing",
+        "test_dropped_bhavcopy_is_dated_by_its_sidecar_and_loaded_once"
+      ],
+      "totalLines": 241,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_nse_bhavcopy_parser.py": {
+      "filePath": "tests/test_nse_bhavcopy_parser.py",
+      "contentHash": "9c628c6b5daa18cfd98fff0e9e82509262bdbae45218ffe1dcb5aeea720a4a1d",
+      "functions": [
+        {
+          "name": "_data",
+          "params": [
+            "lines"
+          ],
+          "returnType": "bytes",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_row_number",
+          "params": [
+            "symbol"
+          ],
+          "returnType": "int",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_replace",
+          "params": [
+            "lines",
+            "row_number"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_recorded_bhavcopy_unzips_and_parses",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_raw_csv_without_the_zip_wrapper_parses_identically",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_reliance_row_matches_the_real_market_data",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_be_series_row_is_kept",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_non_equity_rows_are_filtered_not_quarantined",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_whole_file_rejected",
+          "params": [
+            "data",
+            "reason"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_bad_row_quarantined_and_the_rest_kept",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_malformed_numeric_field_quarantined_with_partial_identity",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_row_with_wrong_field_count_quarantined_without_identity",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_duplicate_isin_series_in_one_file_quarantines_the_later_row",
+          "params": [],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "csv",
+          "specifiers": [
+            "csv"
+          ]
+        },
+        {
+          "source": "io",
+          "specifiers": [
+            "io"
+          ]
+        },
+        {
+          "source": "zipfile",
+          "specifiers": [
+            "zipfile"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "core.compute.isin",
+          "specifiers": [
+            "is_valid_isin"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "BhavcopyQuarantineReason"
+          ]
+        },
+        {
+          "source": "ingest.nse_bhavcopy.parser",
+          "specifiers": [
+            "EQUITY_SERIES",
+            "BhavcopyRejected",
+            "parse_bhavcopy"
+          ]
+        }
+      ],
+      "exports": [
+        "_data",
+        "_row_number",
+        "_replace",
+        "test_recorded_bhavcopy_unzips_and_parses",
+        "test_raw_csv_without_the_zip_wrapper_parses_identically",
+        "test_reliance_row_matches_the_real_market_data",
+        "test_be_series_row_is_kept",
+        "test_non_equity_rows_are_filtered_not_quarantined",
+        "test_whole_file_rejected",
+        "test_bad_row_quarantined_and_the_rest_kept",
+        "test_malformed_numeric_field_quarantined_with_partial_identity",
+        "test_row_with_wrong_field_count_quarantined_without_identity",
+        "test_duplicate_isin_series_in_one_file_quarantines_the_later_row"
+      ],
+      "totalLines": 133,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_nse_indices_adapters.py": {
+      "filePath": "tests/test_nse_indices_adapters.py",
+      "contentHash": "562bb8d8ecd5282f8c120f418511a8d1b462ca5522b1ab1e1ef2802d0dff7986",
+      "functions": [
+        {
+          "name": "_isins",
+          "params": [
+            "data",
+            "index_code"
+          ],
+          "returnType": "frozenset[str]",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "capture_url",
+          "params": [
+            "row"
+          ],
+          "returnType": "str",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "page",
+          "params": [
+            "content",
+            "status",
+            "headers"
+          ],
+          "returnType": "tuple",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_ctx",
+          "params": [
+            "session",
+            "now",
+            "blob",
+            "**settings"
+          ],
+          "returnType": "AdapterContext",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "_live",
+          "params": [
+            "nifty",
+            "next50"
+          ],
+          "returnType": "Web",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_wayback",
+          "params": [
+            "first",
+            "last"
+          ],
+          "returnType": "Web",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "_all",
+          "params": [
+            "session",
+            "model"
+          ],
+          "returnType": "list",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_live_lists_become_snapshots_members_and_entities",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "test_changed_header_quarantines_the_file_keeps_its_bytes_and_fails",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_bad_row_is_quarantined_and_the_snapshot_is_incomplete",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_blocked_source_stops_without_retrying_and_stores_nothing",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_canary_checks_live_shape_without_storing",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_recorded_run_is_five_identical_captures",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_wayback_loads_run_boundaries_dated_by_capture_time",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "test_wayback_rerun_skips_captures_already_stored",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_capture_that_differs_from_its_digest_is_quarantined",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_archive_overload_is_retried_a_bounded_number_of_times_then_stops_keeping_what_loaded",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_gzip_archived_capture_is_checked_as_transferred_and_stored_decoded",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "test_whole_file_quarantine_is_examined_again_only_after_a_rule_change",
+          "params": [
+            "session",
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "test_row_quarantine_is_never_superseded",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_series_fix",
+          "params": [
+            "monkeypatch",
+            "series",
+            "rule_version"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_reparse_supersedes_an_incomplete_snapshot_from_stored_bytes_only",
+          "params": [
+            "session",
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 30
+        },
+        {
+          "name": "test_reparse_of_an_already_current_file_changes_nothing",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "test_row_quarantine_is_superseded_once_a_newer_snapshot_replaces_its_file",
+          "params": [
+            "session",
+            "monkeypatch"
+          ],
+          "exported": true,
+          "lineCount": 23
+        },
+        {
+          "name": "test_redirect_to_another_capture_is_not_stored_under_the_requested_time",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_earlier_evidence_loaded_later_appends_an_earlier_link_to_the_same_entity",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_dropped_capture_is_dated_by_its_sidecar_and_loaded_once",
+          "params": [
+            "session",
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "test_dropped_file_for_an_unknown_list_is_quarantined",
+          "params": [
+            "session",
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "_link",
+          "params": [
+            "session",
+            "isin",
+            "as_of"
+          ],
+          "returnType": "None",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_one_isin_cannot_belong_to_two_entities",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_db_constraints",
+          "params": [
+            "session",
+            "row"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_append_only",
+          "params": [
+            "session",
+            "table",
+            "sql"
+          ],
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [
+        {
+          "name": "Web",
+          "methods": [
+            "__init__",
+            "set",
+            "__call__",
+            "transport",
+            "captures_fetched"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 24
+        }
+      ],
+      "imports": [
+        {
+          "source": "gzip",
+          "specifiers": [
+            "gzip"
+          ]
+        },
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timedelta",
+            "timezone"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "httpx",
+          "specifiers": [
+            "httpx"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "select",
+            "text"
+          ]
+        },
+        {
+          "source": "sqlalchemy.exc",
+          "specifiers": [
+            "DBAPIError",
+            "IntegrityError"
+          ]
+        },
+        {
+          "source": "core.compute.hashing",
+          "specifiers": [
+            "content_hash"
+          ]
+        },
+        {
+          "source": "core.compute.membership",
+          "specifiers": [
+            "Membership"
+          ]
+        },
+        {
+          "source": "core.config",
+          "specifiers": [
+            "Settings"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "Entity",
+            "EntityIsin",
+            "EntityLinkBasis",
+            "IndexCode",
+            "IndexSnapshot",
+            "IndexSnapshotQuarantine",
+            "QuarantineReason",
+            "RawSourceFile"
+          ]
+        },
+        {
+          "source": "core.db.pit",
+          "specifiers": [
+            "index_members_on",
+            "index_quarantine_review_as_of",
+            "index_snapshot_quarantine_as_of",
+            "index_snapshots_as_of"
+          ]
+        },
+        {
+          "source": "core.timezones",
+          "specifiers": [
+            "IST"
+          ]
+        },
+        {
+          "source": "ingest.base",
+          "specifiers": [
+            "AdapterContext",
+            "CanaryStatus",
+            "RunStatus"
+          ]
+        },
+        {
+          "source": "ingest.nse_indices",
+          "specifiers": [
+            "adapters"
+          ]
+        },
+        {
+          "source": "ingest.nse_indices.adapters",
+          "specifiers": [
+            "NseIndicesConstituents",
+            "NseIndicesConstituentsDrop",
+            "WaybackIndexConstituents",
+            "wayback_digest"
+          ]
+        },
+        {
+          "source": "ingest.nse_indices",
+          "specifiers": [
+            "parser_module"
+          ]
+        },
+        {
+          "source": "ingest.nse_indices.parser",
+          "specifiers": [
+            "ListRejected",
+            "parse_constituent_list"
+          ]
+        },
+        {
+          "source": "tests.fakes",
+          "specifiers": [
+            "MemoryBlobStore"
+          ]
+        }
+      ],
+      "exports": [
+        "_isins",
+        "capture_url",
+        "page",
+        "Web",
+        "_ctx",
+        "_live",
+        "_wayback",
+        "_all",
+        "test_live_lists_become_snapshots_members_and_entities",
+        "test_changed_header_quarantines_the_file_keeps_its_bytes_and_fails",
+        "test_bad_row_is_quarantined_and_the_snapshot_is_incomplete",
+        "test_blocked_source_stops_without_retrying_and_stores_nothing",
+        "test_canary_checks_live_shape_without_storing",
+        "test_recorded_run_is_five_identical_captures",
+        "test_wayback_loads_run_boundaries_dated_by_capture_time",
+        "test_wayback_rerun_skips_captures_already_stored",
+        "test_capture_that_differs_from_its_digest_is_quarantined",
+        "test_archive_overload_is_retried_a_bounded_number_of_times_then_stops_keeping_what_loaded",
+        "test_gzip_archived_capture_is_checked_as_transferred_and_stored_decoded",
+        "test_whole_file_quarantine_is_examined_again_only_after_a_rule_change",
+        "test_row_quarantine_is_never_superseded",
+        "_series_fix",
+        "test_reparse_supersedes_an_incomplete_snapshot_from_stored_bytes_only",
+        "test_reparse_of_an_already_current_file_changes_nothing",
+        "test_row_quarantine_is_superseded_once_a_newer_snapshot_replaces_its_file",
+        "test_redirect_to_another_capture_is_not_stored_under_the_requested_time",
+        "test_earlier_evidence_loaded_later_appends_an_earlier_link_to_the_same_entity",
+        "test_dropped_capture_is_dated_by_its_sidecar_and_loaded_once",
+        "test_dropped_file_for_an_unknown_list_is_quarantined",
+        "_link",
+        "test_one_isin_cannot_belong_to_two_entities",
+        "test_db_constraints",
+        "test_append_only"
+      ],
+      "totalLines": 479,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_nse_indices_parser.py": {
+      "filePath": "tests/test_nse_indices_parser.py",
+      "contentHash": "9c2e7999b8965437cc743fc24809da34431cb0b1107f930b32bde51ebca415b5",
+      "functions": [
+        {
+          "name": "test_recorded_lists_parse_without_issues",
+          "params": [
+            "name",
+            "index_code",
+            "count"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_recorded_2016_list_first_row",
+          "params": [],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "_lines",
+          "params": [],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_data",
+          "params": [
+            "lines"
+          ],
+          "returnType": "bytes",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_replace",
+          "params": [
+            "lines",
+            "row_number"
+          ],
+          "returnType": "list[str]",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_bom_crlf_and_blank_lines_are_tolerated",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_whole_file_rejected",
+          "params": [
+            "data",
+            "reason"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_bad_row_quarantined_and_the_rest_kept",
+          "params": [
+            "fields",
+            "reason"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_be_series_is_accepted_alongside_eq",
+          "params": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_row_with_wrong_field_count_quarantined",
+          "params": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_index_for_url",
+          "params": [
+            "url",
+            "index_code"
+          ],
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "csv",
+          "specifiers": [
+            "csv"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "IndexCode",
+            "QuarantineReason"
+          ]
+        },
+        {
+          "source": "ingest.nse_indices.parser",
+          "specifiers": [
+            "ListRejected",
+            "index_for_url",
+            "parse_constituent_list"
+          ]
+        }
+      ],
+      "exports": [
+        "test_recorded_lists_parse_without_issues",
+        "test_recorded_2016_list_first_row",
+        "_lines",
+        "_data",
+        "_replace",
+        "test_bom_crlf_and_blank_lines_are_tolerated",
+        "test_whole_file_rejected",
+        "test_bad_row_quarantined_and_the_rest_kept",
+        "test_be_series_is_accepted_alongside_eq",
+        "test_row_with_wrong_field_count_quarantined",
+        "test_index_for_url"
+      ],
+      "totalLines": 123,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_pit.py": {
+      "filePath": "tests/test_pit.py",
+      "contentHash": "0f3112c307c79fd7273a5cc06ed00a523f683144dad304647c8b0d06e1062ebc",
+      "functions": [
+        {
+          "name": "_read",
+          "params": [
+            "session",
+            "as_of",
+            "**kw"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "restated",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_before_original_filing_nothing_is_known",
+          "params": [
+            "session",
+            "restated"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_read_between_filings_sees_original_not_restatement",
+          "params": [
+            "session",
+            "restated"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_as_of_boundary_is_inclusive",
+          "params": [
+            "session",
+            "restated"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_read_after_restatement_sees_latest_version_only",
+          "params": [
+            "session",
+            "restated"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_instant_and_duration_facts_are_distinct_series",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "test_other_consolidation_and_isin_not_leaked",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "test_naive_as_of_raises",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "date",
+            "datetime"
+          ]
+        },
+        {
+          "source": "decimal",
+          "specifiers": [
+            "Decimal"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "Consolidation"
+          ]
+        },
+        {
+          "source": "core.db.pit",
+          "specifiers": [
+            "facts_as_of"
+          ]
+        },
+        {
+          "source": "core.timezones",
+          "specifiers": [
+            "IST"
+          ]
+        },
+        {
+          "source": "tests.factories",
+          "specifiers": [
+            "RELIANCE",
+            "make_fact"
+          ]
+        }
+      ],
+      "exports": [
+        "_read",
+        "restated",
+        "test_before_original_filing_nothing_is_known",
+        "test_read_between_filings_sees_original_not_restatement",
+        "test_as_of_boundary_is_inclusive",
+        "test_read_after_restatement_sees_latest_version_only",
+        "test_instant_and_duration_facts_are_distinct_series",
+        "test_other_consolidation_and_isin_not_leaked",
+        "test_naive_as_of_raises"
+      ],
+      "totalLines": 82,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_raw_source_file.py": {
+      "filePath": "tests/test_raw_source_file.py",
+      "contentHash": "27bd50c162ce6efff0bc1adb05b0ad9f170b235fe5a1ff7c14da089b636d3a44",
+      "functions": [
+        {
+          "name": "_ctx",
+          "params": [
+            "session",
+            "blob",
+            "**settings"
+          ],
+          "returnType": "AdapterContext",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_stored",
+          "params": [
+            "session"
+          ],
+          "returnType": "list[RawSourceFile]",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "_row",
+          "params": [
+            "**overrides"
+          ],
+          "returnType": "RawSourceFile",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "_assert_rejected",
+          "params": [
+            "session",
+            "row",
+            "exc"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_store_raw_saves_blob_then_records_provenance",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "test_no_provenance_row_when_blob_write_fails",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_publication_after_fetch_rejected_before_anything_is_stored",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "test_naive_as_of_rejected",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_db_rejects_as_of_after_fetched_at",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_db_evaluates_as_of_against_fetch_across_time_zones",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_db_constraints",
+          "params": [
+            "session",
+            "overrides"
+          ],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_same_fetch_recorded_once",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_naive_fetched_at_rejected_before_reaching_db",
+          "params": [],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_append_only",
+          "params": [
+            "session",
+            "sql"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_pit_read_filters_by_publication_time_and_adapter",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "_drop",
+          "params": [
+            "tmp_path",
+            "files"
+          ],
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "test_drop_folder_stores_files_with_published_time_from_sidecar",
+          "params": [
+            "session",
+            "tmp_path"
+          ],
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "test_drop_folder_fails_rather_than_guessing_provenance",
+          "params": [
+            "session",
+            "tmp_path",
+            "files",
+            "error"
+          ],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_drop_folder_unset_is_a_failure_not_a_skip",
+          "params": [
+            "session"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "test_drop_adapter_is_manual_drop_class",
+          "params": [],
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "classes": [
+        {
+          "name": "Drop",
+          "methods": [
+            "ingest"
+          ],
+          "properties": [],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "imports": [
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timedelta",
+            "timezone"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "pydantic",
+          "specifiers": [
+            "ValidationError"
+          ]
+        },
+        {
+          "source": "sqlalchemy",
+          "specifiers": [
+            "select",
+            "text"
+          ]
+        },
+        {
+          "source": "sqlalchemy.exc",
+          "specifiers": [
+            "DBAPIError",
+            "IntegrityError"
+          ]
+        },
+        {
+          "source": "core.compute.hashing",
+          "specifiers": [
+            "content_hash"
+          ]
+        },
+        {
+          "source": "core.config",
+          "specifiers": [
+            "Settings"
+          ]
+        },
+        {
+          "source": "core.db.models",
+          "specifiers": [
+            "RawSourceFile"
+          ]
+        },
+        {
+          "source": "core.db.pit",
+          "specifiers": [
+            "raw_source_files_as_of"
+          ]
+        },
+        {
+          "source": "core.sources",
+          "specifiers": [
+            "SourceClass"
+          ]
+        },
+        {
+          "source": "core.timezones",
+          "specifiers": [
+            "IST"
+          ]
+        },
+        {
+          "source": "ingest.base",
+          "specifiers": [
+            "AdapterContext",
+            "DropFileError",
+            "DropFolderAdapter",
+            "RunResult",
+            "RunStatus"
+          ]
+        },
+        {
+          "source": "tests.fakes",
+          "specifiers": [
+            "FailingBlobStore",
+            "MemoryBlobStore"
+          ]
+        }
+      ],
+      "exports": [
+        "Drop",
+        "_ctx",
+        "_stored",
+        "_row",
+        "_assert_rejected",
+        "test_store_raw_saves_blob_then_records_provenance",
+        "test_no_provenance_row_when_blob_write_fails",
+        "test_publication_after_fetch_rejected_before_anything_is_stored",
+        "test_naive_as_of_rejected",
+        "test_db_rejects_as_of_after_fetched_at",
+        "test_db_evaluates_as_of_against_fetch_across_time_zones",
+        "test_db_constraints",
+        "test_same_fetch_recorded_once",
+        "test_naive_fetched_at_rejected_before_reaching_db",
+        "test_append_only",
+        "test_pit_read_filters_by_publication_time_and_adapter",
+        "_drop",
+        "test_drop_folder_stores_files_with_published_time_from_sidecar",
+        "test_drop_folder_fails_rather_than_guessing_provenance",
+        "test_drop_folder_unset_is_a_failure_not_a_skip",
+        "test_drop_adapter_is_manual_drop_class"
+      ],
+      "totalLines": 216,
+      "hasStructuralAnalysis": true
+    },
+    "tests/test_wayback_cdx.py": {
+      "filePath": "tests/test_wayback_cdx.py",
+      "contentHash": "cb62168e6429dc9189eb4b2bd7cbf7552fe0b51d2144f8dfb14e8d3ec24c857b",
+      "functions": [
+        {
+          "name": "recorded_cdx",
+          "params": [],
+          "returnType": "list[list[str]]",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "test_recorded_cdx_response_parses",
+          "params": [],
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "test_empty_cdx_response",
+          "params": [],
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_cdx_shape_change_fails_loudly",
+          "params": [
+            "rows"
+          ],
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "_capture",
+          "params": [
+            "timestamp",
+            "digest"
+          ],
+          "returnType": "CdxCapture",
+          "exported": true,
+          "lineCount": 2
+        },
+        {
+          "name": "test_run_boundaries_keeps_first_and_last_of_each_identical_run",
+          "params": [],
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "test_recorded_captures_match_their_archive_digests",
+          "params": [
+            "name",
+            "digest"
+          ],
+          "exported": true,
+          "lineCount": 2
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "json",
+          "specifiers": [
+            "json"
+          ]
+        },
+        {
+          "source": "datetime",
+          "specifiers": [
+            "datetime",
+            "timezone"
+          ]
+        },
+        {
+          "source": "pathlib",
+          "specifiers": [
+            "Path"
+          ]
+        },
+        {
+          "source": "pytest",
+          "specifiers": [
+            "pytest"
+          ]
+        },
+        {
+          "source": "ingest.nse_indices.adapters",
+          "specifiers": [
+            "CdxCapture",
+            "CdxShapeError",
+            "parse_cdx",
+            "run_boundaries",
+            "wayback_digest"
+          ]
+        }
+      ],
+      "exports": [
+        "recorded_cdx",
+        "test_recorded_cdx_response_parses",
+        "test_empty_cdx_response",
+        "test_cdx_shape_change_fails_loudly",
+        "_capture",
+        "test_run_boundaries_keeps_first_and_last_of_each_identical_run",
+        "test_recorded_captures_match_their_archive_digests"
+      ],
+      "totalLines": 72,
+      "hasStructuralAnalysis": true
+    }
+  }
+}

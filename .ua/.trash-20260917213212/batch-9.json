@@ -1,0 +1,32 @@
+{
+  "nodes": [
+    {
+      "id": "config:.ua/intermediate/scan-result.json",
+      "type": "config",
+      "name": "scan-result.json",
+      "filePath": ".ua/intermediate/scan-result.json",
+      "summary": "Project scanner output for the equity-knowledge codebase, listing all 81 files with their paths, detected languages (Python, YAML, Dockerfile, JSON, etc.), frameworks (FastAPI, SQLAlchemy, Alembic, pytest, Pydantic), and a per-file import map used by downstream analysis steps.",
+      "tags": ["configuration", "build-system", "data-pipeline", "infrastructure"],
+      "complexity": "complex"
+    },
+    {
+      "id": "config:.ua/intermediate/ua-import-map-output.json",
+      "type": "config",
+      "name": "ua-import-map-output.json",
+      "filePath": ".ua/intermediate/ua-import-map-output.json",
+      "summary": "Resolved import-map produced by the understand-anything scanner, recording 110 intra-project import edges across 31 of the 72 scanned files; used by the file-analyzer agents to emit accurate imports edges without re-parsing source.",
+      "tags": ["configuration", "data-pipeline", "build-system"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:.ua/intermediate/ua-scan-files.json",
+      "type": "config",
+      "name": "ua-scan-files.json",
+      "filePath": ".ua/intermediate/ua-scan-files.json",
+      "summary": "Canonical file inventory produced by the understand-anything project scanner, enumerating 72 source files with language, category, and size metadata, plus aggregate stats (54 code files, 7 docs, 4 infra, 4 data, 4 config) used to drive batched analysis.",
+      "tags": ["configuration", "data-pipeline", "build-system"],
+      "complexity": "moderate"
+    }
+  ],
+  "edges": []
+}

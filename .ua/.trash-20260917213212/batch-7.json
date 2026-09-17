@@ -1,0 +1,117 @@
+{
+  "nodes": [
+    {
+      "id": "config:.env.example",
+      "type": "config",
+      "name": ".env.example",
+      "filePath": ".env.example",
+      "summary": "Environment variable template defining all EQUITY_* configuration keys for database connection, blob storage (MinIO), deployment mode, and data-source adapter switches.",
+      "tags": ["configuration", "environment", "database", "security", "infrastructure"],
+      "complexity": "simple",
+      "languageNotes": "All keys are prefixed EQUITY_* per the project convention; EQUITY_DEPLOYMENT_MODE and EQUITY_WEB_SCRAPING_ENABLED act as master switches governing adapter behaviour."
+    },
+    {
+      "id": "document:CLAUDE.md",
+      "type": "document",
+      "name": "CLAUDE.md",
+      "filePath": "CLAUDE.md",
+      "summary": "Master system specification for the equity-knowledge project, defining the three non-negotiable rules (R1 deterministic compute, R2 as_of on everything, R3 model proposes / data disposes), the full tech stack, data model with 23 knowledge stores, decision-support logic, data sources, and code conventions.",
+      "tags": ["documentation", "specification", "entry-point", "architecture"],
+      "complexity": "complex",
+      "languageNotes": "19 sections covering rules, stack, deployment, data model, decision support, integrations, sources, conventions, testing, and forbidden patterns. Serves as the authoritative behavioural contract for every Claude session."
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "name": "README.md",
+      "filePath": "README.md",
+      "summary": "Developer-facing quickstart covering Windows/PowerShell setup, ingest adapter CLI commands, repository layout, and database invariants enforced at the schema level.",
+      "tags": ["documentation", "entry-point", "development", "infrastructure"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "document:Welcome.md",
+      "type": "document",
+      "name": "Welcome.md",
+      "filePath": "Welcome.md",
+      "summary": "Obsidian vault default welcome note; not part of the equity-knowledge project documentation and can be deleted.",
+      "tags": ["documentation"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:alembic.ini",
+      "type": "config",
+      "name": "alembic.ini",
+      "filePath": "alembic.ini",
+      "summary": "Alembic database migration configuration pointing to the migrations/ directory, deferring the database URL to the EQUITY_DATABASE_URL environment variable via core.config, and configuring log levels for SQLAlchemy and Alembic.",
+      "tags": ["configuration", "database", "migration", "build-system"],
+      "complexity": "simple",
+      "languageNotes": "sqlalchemy.url is intentionally left blank; the adapter pattern resolves it from the EQUITY_DATABASE_URL env var at runtime so secrets never live in the ini file."
+    },
+    {
+      "id": "document:getting-started-plan.md",
+      "type": "document",
+      "name": "getting-started-plan.md",
+      "filePath": "getting-started-plan.md",
+      "summary": "Week-by-week build plan for the MVP, detailing Claude Code session prompts for substrate setup, financial-fact ingestion, guidance extraction, and the working rhythm; also lists what must not be built before the stores have data.",
+      "tags": ["documentation", "development", "planning"],
+      "complexity": "moderate"
+    },
+    {
+      "id": "config:pyproject.toml",
+      "type": "config",
+      "name": "pyproject.toml",
+      "filePath": "pyproject.toml",
+      "summary": "Python project manifest declaring the equity-knowledge package (Python >=3.12) with core dependencies (SQLAlchemy, Alembic, psycopg, Pydantic, boto3, httpx), optional dev dependencies (pytest, hypothesis), pytest test-path configuration, and setuptools package discovery limited to core* and ingest*.",
+      "tags": ["configuration", "build-system", "dependency-management"],
+      "complexity": "simple",
+      "languageNotes": "Package discovery is explicitly scoped to core* and ingest* to prevent accidental inclusion of test or script directories."
+    },
+    {
+      "id": "document:requirements.txt",
+      "type": "document",
+      "name": "requirements.txt",
+      "filePath": "requirements.txt",
+      "summary": "Pinned exact-version dependency lockfile for reproducible venv rebuilds, covering Alembic, boto3, httpx, hypothesis, psycopg, Pydantic, pytest, SQLAlchemy, python-dotenv, and timezone data.",
+      "tags": ["documentation", "dependency-management", "configuration"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "document:README.md",
+      "target": "document:CLAUDE.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:README.md",
+      "target": "document:getting-started-plan.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "document:getting-started-plan.md",
+      "target": "document:CLAUDE.md",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:alembic.ini",
+      "target": "config:.env.example",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "config:pyproject.toml",
+      "target": "document:requirements.txt",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

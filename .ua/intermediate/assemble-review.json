@@ -1,0 +1,18 @@
+﻿{
+  "fixedSectionOk": true,
+  "nodesRecovered": 0,
+  "edgesRestored": 0,
+  "crossBatchEdgesAdded": 0,
+  "typesRemapped": 4,
+  "complexityRemapped": 0,
+  "notes": [
+    "Fixed 4 CI pipeline step nodes that had type='file' instead of type='step'. The node IDs correctly used the 'step:' prefix but the type field was wrong. Affected: step:.github/workflows/ci.yml:Build image, step:.github/workflows/ci.yml:Architecture and pure tests (no services), step:.github/workflows/ci.yml:Full test suite against Postgres 16 + pgvector and MinIO, step:.github/workflows/ci.yml:Tear down.",
+    "All 110 import-map edges from scan-result.json are present in the assembled graph. No cross-batch edge gaps found.",
+    "No nodes with missing IDs, unknown complexity values, or dropped dangling edges were found.",
+    "All import edges across batch boundaries are present: core/blob.py->core/compute/hashing.py, ingest/base.py->core/blob.py, ingest/__main__.py->ingest/registry.py, tests/test_raw_source_file.py->ingest/base.py, and all other import-map relationships.",
+    "Potential gap: the Entity ORM model class (distinct from EntityIsin) may be absent from core/db/models.py nodes. Migration 0003 creates an entity table, but no Entity class node appears in the graph. This is a batch analyzer output omission, not a merge script issue. Low severity since EntityIsin references entity via foreign key.",
+    "Node coverage: all 81 files from scan-result.json are represented as graph nodes with appropriate type prefixes (file, function, class, service, pipeline, step, config, document). The 218-node count is consistent with the file set plus embedded functions and classes.",
+    "Complexity values are all valid (simple/moderate/complex). No unknown values requiring remapping.",
+    "The step node type correction is the only semantic fix applied. The assembled graph was otherwise mechanically clean with correct ID prefixes, valid edge references, and no dangling edges."
+  ]
+}

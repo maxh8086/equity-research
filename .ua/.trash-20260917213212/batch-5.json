@@ -1,0 +1,164 @@
+{
+  "nodes": [
+    {
+      "id": "service:.dockerignore",
+      "type": "service",
+      "name": ".dockerignore",
+      "filePath": ".dockerignore",
+      "summary": "Docker build context exclusion list that prevents .venv, .git, __pycache__, .env, and other non-essential files from being sent to the Docker daemon, keeping images free of local development and credential artifacts.",
+      "tags": ["containerization", "infrastructure", "configuration", "build-system"],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:Dockerfile",
+      "type": "service",
+      "name": "Dockerfile",
+      "filePath": "Dockerfile",
+      "summary": "Single-stage Docker image based on python:3.13-slim that installs application dependencies, runs as a non-root user (uid 10001) with IST timezone, and uses a no-op smoke-test CMD that compose or Kubernetes overrides with the real command.",
+      "tags": ["containerization", "infrastructure", "deployment", "build-system"],
+      "complexity": "simple",
+      "languageNotes": "Single-stage (not multi-stage); requirements.txt is copied and installed before the application source so code-only edits do not invalidate the pip layer."
+    },
+    {
+      "id": "service:docker-compose.yml",
+      "type": "service",
+      "name": "docker-compose.yml",
+      "filePath": "docker-compose.yml",
+      "summary": "Compose orchestration file defining five services — Postgres 16 + pgvector, MinIO object storage, a write-once bucket provisioner, an Alembic migration runner, and a pytest runner — mirroring the intended cloud/Kubernetes deployment topology.",
+      "tags": ["orchestration", "infrastructure", "containerization", "deployment"],
+      "complexity": "moderate",
+      "languageNotes": "Uses a YAML anchor (x-app) to share build context, image name, and environment config between migrate and test services without repetition."
+    },
+    {
+      "id": "service:docker-compose.yml:db",
+      "type": "service",
+      "name": "db",
+      "filePath": "docker-compose.yml",
+      "summary": "Postgres 16 + pgvector database service bound to 127.0.0.1:5433, with a pg_isready health check and a persistent pgdata volume, providing the primary relational and vector store for the equity knowledge system.",
+      "tags": ["database", "infrastructure", "postgres"],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:docker-compose.yml:blob",
+      "type": "service",
+      "name": "blob",
+      "filePath": "docker-compose.yml",
+      "summary": "MinIO S3-compatible object storage service pinned by digest and bound to 127.0.0.1:9000, acting as the local stand-in for cloud blob storage that holds write-once raw source files keyed by content hash.",
+      "tags": ["infrastructure", "object-storage", "deployment"],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:docker-compose.yml:blob-init",
+      "type": "service",
+      "name": "blob-init",
+      "filePath": "docker-compose.yml",
+      "summary": "One-shot MinIO client container that creates the equity-raw and equity-raw-test buckets with object lock and 36500-day GOVERNANCE retention, ensuring stored source bytes are immutable and cannot be deleted.",
+      "tags": ["infrastructure", "object-storage", "deployment"],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:docker-compose.yml:migrate",
+      "type": "service",
+      "name": "migrate",
+      "filePath": "docker-compose.yml",
+      "summary": "One-shot service using the app image to run `alembic upgrade head`, applying all pending schema migrations before any application workload starts; mirrors the Kubernetes Job / init-container pattern.",
+      "tags": ["database", "migration", "deployment"],
+      "complexity": "simple"
+    },
+    {
+      "id": "service:docker-compose.yml:test",
+      "type": "service",
+      "name": "test",
+      "filePath": "docker-compose.yml",
+      "summary": "Pytest runner service (activated via the 'test' profile) using the app image to execute the full test suite with fail-fast mode and short tracebacks, sharing the same EQUITY_* environment as the application.",
+      "tags": ["ci-cd", "testing", "deployment"],
+      "complexity": "simple"
+    }
+  ],
+  "edges": [
+    {
+      "source": "service:.dockerignore",
+      "target": "service:Dockerfile",
+      "type": "configures",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "service:docker-compose.yml",
+      "target": "service:Dockerfile",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "service:docker-compose.yml",
+      "target": "service:docker-compose.yml:db",
+      "type": "deploys",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "service:docker-compose.yml",
+      "target": "service:docker-compose.yml:blob",
+      "type": "deploys",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "service:docker-compose.yml",
+      "target": "service:docker-compose.yml:blob-init",
+      "type": "deploys",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "service:docker-compose.yml",
+      "target": "service:docker-compose.yml:migrate",
+      "type": "deploys",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "service:docker-compose.yml",
+      "target": "service:docker-compose.yml:test",
+      "type": "deploys",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "service:docker-compose.yml:blob-init",
+      "target": "service:docker-compose.yml:blob",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "service:docker-compose.yml:migrate",
+      "target": "service:docker-compose.yml:db",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "service:docker-compose.yml:migrate",
+      "target": "service:docker-compose.yml:blob-init",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "service:docker-compose.yml:test",
+      "target": "service:docker-compose.yml:db",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    },
+    {
+      "source": "service:docker-compose.yml:test",
+      "target": "service:docker-compose.yml:blob-init",
+      "type": "depends_on",
+      "direction": "forward",
+      "weight": 0.6
+    }
+  ]
+}

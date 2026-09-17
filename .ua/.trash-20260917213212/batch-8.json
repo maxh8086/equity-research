@@ -1,0 +1,90 @@
+{
+  "nodes": [
+    {
+      "id": "config:.obsidian/app.json",
+      "type": "config",
+      "name": "app.json",
+      "filePath": ".obsidian/app.json",
+      "summary": "Global Obsidian application settings file; currently empty, indicating all defaults are in use.",
+      "tags": ["configuration", "obsidian", "knowledge-base", "ide-config"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.obsidian/appearance.json",
+      "type": "config",
+      "name": "appearance.json",
+      "filePath": ".obsidian/appearance.json",
+      "summary": "Obsidian appearance configuration disabling native OS menus in favor of Obsidian's custom menu rendering.",
+      "tags": ["configuration", "obsidian", "ui", "appearance"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.obsidian/backlink.json",
+      "type": "config",
+      "name": "backlink.json",
+      "filePath": ".obsidian/backlink.json",
+      "summary": "Obsidian backlink plugin configuration enabling inline backlink display within documents.",
+      "tags": ["configuration", "obsidian", "knowledge-base", "backlinks"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.obsidian/core-plugins.json",
+      "type": "config",
+      "name": "core-plugins.json",
+      "filePath": ".obsidian/core-plugins.json",
+      "summary": "Controls which Obsidian core plugins are enabled; activates graph view, backlinks, daily notes, templates, search, canvas, and sync while disabling slides, audio recorder, and X integration.",
+      "tags": ["configuration", "obsidian", "plugins", "knowledge-base"],
+      "complexity": "simple",
+      "languageNotes": "Sync is enabled, indicating the vault is shared across devices via Obsidian Sync."
+    },
+    {
+      "id": "config:.obsidian/graph.json",
+      "type": "config",
+      "name": "graph.json",
+      "filePath": ".obsidian/graph.json",
+      "summary": "Obsidian graph view display settings controlling node size, link strength, zoom scale, and visibility of tags, attachments, and orphan nodes.",
+      "tags": ["configuration", "obsidian", "graph-view", "visualization"],
+      "complexity": "simple"
+    },
+    {
+      "id": "config:.obsidian/workspace.json",
+      "type": "config",
+      "name": "workspace.json",
+      "filePath": ".obsidian/workspace.json",
+      "summary": "Obsidian workspace layout snapshot defining the three-panel layout with graph view as the main pane, file explorer and search in the left sidebar, and backlinks, outgoing links, tags, properties, and outline panels in the collapsed right sidebar.",
+      "tags": ["configuration", "obsidian", "workspace", "layout"],
+      "complexity": "moderate",
+      "languageNotes": "The lastOpenFiles list reveals recently accessed project files including README.md, CLAUDE.md, and getting-started-plan.md, reflecting active knowledge-base usage."
+    }
+  ],
+  "edges": [
+    {
+      "source": "config:.obsidian/appearance.json",
+      "target": "config:.obsidian/app.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:.obsidian/backlink.json",
+      "target": "config:.obsidian/core-plugins.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:.obsidian/graph.json",
+      "target": "config:.obsidian/core-plugins.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    },
+    {
+      "source": "config:.obsidian/workspace.json",
+      "target": "config:.obsidian/core-plugins.json",
+      "type": "related",
+      "direction": "forward",
+      "weight": 0.5
+    }
+  ]
+}

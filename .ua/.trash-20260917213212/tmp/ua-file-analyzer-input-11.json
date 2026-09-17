@@ -1,0 +1,35 @@
+{
+  "projectRoot": "C:/Users/vaibh/Downloads/Projects/Cluade Agent Swarm - Market Analyst",
+  "batchFiles": [
+    {"path": ".gitattributes", "language": "unknown", "sizeLines": 6, "fileCategory": "code"},
+    {"path": "core/__init__.py", "language": "python", "sizeLines": 0, "fileCategory": "code"},
+    {"path": "core/compute/__init__.py", "language": "python", "sizeLines": 5, "fileCategory": "code"},
+    {"path": "core/db/__init__.py", "language": "python", "sizeLines": 0, "fileCategory": "code"},
+    {"path": "docs/temporal-model.md", "language": "markdown", "sizeLines": 124, "fileCategory": "docs"},
+    {"path": "migrations/script.py.mako", "language": "mako", "sizeLines": 25, "fileCategory": "code"},
+    {"path": "migrations/versions/0001_financial_facts.py", "language": "python", "sizeLines": 119, "fileCategory": "code"},
+    {"path": "migrations/versions/0002_raw_source_file.py", "language": "python", "sizeLines": 68, "fileCategory": "code"},
+    {"path": "migrations/versions/0003_entity_and_index_snapshots.py", "language": "python", "sizeLines": 209, "fileCategory": "code"},
+    {"path": "migrations/versions/0004_index_snapshot_rule_versioned.py", "language": "python", "sizeLines": 38, "fileCategory": "code"},
+    {"path": "migrations/versions/0005_nse_bhavcopy.py", "language": "python", "sizeLines": 130, "fileCategory": "code"},
+    {"path": "tests/__init__.py", "language": "python", "sizeLines": 0, "fileCategory": "code"},
+    {"path": "tests/fixtures/nse_bhavcopy/SOURCES.md", "language": "markdown", "sizeLines": 12, "fileCategory": "docs"},
+    {"path": "tests/test_architecture.py", "language": "python", "sizeLines": 721, "fileCategory": "code"}
+  ],
+  "batchImportData": {
+    ".gitattributes": [],
+    "core/__init__.py": [],
+    "core/compute/__init__.py": [],
+    "core/db/__init__.py": [],
+    "docs/temporal-model.md": [],
+    "migrations/script.py.mako": [],
+    "migrations/versions/0001_financial_facts.py": [],
+    "migrations/versions/0002_raw_source_file.py": [],
+    "migrations/versions/0003_entity_and_index_snapshots.py": [],
+    "migrations/versions/0004_index_snapshot_rule_versioned.py": [],
+    "migrations/versions/0005_nse_bhavcopy.py": [],
+    "tests/__init__.py": [],
+    "tests/fixtures/nse_bhavcopy/SOURCES.md": [],
+    "tests/test_architecture.py": []
+  }
+}

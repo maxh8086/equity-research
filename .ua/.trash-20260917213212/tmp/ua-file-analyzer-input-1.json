@@ -1,0 +1,29 @@
+{
+  "projectRoot": "C:/Users/vaibh/Downloads/Projects/Cluade Agent Swarm - Market Analyst",
+  "batchFiles": [
+    {"path": "core/compute/isin.py", "language": "python", "sizeLines": 32, "fileCategory": "code"},
+    {"path": "ingest/http.py", "language": "python", "sizeLines": 196, "fileCategory": "code"},
+    {"path": "ingest/nse_bhavcopy/parser.py", "language": "python", "sizeLines": 251, "fileCategory": "code"},
+    {"path": "ingest/nse_indices/adapters.py", "language": "python", "sizeLines": 489, "fileCategory": "code"},
+    {"path": "ingest/nse_indices/parser.py", "language": "python", "sizeLines": 154, "fileCategory": "code"},
+    {"path": "ingest/schema.py", "language": "python", "sizeLines": 7, "fileCategory": "code"},
+    {"path": "tests/test_compute_isin.py", "language": "python", "sizeLines": 47, "fileCategory": "code"},
+    {"path": "tests/test_http.py", "language": "python", "sizeLines": 189, "fileCategory": "code"},
+    {"path": "tests/test_nse_bhavcopy_parser.py", "language": "python", "sizeLines": 132, "fileCategory": "code"},
+    {"path": "tests/test_nse_indices_parser.py", "language": "python", "sizeLines": 122, "fileCategory": "code"},
+    {"path": "tests/test_wayback_cdx.py", "language": "python", "sizeLines": 71, "fileCategory": "code"}
+  ],
+  "batchImportData": {
+    "core/compute/isin.py": [],
+    "ingest/http.py": [],
+    "ingest/nse_bhavcopy/parser.py": ["core/compute/isin.py", "core/db/models.py", "ingest/schema.py"],
+    "ingest/nse_indices/adapters.py": ["core/db/models.py", "core/db/pit.py", "core/sources.py", "ingest/base.py", "ingest/http.py", "ingest/nse_indices/parser.py", "ingest/schema.py"],
+    "ingest/nse_indices/parser.py": ["core/compute/isin.py", "core/db/models.py", "ingest/schema.py"],
+    "ingest/schema.py": [],
+    "tests/test_compute_isin.py": ["core/compute/isin.py"],
+    "tests/test_http.py": ["ingest/http.py"],
+    "tests/test_nse_bhavcopy_parser.py": ["core/compute/isin.py", "core/db/models.py", "ingest/nse_bhavcopy/parser.py"],
+    "tests/test_nse_indices_parser.py": ["core/db/models.py", "ingest/nse_indices/parser.py"],
+    "tests/test_wayback_cdx.py": ["ingest/nse_indices/adapters.py"]
+  }
+}
