@@ -2,7 +2,7 @@
 
 from collections.abc import Collection, Sequence
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -22,6 +22,8 @@ from core.db.models import (
     IndexSnapshot,
     IndexSnapshotConstituent,
     IndexSnapshotQuarantine,
+    NseBhavcopyQuarantine,
+    NseBhavcopyRow,
     RawSourceFile,
 )
 from core.timezones import require_aware
@@ -258,4 +260,177 @@ def index_quarantine_review_as_of(session: Session, *, as_of: datetime) -> list[
             latest_id = newest.get(key) if key else None
             superseded = latest_id if latest_id is not None and latest_id != q.snapshot_id else None
             entries.append(QuarantineEntry(q, superseded))
+    return entries
+
+
+# --------------------------------------------------------------------------- #
+# NSE bhavcopy: price cross-check and the dated ticker -> ISIN map
+# --------------------------------------------------------------------------- #
+
+
+def bhavcopy_sources_settled_as_of(
+    session: Session, *, extracted_by: str, rule_version: str, as_of: datetime
+) -> set[str]:
+    """Source URLs (one per trade date) `extracted_by` already turned into rows,
+    or quarantined whole, under `rule_version`. An adapter skips these.
+    """
+    require_aware(as_of, "as_of")
+    r, q = NseBhavcopyRow, NseBhavcopyQuarantine
+    rows = session.scalars(
+        select(r.source_url).where(
+            r.extracted_by == extracted_by, r.rule_version == rule_version, r.as_of <= as_of
+        )
+    )
+    whole_file = session.scalars(
+        select(q.source_url).where(
+            q.extracted_by == extracted_by,
+            q.rule_version == rule_version,
+            q.row_number.is_(None),
+            q.as_of <= as_of,
+        )
+    )
+    return set(rows) | set(whole_file)
+
+
+def bhavcopy_source_loaded_as_of(
+    session: Session, *, source_url: str, extracted_by: str, rule_version: str, as_of: datetime
+) -> bool:
+    """Whether `source_url` already has a row or a whole-file quarantine under `rule_version`.
+
+    The correctness backstop `load_bhavcopy` itself checks, so a drop-folder
+    rerun or a reparse of an already-current file is a no-op rather than a
+    duplicate insert; `bhavcopy_sources_settled_as_of` is the batch version
+    the archive adapter uses to skip fetching bytes it already has.
+    """
+    require_aware(as_of, "as_of")
+    r, q = NseBhavcopyRow, NseBhavcopyQuarantine
+    has_row = session.scalar(
+        select(r.id)
+        .where(r.source_url == source_url, r.extracted_by == extracted_by,
+               r.rule_version == rule_version, r.as_of <= as_of)
+        .limit(1)
+    )  # fmt: skip
+    if has_row is not None:
+        return True
+    has_quarantine = session.scalar(
+        select(q.id)
+        .where(q.source_url == source_url, q.extracted_by == extracted_by,
+               q.rule_version == rule_version, q.row_number.is_(None), q.as_of <= as_of)
+        .limit(1)
+    )  # fmt: skip
+    return has_quarantine is not None
+
+
+def bhavcopy_latest_trade_date_as_of(session: Session, *, extracted_by: str, as_of: datetime) -> date | None:
+    """The latest trade_date `extracted_by` has stored a row for, known by `as_of`.
+
+    The archive adapter's resume cursor: walking every day from scratch on
+    every run would re-check every past holiday's URL forever (a 404, not a
+    stored fact -- nothing marks a holiday "settled"). Starting the day after
+    this bounds a rerun's wasted checks to the current holiday streak, not
+    the whole history. `bhavcopy_sources_settled_as_of` still guards
+    correctness for any gap this cursor does not cover (e.g. a whole-file
+    quarantine with no row of its own).
+    """
+    require_aware(as_of, "as_of")
+    r = NseBhavcopyRow
+    return session.scalar(
+        select(r.trade_date)
+        .where(r.extracted_by == extracted_by, r.as_of <= as_of)
+        .order_by(r.trade_date.desc())
+        .limit(1)
+    )
+
+
+def bhavcopy_rows_as_of(
+    session: Session, *, isin: str, start: date, end: date, as_of: datetime
+) -> list[NseBhavcopyRow]:
+    """Bhavcopy rows for `isin` with trade_date in [start, end], published by `as_of`, oldest first.
+
+    A reparse under a corrected rule_version adds a row rather than editing
+    the old one (append-only); this keeps only the newest row per trade_date.
+    """
+    require_aware(as_of, "as_of")
+    r = NseBhavcopyRow
+    all_rows = list(
+        session.scalars(
+            select(r)
+            .where(r.isin == isin, r.trade_date >= start, r.trade_date <= end, r.as_of <= as_of)
+            .order_by(r.id)
+        )
+    )
+    latest_by_date: dict[date, NseBhavcopyRow] = {}
+    for row in all_rows:
+        latest_by_date[row.trade_date] = row  # ascending id: last write wins
+    return sorted(latest_by_date.values(), key=lambda row: row.trade_date)
+
+
+def symbol_to_isin_as_of(session: Session, *, symbol: str, on: date, as_of: datetime) -> str | None:
+    """The ISIN bhavcopy showed for `symbol` on the latest trade_date <= `on`, known by `as_of`.
+
+    Symbols are reused across companies over decades (CLAUDE.md "Universe"),
+    so this is a snapshot at a date, never a standing lookup table. None if
+    `symbol` never traded on or before `on` in what is known by `as_of`.
+    """
+    require_aware(as_of, "as_of")
+    r = NseBhavcopyRow
+    rows = list(
+        session.scalars(
+            select(r).where(r.symbol == symbol, r.trade_date <= on, r.as_of <= as_of).order_by(r.id)
+        )
+    )
+    if not rows:
+        return None
+    latest_by_date: dict[date, NseBhavcopyRow] = {}
+    for row in rows:
+        latest_by_date[row.trade_date] = row  # ascending id: last write wins (reparse safety)
+    return latest_by_date[max(latest_by_date)].isin
+
+
+def bhavcopy_quarantine_as_of(session: Session, *, as_of: datetime) -> list[NseBhavcopyQuarantine]:
+    """Bhavcopy files and rows held back for review, published by `as_of`, oldest first."""
+    require_aware(as_of, "as_of")
+    q = NseBhavcopyQuarantine
+    return list(session.scalars(select(q).where(q.as_of <= as_of).order_by(q.as_of, q.id)))
+
+
+@dataclass(frozen=True)
+class BhavcopyQuarantineEntry:
+    row: NseBhavcopyQuarantine
+    resolved: bool  # a matching row now exists, e.g. after a rule fix reparsed the file
+
+    @property
+    def needs_review(self) -> bool:
+        return not self.resolved
+
+
+def bhavcopy_quarantine_review_as_of(session: Session, *, as_of: datetime) -> list[BhavcopyQuarantineEntry]:
+    """Every bhavcopy quarantine row for files published by `as_of`, marked once resolved.
+
+    A row-level entry is resolved once a valid row now exists for the same
+    file (source_url) and (isin, series); a whole-file entry is resolved once
+    ANY row now exists for that file. Quarantine rows are never deleted
+    (append-only); only their review status is computed at read time.
+    """
+    rows = bhavcopy_quarantine_as_of(session, as_of=as_of)
+    if not rows:
+        return []
+    r = NseBhavcopyRow
+    urls = {row.source_url for row in rows}
+    existing = session.execute(
+        select(r.source_url, r.isin, r.series).where(r.source_url.in_(urls), r.as_of <= as_of)
+    )
+    by_url_key: dict[str, set[tuple[str, str]]] = {}
+    any_row_for_url: set[str] = set()
+    for url, isin, series in existing:
+        by_url_key.setdefault(url, set()).add((isin, series))
+        any_row_for_url.add(url)
+
+    entries = []
+    for row in rows:
+        if row.row_number is None:
+            resolved = row.source_url in any_row_for_url
+        else:
+            resolved = (row.isin, row.series) in by_url_key.get(row.source_url, set())
+        entries.append(BhavcopyQuarantineEntry(row, resolved))
     return entries

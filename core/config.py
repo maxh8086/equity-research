@@ -67,6 +67,14 @@ class Settings(BaseSettings):
         ]
     )
 
+    # NSE bhavcopy (ingest/nse_bhavcopy): daily full capital-market UDiFF CSV, zipped,
+    # one file per trade date. Unlike the indices lists, NSE's own archive host serves
+    # the whole history back to the format's start (no Wayback needed).
+    nse_bhavcopy_archive_url_template: str = (
+        "https://archives.nseindia.com/content/cm/BhavCopy_NSE_CM_0_0_0_{date}_F_0000.csv.zip"
+    )
+    nse_bhavcopy_min_interval_seconds: float = 3.0
+
 
 def parse_source_switches(environ: Mapping[str, str]) -> dict[str, bool]:
     """EQUITY_SOURCE_<NAME>_ENABLED → {name: bool}. A value that is not a boolean raises."""

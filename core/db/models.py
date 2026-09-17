@@ -310,3 +310,107 @@ class IndexSnapshotQuarantine(ProvenanceMixin, Base):
         CheckConstraint("model_version IS NULL", name="ck_index_snapshot_quarantine_no_model"),
         Index("ix_index_snapshot_quarantine_pit", "as_of"),
     )
+
+
+# --------------------------------------------------------------------------- #
+# NSE bhavcopy: daily price cross-check and the dated ticker -> ISIN map
+# --------------------------------------------------------------------------- #
+
+
+class BhavcopyQuarantineReason(StrEnum):
+    # Whole file: nothing from it enters a store
+    SHAPE_CHANGED = "shape_changed"
+    ROW_COUNT = "row_count"
+    # One row: the rest of the file is stored
+    MALFORMED_ROW = "malformed_row"
+    INVALID_ISIN = "invalid_isin"
+    DUPLICATE_ROW = "duplicate_row"
+
+
+BHAVCOPY_QUARANTINE_REASON = _pg_enum(BhavcopyQuarantineReason, "bhavcopy_quarantine_reason")
+
+
+class NseBhavcopyRow(ProvenanceMixin, Base):
+    """One equity's row from one day's NSE bhavcopy, exactly as published.
+
+    Only rows whose series is a confirmed equity series are stored (the file
+    also carries SME, debt, gilt and gold-bond instruments out of this
+    system's scope -- ingest.nse_bhavcopy.parser.EQUITY_SERIES). This is both
+    the cross-check for Upstox prices and, via core.db.pit.symbol_to_isin_as_of,
+    the dated ticker -> ISIN map: a symbol resolves to whatever ISIN traded
+    under it on the nearest bhavcopy on or before a date. Append-only; a
+    reparse under a corrected rule_version adds a row rather than editing the
+    old one (core.db.pit.bhavcopy_rows_as_of picks the newest per trade_date).
+    """
+
+    __tablename__ = "nse_bhavcopy_row"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    trade_date: Mapped[date] = mapped_column(Date, nullable=False)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    symbol: Mapped[str] = mapped_column(Text, nullable=False)
+    series: Mapped[str] = mapped_column(Text, nullable=False)
+    open: Mapped[Decimal] = mapped_column(Numeric(20, 4), nullable=False)
+    high: Mapped[Decimal] = mapped_column(Numeric(20, 4), nullable=False)
+    low: Mapped[Decimal] = mapped_column(Numeric(20, 4), nullable=False)
+    close: Mapped[Decimal] = mapped_column(Numeric(20, 4), nullable=False)
+    prev_close: Mapped[Decimal] = mapped_column(Numeric(20, 4), nullable=False)
+    volume: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    turnover: Mapped[Decimal] = mapped_column(Numeric(24, 4), nullable=False)
+    trades: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_nse_bhavcopy_row_isin_format"),
+        CheckConstraint(
+            "open >= 0 AND high >= 0 AND low >= 0 AND close >= 0 AND prev_close >= 0",
+            name="ck_nse_bhavcopy_row_prices_non_negative",
+        ),
+        CheckConstraint("high >= low", name="ck_nse_bhavcopy_row_high_not_below_low"),
+        CheckConstraint(
+            "volume >= 0 AND turnover >= 0 AND trades >= 0", name="ck_nse_bhavcopy_row_counts_non_negative"
+        ),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_nse_bhavcopy_row_content_hash_sha256"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_nse_bhavcopy_row_no_model"),
+        UniqueConstraint(
+            "trade_date", "isin", "series", "rule_version", name="uq_nse_bhavcopy_row_publication"
+        ),
+        Index("ix_nse_bhavcopy_row_isin_pit", "isin", "trade_date"),
+        Index("ix_nse_bhavcopy_row_symbol_pit", "symbol", "trade_date"),
+    )
+
+
+class NseBhavcopyQuarantine(ProvenanceMixin, Base):
+    """A bhavcopy file or row held back for manual review. Never guessed.
+
+    A whole-file entry has `row_number` NULL. Append-only; superseded once a
+    matching `nse_bhavcopy_row` exists for the same file (core.db.pit
+    `bhavcopy_quarantine_review_as_of`).
+    """
+
+    __tablename__ = "nse_bhavcopy_quarantine"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    trade_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    row_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    isin: Mapped[str | None] = mapped_column(CHAR(12), nullable=True)
+    symbol: Mapped[str | None] = mapped_column(Text, nullable=True)
+    series: Mapped[str | None] = mapped_column(Text, nullable=True)
+    raw_row: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reason: Mapped[BhavcopyQuarantineReason] = mapped_column(BHAVCOPY_QUARANTINE_REASON, nullable=False)
+    detail: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "(row_number IS NULL) = (raw_row IS NULL)",
+            name="ck_nse_bhavcopy_quarantine_row_fields_together",
+        ),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_nse_bhavcopy_quarantine_content_hash_sha256"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_nse_bhavcopy_quarantine_no_model"),
+        Index("ix_nse_bhavcopy_quarantine_pit", "as_of"),
+    )

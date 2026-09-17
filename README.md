@@ -53,6 +53,15 @@ same file has been loaded again -- typically via `python -m ingest reparse`
 after a parser rule change, which re-derives from the bytes already in blob
 storage rather than re-fetching.
 
+Bhavcopy (`nse_bhavcopy`, `nse_bhavcopy_drop`): NSE's daily UDiFF CSV, one
+zipped file per trade date, walked day by day from its format's own start
+(2024-07-08) to today; a 404 means "not a trading day" and is skipped, not a
+block. Only confirmed equity series (EQ, BE) are stored, as `nse_bhavcopy_row`
+-- both the cross-check for Upstox prices and, via
+`core.db.pit.symbol_to_isin_as_of`, the dated ticker -> ISIN map. Rows that
+fail checks land in `nse_bhavcopy_quarantine`, reviewed the same way via
+`core.db.pit.bhavcopy_quarantine_review_as_of`.
+
 ## Layout
 
 | Path | What |
@@ -60,8 +69,9 @@ storage rather than re-fetching.
 | `core/compute/` | Pure functions. No I/O. Property-tested. |
 | `core/compute/membership.py` | Index membership intervals (member / uncertain) from dated constituent lists |
 | `core/db/base.py` | Provenance mixin: `as_of`, `content_hash`, `source_url`, `extracted_by`, `model_version`, `ingested_at` |
-| `core/db/models.py` | Store ① `financial_facts`; `raw_source_file`; `entity` / `entity_isin`; `index_snapshot`, its constituents and quarantine |
+| `core/db/models.py` | Store ① `financial_facts`; `raw_source_file`; `entity` / `entity_isin`; `index_snapshot`, its constituents and quarantine; `nse_bhavcopy_row` and its quarantine |
 | `ingest/nse_indices/` | Nifty 50 / Next 50 constituent lists: NSE archive, drop folder, Wayback captures; one parser |
+| `ingest/nse_bhavcopy/` | Daily NSE bhavcopy: archive host and drop folder; one parser |
 | `core/db/pit.py` | Point-in-time reads — `as_of` is a required argument |
 | `core/blob.py` | The one blob-storage interface (S3-compatible now; Azure later) |
 | `core/sources.py` | Source classes and deployment modes |
