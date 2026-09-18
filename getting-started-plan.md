@@ -76,7 +76,7 @@ Session 4b — shareholding pattern
 > Parse quarterly shareholding-pattern XBRL into `shareholding_pattern`: share counts (not just percentages) for promoter, FII/FPI, DII by type and public, plus pledged shares. `as_of` must be after quarter end. Same deterministic mapping and quarantine as Session 4.
 
 - **4c — shareholding pattern** ✅ `ingest/nse_shp`: the SEBI Regulation 31 parser for the 2020 layout (2020-09-30 taxonomy) and the 2025 layout (2025-05-31 and 2025-10-31). Share counts per category and measure, including pledged and other encumbered shares, in long format; percentages are skipped and recomputed by code. Every parent category must equal the sum of its children, or the file is rejected. The `nse_shareholding_drop` adapter resolves the ISIN like the results adapter and rejects an `as_of` on or before the "as on" date, or before the file name's timestamp. A revised filing wins from its own `as_of`. Migration 0009 adds `shareholding_filing`, `shareholding_pattern` and `shareholding_quarantine`, all append-only. Contract tests run on 10 real NSE filings (`tests/fixtures/nse_shp/SOURCES.md`).
-- **Not yet:** a live NSE shareholding listing adapter (drop folder only); named-holder facts (typed dimensions: each promoter and each holder above 1%) are counted and deferred; the fixtures' broadcast times were not recorded, so the adapter tests use assumed publication times.
+- **Not yet:** a live NSE shareholding listing adapter (drop folder only); named-holder facts (typed dimensions: each promoter and each holder above 1%) are counted and deferred.
 
 Session 5 — ratios
 > Implement ratio computation in `core/compute/ratios.py`. Pure functions, Decimal throughout, property tests. ROCE, margins, debt ratios, incremental ROCE.

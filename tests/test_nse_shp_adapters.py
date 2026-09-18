@@ -39,11 +39,11 @@ NAME = "nse_shareholding_drop"
 
 VEDL, ADANIPORTS, OTHER = "INE205A01025", "INE742F01042", "INE002A01018"
 AS_ON = date(2026, 6, 30)
-# Publication times assumed for the tests: after the file name's clock read as PM (tests/fixtures/nse_shp/SOURCES.md).
+# NSE's listed broadcast times (tests/fixtures/nse_shp/SOURCES.md).
 VEDL_FILE = "SHP_1696479_20072026120029_WEB.xml"
-VEDL_PUBLISHED = datetime(2026, 7, 20, 12, 5, tzinfo=IST)
+VEDL_PUBLISHED = datetime(2026, 7, 20, 12, 0, 34, tzinfo=IST)
 PORTS_FILE = "SHP_1690812_10072026084030_WEB.xml"
-PORTS_PUBLISHED = datetime(2026, 7, 10, 20, 45, tzinfo=IST)
+PORTS_PUBLISHED = datetime(2026, 7, 10, 20, 40, 37, tzinfo=IST)
 PORTS_ISIN_FACT = b'<in-bse-shp:ISIN contextRef="MainD">INE742F01042<'
 
 
@@ -207,6 +207,15 @@ def test_implausible_publication_time_is_rejected(session, tmp_path, published):
     result = NseShpDrop().run(_ctx(session, tmp_path, VEDL_PUBLISHED))
     assert result.status is RunStatus.FAILED
     assert [q.reason for q in _quarantine(session)] == [Reason.IMPLAUSIBLE_AS_OF]
+
+
+def test_file_replaced_after_its_listed_broadcast_is_rejected(session, tmp_path):
+    """HDFCBANK 30-Sep-2025: NSE lists 08-Oct-2025, but these bytes were generated on 13-Nov-2025."""
+    name = "SHP_1574385_13112025090903_WEB.xml"
+    _drop(tmp_path, name, datetime(2025, 10, 8, 14, 20, 5, tzinfo=IST))
+    NseShpDrop().run(_ctx(session, tmp_path, datetime(2026, 9, 18, tzinfo=IST)))
+    (entry,) = _quarantine(session)
+    assert entry.reason is Reason.IMPLAUSIBLE_AS_OF and "file name's timestamp" in entry.detail
 
 
 def test_totals_mismatch_quarantines_the_whole_file(session, tmp_path):

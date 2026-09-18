@@ -21,15 +21,50 @@ or revised file mutate these bytes in memory.
 | `SHP_1696479_20072026120029_WEB.xml` | VEDL | INE205A01025 | 2025-10-31 | 2026-06-30 | 20-07-2026 12:00:29 |
 | `SHP_1698632_21072026062045_WEB.xml` | JSWSTEEL | INE019A01038 | 2025-10-31 | 2026-06-30 | 21-07-2026 06:20:45 |
 
-## Publication time was not recorded
+## Publication times
 
-NSE's broadcast time for these filings was not written down when they were
-downloaded. The file name's clock is 12-hour with no AM/PM marker, so it gives
-only a lower bound (the adapter reads it as AM, `generated_no_earlier_than`).
-The adapter tests therefore use an **assumed** `published_at`, at or after the
-file-name clock read as PM. Those times are test inputs, not facts about the
-filings. For real loads, take `published_at` from the broadcast time on NSE's
-shareholding-pattern page.
+Looked up on 2026-09-18 on NSE's shareholding-pattern page
+(`https://www.nseindia.com/companies-listing/corporate-filings-shareholding-pattern`,
+column "Broadcast date/time"; the page's data comes from
+`/api/corporate-share-holdings-master?index=equities&symbol=<SYMBOL>`), matched
+to each file by its `xbrl` link.
+
+| File | Submitted | Revised | Broadcast (IST) |
+|---|---|---|---|
+| `SHP_162513_538030_19102021032428_WEB.xml` | 19-Oct-2021 | - | 07-Jan-2022 00:10:01 |
+| `SHP_1574385_13112025090903_WEB.xml` | 08-Oct-2025 | - | 08-Oct-2025 14:20:05 |
+| `SHP_1584868_11122025040253_WEB.xml` | 11-Dec-2025 | - | 11-Dec-2025 16:02:58 |
+| `SHP_1660737_28042026112844_WEB.xml` | 21-Apr-2026 | 28-Apr-2026 | 06-May-2026 13:05:14 |
+| `SHP_1687801_03072026023346_WEB.xml` | 03-Jul-2026 | - | 03-Jul-2026 14:33:54 |
+| `SHP_1690812_10072026084030_WEB.xml` | 10-Jul-2026 | - | 10-Jul-2026 20:40:37 |
+| `SHP_1693581_15072026065242_WEB.xml` | 15-Jul-2026 | - | 15-Jul-2026 18:52:47 |
+| `SHP_1695339_17072026045502_WEB.xml` | 17-Jul-2026 | - | 17-Jul-2026 16:55:08 |
+| `SHP_1696479_20072026120029_WEB.xml` | 20-Jul-2026 | - | 20-Jul-2026 12:00:34 |
+| `SHP_1698632_21072026062045_WEB.xml` | 21-Jul-2026 | - | 21-Jul-2026 18:20:54 |
+
+What the listing shows about itself:
+
+- The broadcast time is a few seconds after the file-name clock read as PM
+  (or noon, for VEDL's `12`). The file-name rule in the adapter holds.
+- **HDFCBANK 30-Sep-2025 does not fit.** Its file name says 13-Nov-2025
+  09:09:03 (AM or PM), five weeks after the listed broadcast of 08-Oct-2025.
+  The file was replaced without a revision flag, so the listed broadcast time
+  is not when these bytes became public. With that `published_at` the adapter
+  rejects the file as `implausible_as_of`, which is correct: no earlier than
+  13-Nov-2025 09:09:03 is known.
+- **HDFCLIFE is the revised file** (28-Apr-2026: "Inadvertent error in
+  calculating outstanding ESOPs number"). The listing no longer links the
+  original 21-Apr-2026 file. A listing adapter must keep every version of the
+  listing it sees, or originals are lost.
+- **INFY 30-Sep-2021** lists a broadcast in January 2022, 80 days after
+  submission, with no system time. It looks like a later reload of the
+  listing. Using it as `as_of` is late, never early, so it is safe (R2).
+- The listing's `isin` field is not the equity ISIN for several companies
+  (INFY `IN9009A01011`, HDFCBANK `INE040A01018`, VEDL `INE205A01017`,
+  INDUSINDBK `IN9095A01010`; the files carry the current equity ISINs). It
+  must never be used to resolve an ISIN.
+
+The adapter tests use the listed broadcast times for VEDL and ADANIPORTS.
 
 ## Figures checked against the published patterns
 
