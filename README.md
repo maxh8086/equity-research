@@ -78,6 +78,30 @@ body with the request URL as `source_url` and the download time as
 `core.db.pit.upstox_quarantine_review_as_of`, which judges entries against the
 current rule version.
 
+Corporate actions (`nse_corporate_actions_drop`, `corporate_actions_curated_drop`),
+drop folders only; switches `EQUITY_SOURCE_NSE_CORPORATE_ACTIONS_DROP_ENABLED`
+and `EQUITY_SOURCE_CORPORATE_ACTIONS_CURATED_DROP_ENABLED`:
+- **NSE export:** the corporate-actions CSV from nseindia.com, saved by hand,
+  with the page as `source_url` and the download time as `published_at`.
+  Splits, consolidations, bonuses, rights and dividends are read from the
+  PURPOSE text by fixed patterns; anything else named but unreadable, and
+  every demerger (its ratio is not in an exchange field), goes to
+  `corporate_action_quarantine`. Symbols resolve to ISINs through the
+  bhavcopy map, so load bhavcopy first; a rerun retries unresolved symbols.
+- **Curated file:** a CSV with exactly the columns `action_key, isin,
+  action_type, status, announced_at, ex_date, record_date, face_value_from,
+  face_value_to, shares_new, shares_held, issue_price, dividend_per_share,
+  retained_fraction, new_isin, evidence_url, verified_by, note`. One row per
+  action version, typed from the evidence by a named person (`verified_by`),
+  with an aware `announced_at`. Use it for demergers, ISIN changes and
+  corrections; a later row with the same `action_key` supersedes an earlier
+  one (e.g. `status=withdrawn`).
+
+`core.db.pit.price_adjustments_as_of` returns the factors known at `t` and
+every action it skipped, with the reason; `adjusted_closes_as_of` applies them
+to bhavcopy closes across the ISIN lineage. Review quarantine with
+`core.db.pit.corporate_action_quarantine_review_as_of`.
+
 ## Layout
 
 | Path | What |
@@ -85,11 +109,13 @@ current rule version.
 | `core/compute/` | Pure functions. No I/O. Property-tested. |
 | `core/compute/membership.py` | Index membership intervals (member / uncertain) from dated constituent lists |
 | `core/compute/price_crosscheck.py` | Vendor daily bars vs. the exchange's record of the same days |
+| `core/compute/adjustment.py` | Price adjustment factors for splits, bonuses, rights and demergers, and their application |
 | `core/db/base.py` | Provenance mixin: `as_of`, `content_hash`, `source_url`, `extracted_by`, `model_version`, `ingested_at` |
-| `core/db/models.py` | Store ① `financial_facts`; `raw_source_file`; `entity` / `entity_isin`; `index_snapshot`, its constituents and quarantine; `nse_bhavcopy_row` and its quarantine; `upstox_candle` and its quarantine |
+| `core/db/models.py` | Store ① `financial_facts`; `raw_source_file`; `entity` / `entity_isin`; `index_snapshot`, its constituents and quarantine; `nse_bhavcopy_row` and its quarantine; `upstox_candle` and its quarantine; `corporate_action` and its quarantine |
 | `ingest/nse_indices/` | Nifty 50 / Next 50 constituent lists: NSE archive, drop folder, Wayback captures; one parser |
 | `ingest/nse_bhavcopy/` | Daily NSE bhavcopy: archive host and drop folder; one parser |
 | `ingest/upstox/` | Upstox v3 daily candles by ISIN: API and drop folder; one parser |
+| `ingest/corporate_actions/` | Corporate actions: NSE export and curated file, both drop folders |
 | `core/db/pit.py` | Point-in-time reads — `as_of` is a required argument |
 | `core/blob.py` | The one blob-storage interface (S3-compatible now; Azure later) |
 | `core/sources.py` | Source classes and deployment modes |

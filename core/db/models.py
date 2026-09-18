@@ -172,8 +172,10 @@ INDEX_CODE = _pg_enum(IndexCode, "index_code")
 class Entity(ProvenanceMixin, Base):
     """A security's identity across ISIN changes (splits, demergers, amalgamations).
 
-    Until corporate actions are loaded (Session 3e) every ISIN has its own
-    entity. Provenance is the evidence that created the row; what was known
+    Every ISIN has its own entity row, and this table is never rewritten when
+    an ISIN changes: lineage across a split, demerger or amalgamation is
+    computed at read time from `isin_change` corporate actions known at `t`
+    (core.db.pit.isin_lineage_as_of). Provenance is the evidence that created the row; what was known
     when is read through `entity_isin` (core.db.pit). Append-only.
     """
 
@@ -513,4 +515,169 @@ class UpstoxCandleQuarantine(ProvenanceMixin, Base):
         ),
         CheckConstraint("model_version IS NULL", name="ck_upstox_candle_quarantine_no_model"),
         Index("ix_upstox_candle_quarantine_pit", "as_of"),
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Corporate actions: price adjustment factors and ISIN lineage (store 15, core)
+# --------------------------------------------------------------------------- #
+
+
+class CorporateActionType(StrEnum):
+    SPLIT = "split"  # face value sub-division
+    CONSOLIDATION = "consolidation"  # face value consolidation (reverse split)
+    BONUS = "bonus"
+    RIGHTS = "rights"
+    DIVIDEND = "dividend"
+    DEMERGER = "demerger"
+    ISIN_CHANGE = "isin_change"
+
+
+class CorporateActionStatus(StrEnum):
+    ANNOUNCED = "announced"
+    APPROVED = "approved"
+    DATES_SET = "dates_set"
+    EFFECTIVE = "effective"
+    COMPLETED = "completed"
+    REVISED = "revised"  # this version carries revised terms
+    WITHDRAWN = "withdrawn"
+
+
+class RatioBasis(StrEnum):
+    EXCHANGE_FIELD = "exchange_field"  # parsed by code from an exchange's own field
+    HUMAN_VERIFIED = "human_verified"  # entered or checked by a named person against the evidence
+    UNVERIFIED = "unverified"  # e.g. extracted from a PDF: adjusts no price until verified
+
+
+class CorporateActionQuarantineReason(StrEnum):
+    # Whole file: nothing from it enters a store
+    SHAPE_CHANGED = "shape_changed"
+    # One row: the rest of the file is stored
+    MALFORMED_ROW = "malformed_row"
+    INVALID_ISIN = "invalid_isin"
+    UNKNOWN_SYMBOL = "unknown_symbol"
+    UNPARSED_PURPOSE = "unparsed_purpose"
+    RATIO_NOT_IN_EXCHANGE_FIELD = "ratio_not_in_exchange_field"
+    DUPLICATE_ACTION = "duplicate_action"
+
+
+CORPORATE_ACTION_TYPE = _pg_enum(CorporateActionType, "corporate_action_type")
+CORPORATE_ACTION_STATUS = _pg_enum(CorporateActionStatus, "corporate_action_status")
+RATIO_BASIS = _pg_enum(RatioBasis, "ratio_basis")
+CORPORATE_ACTION_QUARANTINE_REASON = _pg_enum(
+    CorporateActionQuarantineReason, "corporate_action_quarantine_reason"
+)
+
+# Statuses under which terms and an ex-date may still be missing.
+PRELIMINARY_STATUSES = ("announced", "approved", "withdrawn")
+
+
+class CorporateAction(ProvenanceMixin, Base):
+    """One version of one corporate action, as known from `as_of`.
+
+    `action_key` identifies the action across versions; a later version
+    (new status, revised terms, a verified ratio) is a new row, and
+    core.db.pit reads take the newest per key: latest `as_of`, then highest
+    id. Terms are stored as the source states them (face values, share
+    ratios, prices), never as a precomputed factor: factors are computed by
+    core.compute.adjustment at read time. Only `exchange_field` and
+    `human_verified` ratios adjust prices. `ex_date` is the event time.
+    Append-only.
+    """
+
+    __tablename__ = "corporate_action"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    action_key: Mapped[str] = mapped_column(Text, nullable=False)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    action_type: Mapped[CorporateActionType] = mapped_column(CORPORATE_ACTION_TYPE, nullable=False)
+    status: Mapped[CorporateActionStatus] = mapped_column(CORPORATE_ACTION_STATUS, nullable=False)
+    ex_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    record_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    face_value_from: Mapped[Decimal | None] = mapped_column(Numeric(20, 4), nullable=True)
+    face_value_to: Mapped[Decimal | None] = mapped_column(Numeric(20, 4), nullable=True)
+    shares_new: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    shares_held: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    issue_price: Mapped[Decimal | None] = mapped_column(Numeric(20, 4), nullable=True)
+    dividend_per_share: Mapped[Decimal | None] = mapped_column(Numeric(20, 4), nullable=True)
+    retained_fraction: Mapped[Decimal | None] = mapped_column(Numeric(12, 10), nullable=True)
+    new_isin: Mapped[str | None] = mapped_column(CHAR(12), nullable=True)
+    ratio_basis: Mapped[RatioBasis] = mapped_column(RATIO_BASIS, nullable=False)
+    verified_by: Mapped[str | None] = mapped_column(Text, nullable=True)
+    purpose: Mapped[str | None] = mapped_column(Text, nullable=True)
+    source_row: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-based data row in the file
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_corporate_action_isin_format"),
+        CheckConstraint("source_row > 0", name="ck_corporate_action_source_row_positive"),
+        CheckConstraint(
+            "new_isin IS NULL OR (new_isin ~ '^IN[A-Z0-9]{9}[0-9]$' AND new_isin <> isin)",
+            name="ck_corporate_action_new_isin",
+        ),
+        CheckConstraint(
+            "(ratio_basis = 'human_verified') = (verified_by IS NOT NULL)",
+            name="ck_corporate_action_verified_by_iff_human",
+        ),
+        CheckConstraint(
+            "status IN ('announced', 'approved', 'withdrawn') OR ex_date IS NOT NULL",
+            name="ck_corporate_action_ex_date_once_set",
+        ),
+        CheckConstraint(
+            "status IN ('announced', 'approved', 'withdrawn') OR CASE action_type"
+            " WHEN 'split' THEN face_value_to < face_value_from AND face_value_to > 0"
+            " WHEN 'consolidation' THEN face_value_to > face_value_from AND face_value_from > 0"
+            " WHEN 'bonus' THEN shares_new > 0 AND shares_held > 0"
+            " WHEN 'rights' THEN shares_new > 0 AND shares_held > 0 AND issue_price >= 0"
+            " WHEN 'dividend' THEN dividend_per_share >= 0"
+            " WHEN 'demerger' THEN retained_fraction > 0 AND retained_fraction < 1"
+            " WHEN 'isin_change' THEN new_isin IS NOT NULL"
+            " END",
+            name="ck_corporate_action_terms",
+        ),
+        # An ex-date is announced before it arrives (docs/temporal-model.md).
+        CheckConstraint(
+            "ex_date IS NULL OR status = 'withdrawn'"
+            " OR (as_of AT TIME ZONE 'Asia/Kolkata')::date <= ex_date",
+            name="ck_corporate_action_as_of_not_after_ex_date",
+        ),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_corporate_action_content_hash_sha256"),
+        CheckConstraint("model_version IS NULL", name="ck_corporate_action_no_model"),
+        UniqueConstraint(
+            "action_key", "as_of", "content_hash", "rule_version", name="uq_corporate_action_version"
+        ),
+        Index("ix_corporate_action_isin_pit", "isin", "as_of"),
+        Index("ix_corporate_action_new_isin_pit", "new_isin", "as_of"),
+    )
+
+
+class CorporateActionQuarantine(ProvenanceMixin, Base):
+    """A corporate-action file or row held back for manual review. Never guessed.
+
+    A whole-file entry has `row_number` NULL. Append-only; see
+    core.db.pit.corporate_action_quarantine_review_as_of.
+    """
+
+    __tablename__ = "corporate_action_quarantine"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str | None] = mapped_column(CHAR(12), nullable=True)
+    row_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    raw_row: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reason: Mapped[CorporateActionQuarantineReason] = mapped_column(
+        CORPORATE_ACTION_QUARANTINE_REASON, nullable=False
+    )
+    detail: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "(row_number IS NULL) = (raw_row IS NULL)",
+            name="ck_corporate_action_quarantine_row_fields_together",
+        ),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_corporate_action_quarantine_content_hash_sha256"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_corporate_action_quarantine_no_model"),
+        Index("ix_corporate_action_quarantine_pit", "as_of"),
     )

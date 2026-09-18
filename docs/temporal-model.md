@@ -66,6 +66,28 @@ state at `t` is the latest row with `as_of <= t`.
   A read answers member, not a member, or *uncertain*: between two lists that
   disagree, and after the latest list, nothing is guessed.
 
+**4. Corporate actions** (`corporate_action`): a lifecycle keyed by
+`action_key`, with the ex-date as event time
+- Every version is a new row with the same `action_key`; the newest known by
+  `t` (latest `as_of`, then highest `id`) is the action at `t`
+  (`core.db.pit.corporate_actions_as_of`). A withdrawal or a verified ratio is
+  a new version, never an edit.
+- `as_of` for an NSE export row is the earlier of the file's download time and
+  00:00 IST on the ex-date: the action was public by the time it went ex. A
+  curated row's `as_of` is its `announced_at`, and a curated file may not
+  contain a row announced after the file was saved.
+- **Adjustment factors are computed at read time** from the versions known at
+  `t` (`price_adjustments_as_of`). An action adjusts prices only if it is
+  final (dates set or later, not withdrawn), its ex-date is on or before `t`,
+  and its terms came from an exchange field or were verified by a named
+  person. A ratio read from a PDF adjusts nothing until verified. Dividends
+  are stored but never adjust prices. Every action left out is returned with
+  the reason.
+- **ISIN lineage is computed, not stored.** `entity_isin` keeps one row per
+  ISIN; `isin_lineage_as_of` follows `isin_change` actions known and effective
+  at `t`, so an old ISIN's history joins the new one only from the moment
+  that change was known.
+
 ## Reparsing under a corrected rule (not a restatement)
 
 A parser bug is not new information: the source bytes and their publication
@@ -120,8 +142,8 @@ earnings in 2027), which *is* new information and must keep the later
 
 | Mechanism | State |
 |---|---|
-| Append-only triggers and `as_of` sanity checks per store | Done for `financial_facts`; `raw_source_file` (`as_of <= fetched_at`); `entity`, `entity_isin` (one ISIN, one entity); `index_snapshot`, `index_snapshot_constituent`, `index_snapshot_quarantine`; `nse_bhavcopy_row`, `nse_bhavcopy_quarantine`; `upstox_candle` (`as_of` = fetch time, IST date >= trade date), `upstox_candle_quarantine` |
-| One point-in-time read function per store, `t` required (`core/db/pit.py`) | Done for `financial_facts`, `raw_source_file`, entity links, index snapshots and membership (`index_members_on` takes both the date and `as_of`), bhavcopy rows and the dated ticker -> ISIN map (`symbol_to_isin_as_of`), Upstox candles (newest fetch per day) and their bhavcopy cross-check |
+| Append-only triggers and `as_of` sanity checks per store | Done for `financial_facts`; `raw_source_file` (`as_of <= fetched_at`); `entity`, `entity_isin` (one ISIN, one entity); `index_snapshot`, `index_snapshot_constituent`, `index_snapshot_quarantine`; `nse_bhavcopy_row`, `nse_bhavcopy_quarantine`; `upstox_candle` (`as_of` = fetch time, IST date >= trade date), `upstox_candle_quarantine`; `corporate_action` (terms checked per type, `source_row` > 0), `corporate_action_quarantine` |
+| One point-in-time read function per store, `t` required (`core/db/pit.py`) | Done for `financial_facts`, `raw_source_file`, entity links, index snapshots and membership (`index_members_on` takes both the date and `as_of`), bhavcopy rows and the dated ticker -> ISIN map (`symbol_to_isin_as_of`), Upstox candles (newest fetch per day) and their bhavcopy cross-check, corporate actions (newest version per `action_key`), ISIN lineage and price adjustment factors |
 | Adapters record publication time, not fetch time (except vendor histories, see above); drop-folder files need a sidecar with an aware `published_at` (`ingest/base.py`) | Done |
 | Naive datetimes rejected before reaching the DB (`core/timezones.py`) | Done |
 | Architecture test: no direct queries against store tables outside PIT functions (`tests/test_architecture.py`) | Done |

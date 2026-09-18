@@ -1,0 +1,4 @@
+action_key,isin,action_type,status,announced_at,ex_date,record_date,face_value_from,face_value_to,shares_new,shares_held,issue_price,dividend_per_share,retained_fraction,new_isin,evidence_url,verified_by,note
+curated:demerger:INE009A01021:2024-09-05,INE009A01021,demerger,dates_set,2024-08-20T18:30:00+05:30,2024-09-05,2024-09-05,,,,,,,0.8500000000,,https://www.bseindia.com/xml-data/corpfiling/AttachLive/example-scheme.pdf,family-reviewer,Cost apportionment 85% parent / 15% resulting company
+curated:isin_change:INE009A01021:2024-10-01,INE009A01021,isin_change,effective,2024-09-20T17:00:00+05:30,2024-10-01,,,,,,,,,INE009A01039,https://www.nseindia.com/example-isin-change-circular,family-reviewer,
+curated:bonus:INE002A01018:2024-10-28,INE002A01018,bonus,dates_set,2024-09-05T15:00:00+05:30,2024-10-28,2024-10-28,,,0,1,,,,,https://www.bseindia.com/example-bonus.pdf,family-reviewer,shares_new is zero: refused

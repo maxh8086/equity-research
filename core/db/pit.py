@@ -1,12 +1,21 @@
 """Point-in-time reads. Every read takes an explicit `as_of`; there is no default."""
 
-from collections.abc import Collection, Sequence
+from collections.abc import Collection, Iterable, Sequence
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+from decimal import Decimal
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from core.compute.adjustment import (
+    PriceFactor,
+    adjust_series,
+    bonus_factor,
+    demerger_factor,
+    rights_factor,
+    split_factor,
+)
 from core.compute.membership import (
     Membership,
     ObservedInterval,
@@ -17,6 +26,10 @@ from core.compute.membership import (
 from core.compute.price_crosscheck import Bar, Mismatch, crosscheck
 from core.db.models import (
     Consolidation,
+    CorporateAction,
+    CorporateActionQuarantine,
+    CorporateActionStatus,
+    CorporateActionType,
     EntityIsin,
     FinancialFact,
     IndexCode,
@@ -25,11 +38,12 @@ from core.db.models import (
     IndexSnapshotQuarantine,
     NseBhavcopyQuarantine,
     NseBhavcopyRow,
+    RatioBasis,
     RawSourceFile,
     UpstoxCandle,
     UpstoxCandleQuarantine,
 )
-from core.timezones import require_aware
+from core.timezones import IST, require_aware
 
 
 def facts_as_of(
@@ -611,4 +625,286 @@ def upstox_quarantine_review_as_of(
             and (*response, row.candle_index) not in requarantined
         )
         entries.append(UpstoxQuarantineEntry(row, resolved))
+    return entries
+
+
+# --------------------------------------------------------------------------- #
+# Corporate actions: versions, ISIN lineage, price adjustment factors
+# --------------------------------------------------------------------------- #
+
+# Actions that change the price series (core.compute.adjustment); dividends do not.
+CAPITAL_ACTION_TYPES = (
+    CorporateActionType.SPLIT,
+    CorporateActionType.CONSOLIDATION,
+    CorporateActionType.BONUS,
+    CorporateActionType.RIGHTS,
+    CorporateActionType.DEMERGER,
+)
+_PRELIMINARY = frozenset({CorporateActionStatus.ANNOUNCED, CorporateActionStatus.APPROVED})
+_ADJUSTING_BASES = frozenset({RatioBasis.EXCHANGE_FIELD, RatioBasis.HUMAN_VERIFIED})
+# How far back to look for the last cum-rights close before a rights ex-date.
+CUM_CLOSE_LOOKBACK = timedelta(days=30)
+
+
+def _newest_per_key(rows: Iterable[CorporateAction]) -> list[CorporateAction]:
+    latest: dict[str, CorporateAction] = {}
+    for row in sorted(rows, key=lambda r: (r.as_of, r.id)):
+        latest[row.action_key] = row  # ascending (as_of, id): last write wins
+    return sorted(latest.values(), key=lambda r: (r.ex_date or date.max, r.action_key))
+
+
+def corporate_actions_as_of(
+    session: Session,
+    *,
+    isins: Collection[str],
+    as_of: datetime,
+    action_types: Collection[CorporateActionType] | None = None,
+) -> list[CorporateAction]:
+    """The newest version, known by `as_of`, of every action on any of `isins`, by ex-date.
+
+    A later version (a new status, revised terms, a human-verified ratio) is a
+    new row with the same `action_key`: the newest is the latest `as_of`, then
+    the highest id. The newest version decides the ISIN, so a correction that
+    moves an action to another ISIN moves it here too.
+    """
+    require_aware(as_of, "as_of")
+    ca = CorporateAction
+    keys = select(ca.action_key).where(ca.isin.in_(list(isins)), ca.as_of <= as_of)
+    stmt = select(ca).where(ca.action_key.in_(keys), ca.as_of <= as_of)
+    newest = _newest_per_key(session.scalars(stmt))
+    return [
+        row
+        for row in newest
+        if row.isin in isins and (action_types is None or row.action_type in action_types)
+    ]
+
+
+def _usable(row: CorporateAction, on: date) -> str | None:
+    """Why this version adjusts nothing on `on`, or None if it does."""
+    if row.status is CorporateActionStatus.WITHDRAWN:
+        return "withdrawn"
+    if row.status in _PRELIMINARY or row.ex_date is None:
+        return f"status {row.status}: terms not final"
+    if row.ratio_basis not in _ADJUSTING_BASES:
+        return f"ratio basis {row.ratio_basis}: needs human verification"
+    if row.ex_date > on:
+        return f"ex-date {row.ex_date} is after {on}"
+    return None
+
+
+def isin_lineage_as_of(session: Session, *, isin: str, as_of: datetime) -> list[str]:
+    """`isin` followed by every ISIN it replaced, through `isin_change` actions known and effective by `as_of`.
+
+    Computed, never stored: the entity table keeps one row per ISIN, and ISIN
+    change evidence may arrive out of order (docs/temporal-model.md). Newest
+    first; a chain that loops is cut where it repeats.
+    """
+    require_aware(as_of, "as_of")
+    on = as_of.astimezone(IST).date()
+    ca = CorporateAction
+    changes = _newest_per_key(
+        session.scalars(
+            select(ca).where(ca.action_type == CorporateActionType.ISIN_CHANGE, ca.as_of <= as_of)
+        )
+    )
+    predecessors: dict[str, list[str]] = {}
+    for row in changes:
+        if _usable(row, on) is None and row.new_isin is not None:
+            predecessors.setdefault(row.new_isin, []).append(row.isin)
+    lineage, frontier = [isin], [isin]
+    while frontier:
+        nxt = []
+        for current in frontier:
+            for old in sorted(predecessors.get(current, [])):
+                if old not in lineage:
+                    lineage.append(old)
+                    nxt.append(old)
+        frontier = nxt
+    return lineage
+
+
+@dataclass(frozen=True)
+class AppliedAdjustment:
+    action: CorporateAction
+    factor: PriceFactor
+    cum_close: Decimal | None = None  # rights only: the close the TERP was computed from
+
+
+@dataclass(frozen=True)
+class SkippedAdjustment:
+    action: CorporateAction
+    reason: str
+
+
+@dataclass(frozen=True)
+class PriceAdjustments:
+    """The adjustment factors known and effective at `as_of`, and every capital action left out, with why."""
+
+    as_of: datetime
+    lineage: tuple[str, ...]
+    applied: tuple[AppliedAdjustment, ...]
+    skipped: tuple[SkippedAdjustment, ...]
+
+    @property
+    def factors(self) -> list[PriceFactor]:
+        return [a.factor for a in self.applied]
+
+
+def _cum_close(session: Session, *, isin: str, ex_date: date, as_of: datetime) -> Decimal | None:
+    """The last close before `ex_date`: exchange bhavcopy first, then Upstox."""
+    start, end = ex_date - CUM_CLOSE_LOOKBACK, ex_date - timedelta(days=1)
+    for rows in (
+        bhavcopy_rows_as_of(session, isin=isin, start=start, end=end, as_of=as_of),
+        upstox_candles_as_of(session, isin=isin, start=start, end=end, as_of=as_of),
+    ):
+        if rows:
+            return rows[-1].close
+    return None
+
+
+def _factor(session: Session, row: CorporateAction, as_of: datetime) -> AppliedAdjustment | str:
+    kind, ex_date = row.action_type, row.ex_date
+    assert ex_date is not None  # _usable checked it
+    if kind in (CorporateActionType.SPLIT, CorporateActionType.CONSOLIDATION):
+        return AppliedAdjustment(row, PriceFactor(ex_date, split_factor(row.face_value_from, row.face_value_to)))
+    if kind is CorporateActionType.BONUS:
+        return AppliedAdjustment(row, PriceFactor(ex_date, bonus_factor(row.shares_new, row.shares_held)))
+    if kind is CorporateActionType.DEMERGER:
+        return AppliedAdjustment(row, PriceFactor(ex_date, demerger_factor(row.retained_fraction)))
+    cum = _cum_close(session, isin=row.isin, ex_date=ex_date, as_of=as_of)
+    if cum is None or not cum > 0:
+        return f"no close in the {CUM_CLOSE_LOOKBACK.days} days before the rights ex-date {ex_date}"
+    factor = rights_factor(row.shares_new, row.shares_held, row.issue_price, cum)
+    return AppliedAdjustment(row, PriceFactor(ex_date, factor), cum_close=cum)
+
+
+def price_adjustments_as_of(session: Session, *, isin: str, as_of: datetime) -> PriceAdjustments:
+    """Price adjustment factors for `isin` and the ISINs it replaced, as known and effective at `as_of`.
+
+    Only capital actions adjust prices (splits, consolidations, bonuses,
+    rights, demergers); dividends never do. An action counts only if its
+    newest version known by `as_of` is final (not announced, approved or
+    withdrawn), its ex-date is on or before `as_of` (IST date), and its terms
+    came from an exchange field or were verified by a named person: a ratio
+    read from a PDF adjusts nothing until verified. Everything left out is
+    returned in `skipped` with the reason, never silently dropped.
+    """
+    require_aware(as_of, "as_of")
+    on = as_of.astimezone(IST).date()
+    lineage = isin_lineage_as_of(session, isin=isin, as_of=as_of)
+    applied: list[AppliedAdjustment] = []
+    skipped: list[SkippedAdjustment] = []
+    for row in corporate_actions_as_of(session, isins=lineage, as_of=as_of, action_types=CAPITAL_ACTION_TYPES):
+        reason = _usable(row, on)
+        result = reason if reason is not None else _factor(session, row, as_of)
+        if isinstance(result, str):
+            skipped.append(SkippedAdjustment(row, result))
+        else:
+            applied.append(result)
+    return PriceAdjustments(as_of, tuple(lineage), tuple(applied), tuple(skipped))
+
+
+def adjusted_closes_as_of(
+    session: Session, *, isin: str, start: date, end: date, as_of: datetime
+) -> dict[date, Decimal]:
+    """NSE bhavcopy closes for `isin` and the ISINs it replaced, adjusted with the factors known at `as_of`.
+
+    Bhavcopy prices are as traded, so every factor applies. Upstox candles are
+    not used here: whether the vendor has already adjusted them is checked by
+    upstox_bhavcopy_crosscheck_as_of, never assumed. A date on which two
+    lineage ISINs both traded keeps the newer ISIN's close.
+    """
+    adjustments = price_adjustments_as_of(session, isin=isin, as_of=as_of)
+    closes: dict[date, Decimal] = {}
+    for member in reversed(adjustments.lineage):  # oldest first: the newer ISIN wins a shared date
+        for row in bhavcopy_rows_as_of(session, isin=member, start=start, end=end, as_of=as_of):
+            closes[row.trade_date] = row.close
+    return adjust_series(closes, adjustments.factors)
+
+
+def corporate_action_file_rows_as_of(
+    session: Session, *, content_hash: str, extracted_by: str, rule_version: str, as_of: datetime
+) -> tuple[set[tuple[str, datetime]], set[tuple[int | None, str, str]]]:
+    """What one file already produced under `rule_version`: action (key, as_of) and quarantine (row, reason, detail).
+
+    The loader's backstop, so a rerun or reparse writes only what is new
+    (e.g. a row whose symbol has since become resolvable).
+    """
+    require_aware(as_of, "as_of")
+    ca, q = CorporateAction, CorporateActionQuarantine
+    actions = set(
+        session.execute(
+            select(ca.action_key, ca.as_of).where(
+                ca.content_hash == content_hash, ca.extracted_by == extracted_by,
+                ca.rule_version == rule_version, ca.as_of <= as_of,
+            )  # fmt: skip
+        ).tuples()
+    )
+    issues = set(
+        session.execute(
+            select(q.row_number, q.reason, q.detail).where(
+                q.content_hash == content_hash, q.extracted_by == extracted_by,
+                q.rule_version == rule_version, q.as_of <= as_of,
+            )  # fmt: skip
+        ).tuples()
+    )
+    return actions, {(n, str(reason), detail) for n, reason, detail in issues}
+
+
+def corporate_action_quarantine_as_of(session: Session, *, as_of: datetime) -> list[CorporateActionQuarantine]:
+    """Corporate-action files and rows held back for review, known by `as_of`, oldest first."""
+    require_aware(as_of, "as_of")
+    q = CorporateActionQuarantine
+    return list(session.scalars(select(q).where(q.as_of <= as_of).order_by(q.as_of, q.id)))
+
+
+@dataclass(frozen=True)
+class CorporateActionQuarantineEntry:
+    row: CorporateActionQuarantine
+    resolved: bool
+
+    @property
+    def needs_review(self) -> bool:
+        return not self.resolved
+
+
+def corporate_action_quarantine_review_as_of(
+    session: Session, *, current_rule_version: str, as_of: datetime
+) -> list[CorporateActionQuarantineEntry]:
+    """Every corporate-action quarantine row known by `as_of`, marked once it has been dealt with.
+
+    A file row is identified by (content_hash, row_number). An entry is
+    resolved when that row has since produced an action (e.g. its symbol
+    became resolvable), or when it is under an older rule, the file has been
+    parsed under `current_rule_version`, and that parse did not quarantine
+    the same row again. Quarantine rows are never deleted (append-only).
+    """
+    rows = corporate_action_quarantine_as_of(session, as_of=as_of)
+    if not rows:
+        return []
+    ca = CorporateAction
+    hashes = {row.content_hash for row in rows}
+    produced = set(
+        session.execute(
+            select(ca.content_hash, ca.source_row, ca.rule_version)
+            .where(ca.content_hash.in_(hashes), ca.as_of <= as_of)
+            .distinct()
+        ).tuples()
+    )
+    parsed_now = {(h, v) for h, _, v in produced if v == current_rule_version}
+    produced_rows = {(h, n) for h, n, _ in produced}
+    requarantined = set()
+    for row in rows:
+        if row.rule_version == current_rule_version:
+            parsed_now.add((row.content_hash, row.rule_version))
+            requarantined.add((row.content_hash, row.row_number))
+    entries = []
+    for row in rows:
+        file_row = (row.content_hash, row.row_number)
+        resolved = file_row in produced_rows or (
+            row.rule_version != current_rule_version
+            and (row.content_hash, current_rule_version) in parsed_now
+            and file_row not in requarantined
+        )
+        entries.append(CorporateActionQuarantineEntry(row, resolved))
     return entries
