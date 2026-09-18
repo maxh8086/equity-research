@@ -102,6 +102,25 @@ every action it skipped, with the reason; `adjusted_closes_as_of` applies them
 to bhavcopy closes across the ISIN lineage. Review quarantine with
 `core.db.pit.corporate_action_quarantine_review_as_of`.
 
+XBRL results (`nse_xbrl_results_drop`), drop folder only; switch
+`EQUITY_SOURCE_NSE_XBRL_RESULTS_DROP_ENABLED`. Save a results XBRL file from
+`https://nsearchives.nseindia.com/corporate/xbrl/<file>` byte-for-byte, with
+that URL as `source_url` and NSE's dissemination time (the listing's
+`exchdisstime`, IST) as `published_at`. The parser (`ingest/nse_xbrl`)
+supports the SEBI 2020 Ind AS and NBFC taxonomies, the 2019 banking taxonomy,
+and the 2020 life and general insurance taxonomies. Older filings are quarantined
+as `unsupported_taxonomy`. Elements map to line items through a hardcoded
+table (`mapping.py`, `RULE_VERSION`). An element missing from the table,
+an unexpected unit, a malformed value, or one element tagged twice with
+different values is quarantined, never guessed. Every non-dimensional context
+is stored: the quarter and the year to date. Segment and other dimensional
+facts are counted on `financial_filing` and deferred. The ISIN comes from
+the file (banks, insurers) or from the symbol, through bhavcopy rows from the
+10 days before publication and index lists from the 190 days before it. Every
+read must agree. Load bhavcopy or index lists first; a rerun retries an
+unresolved file. Review quarantine with
+`core.db.pit.financial_facts_quarantine_review_as_of`.
+
 ## Layout
 
 | Path | What |
@@ -116,6 +135,7 @@ to bhavcopy closes across the ISIN lineage. Review quarantine with
 | `ingest/nse_bhavcopy/` | Daily NSE bhavcopy: archive host and drop folder; one parser |
 | `ingest/upstox/` | Upstox v3 daily candles by ISIN: API and drop folder; one parser |
 | `ingest/corporate_actions/` | Corporate actions: NSE export and curated file, both drop folders |
+| `ingest/nse_xbrl/` | XBRL results files → `financial_filing`, `financial_facts`: hardcoded element mapping, drop folder |
 | `core/db/pit.py` | Point-in-time reads — `as_of` is a required argument |
 | `core/blob.py` | The one blob-storage interface (S3-compatible now; Azure later) |
 | `core/sources.py` | Source classes and deployment modes |

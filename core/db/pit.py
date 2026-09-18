@@ -32,6 +32,8 @@ from core.db.models import (
     CorporateActionType,
     EntityIsin,
     FinancialFact,
+    FinancialFactsQuarantine,
+    FinancialFiling,
     IndexCode,
     IndexSnapshot,
     IndexSnapshotConstituent,
@@ -382,20 +384,22 @@ def bhavcopy_rows_as_of(
     return sorted(latest_by_date.values(), key=lambda row: row.trade_date)
 
 
-def symbol_to_isin_as_of(session: Session, *, symbol: str, on: date, as_of: datetime) -> str | None:
+def symbol_to_isin_as_of(
+    session: Session, *, symbol: str, on: date, as_of: datetime, since: date | None = None
+) -> str | None:
     """The ISIN bhavcopy showed for `symbol` on the latest trade_date <= `on`, known by `as_of`.
 
     Symbols are reused across companies over decades (CLAUDE.md "Universe"),
     so this is a snapshot at a date, never a standing lookup table. None if
-    `symbol` never traded on or before `on` in what is known by `as_of`.
+    `symbol` never traded on or before `on` in what is known by `as_of`, or
+    not since `since` when that is given (a stale row may be another company).
     """
     require_aware(as_of, "as_of")
     r = NseBhavcopyRow
-    rows = list(
-        session.scalars(
-            select(r).where(r.symbol == symbol, r.trade_date <= on, r.as_of <= as_of).order_by(r.id)
-        )
-    )
+    stmt = select(r).where(r.symbol == symbol, r.trade_date <= on, r.as_of <= as_of).order_by(r.id)
+    if since is not None:
+        stmt = stmt.where(r.trade_date >= since)
+    rows = list(session.scalars(stmt))
     if not rows:
         return None
     latest_by_date: dict[date, NseBhavcopyRow] = {}
@@ -464,6 +468,26 @@ def index_universe_isins_as_of(session: Session, *, as_of: datetime) -> set[str]
     s, c = IndexSnapshot, IndexSnapshotConstituent
     rows = session.scalars(
         select(c.isin).join(s, s.id == c.snapshot_id).where(s.as_of <= as_of, c.as_of <= as_of).distinct()
+    )
+    return set(rows)
+
+
+def index_symbol_isins_as_of(
+    session: Session, *, symbol: str, since: datetime, as_of: datetime
+) -> set[str]:
+    """ISINs that constituent lists published between `since` and `as_of` gave for `symbol`.
+
+    A second, independent symbol -> ISIN read for XBRL filings that carry no
+    ISIN. More than one ISIN means the symbol changed hands in the window.
+    """
+    require_aware(as_of, "as_of")
+    require_aware(since, "since")
+    s, c = IndexSnapshot, IndexSnapshotConstituent
+    rows = session.scalars(
+        select(c.isin)
+        .join(s, s.id == c.snapshot_id)
+        .where(c.symbol == symbol, s.as_of >= since, s.as_of <= as_of, c.as_of <= as_of)
+        .distinct()
     )
     return set(rows)
 
@@ -907,4 +931,109 @@ def corporate_action_quarantine_review_as_of(
             and file_row not in requarantined
         )
         entries.append(CorporateActionQuarantineEntry(row, resolved))
+    return entries
+
+
+# --------------------------------------------------------------------------- #
+# XBRL results filings (financial_facts)
+# --------------------------------------------------------------------------- #
+
+
+def financial_filings_as_of(
+    session: Session, *, isin: str | None = None, as_of: datetime
+) -> list[FinancialFiling]:
+    """Parsed XBRL results files known by `as_of`, oldest first; every rule_version's row."""
+    require_aware(as_of, "as_of")
+    f = FinancialFiling
+    stmt = select(f).where(f.as_of <= as_of).order_by(f.as_of, f.id)
+    if isin is not None:
+        stmt = stmt.where(f.isin == isin)
+    return list(session.scalars(stmt))
+
+
+def financial_filing_loaded_as_of(
+    session: Session, *, content_hash: str, file_as_of: datetime, rule_version: str, as_of: datetime
+) -> tuple[bool, set[tuple[str, str]]]:
+    """Whether one file was parsed into a filing under `rule_version`, and its whole-file quarantines.
+
+    The loader's backstop: a parsed file is skipped; a whole-file quarantine
+    (reason, detail) is not written twice, but the file is tried again, so an
+    ISIN that has since become resolvable loads.
+    """
+    require_aware(as_of, "as_of")
+    f, q = FinancialFiling, FinancialFactsQuarantine
+    parsed = session.scalar(
+        select(f.id).where(
+            f.content_hash == content_hash, f.as_of == file_as_of, f.rule_version == rule_version, f.as_of <= as_of
+        ).limit(1)
+    )
+    rejected = session.execute(
+        select(q.reason, q.detail).where(
+            q.content_hash == content_hash, q.as_of == file_as_of, q.rule_version == rule_version,
+            q.xbrl_element.is_(None), q.as_of <= as_of,
+        )  # fmt: skip
+    ).tuples()
+    return parsed is not None, {(str(reason), detail) for reason, detail in rejected}
+
+
+def financial_facts_quarantine_as_of(session: Session, *, as_of: datetime) -> list[FinancialFactsQuarantine]:
+    """XBRL files and facts held back for review, known by `as_of`, oldest first."""
+    require_aware(as_of, "as_of")
+    q = FinancialFactsQuarantine
+    return list(session.scalars(select(q).where(q.as_of <= as_of).order_by(q.as_of, q.id)))
+
+
+@dataclass(frozen=True)
+class FinancialFactsQuarantineEntry:
+    row: FinancialFactsQuarantine
+    resolved: bool
+
+    @property
+    def needs_review(self) -> bool:
+        return not self.resolved
+
+
+def financial_facts_quarantine_review_as_of(
+    session: Session, *, current_rule_version: str, as_of: datetime
+) -> list[FinancialFactsQuarantineEntry]:
+    """Every XBRL quarantine row known by `as_of`, marked once it has been dealt with.
+
+    A whole-file entry is resolved when that file (content_hash, as_of) has
+    since produced a filing under the entry's own rule (e.g. its ISIN became
+    resolvable) or under `current_rule_version`. A fact entry is resolved when it
+    is under an older rule, the file has been parsed under
+    `current_rule_version`, and that parse did not quarantine the same
+    (element, context) again. Quarantine rows are never deleted (append-only).
+    """
+    rows = financial_facts_quarantine_as_of(session, as_of=as_of)
+    if not rows:
+        return []
+    f = FinancialFiling
+    hashes = {row.content_hash for row in rows}
+    filings = set(
+        session.execute(
+            select(f.content_hash, f.as_of, f.rule_version)
+            .where(f.content_hash.in_(hashes), f.as_of <= as_of)
+            .distinct()
+        ).tuples()
+    )
+    parsed_under = filings
+    parsed_now = {(h, t) for h, t, v in filings if v == current_rule_version}
+    requarantined = {
+        (row.content_hash, row.as_of, row.xbrl_element, row.context_ref)
+        for row in rows
+        if row.rule_version == current_rule_version and row.xbrl_element is not None
+    }
+    entries = []
+    for row in rows:
+        file = (row.content_hash, row.as_of)
+        if row.xbrl_element is None:
+            resolved = (*file, row.rule_version) in parsed_under or file in parsed_now
+        else:
+            resolved = (
+                row.rule_version != current_rule_version
+                and file in parsed_now
+                and (*file, row.xbrl_element, row.context_ref) not in requarantined
+            )
+        entries.append(FinancialFactsQuarantineEntry(row, resolved))
     return entries

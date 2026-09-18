@@ -114,6 +114,12 @@ The general shape, implemented for index snapshots
   quarantine entries tied to it as no longer needing review, pointing at
   whatever replaced it
 
+`financial_facts` follows the same shape (migration 0008): `rule_version`
+joins its uniqueness key, and `ingest/nse_xbrl` reparses stored XBRL files
+into new `financial_filing` and `financial_facts` rows at the file's original
+`as_of`. `facts_as_of` takes the newest row per (line item, period) by `as_of`,
+then `id`. Rows from before 0008 carry `rule_version = 'pre-0008'`.
+
 This is distinct from a genuine restatement (a company revising 2019
 earnings in 2027), which *is* new information and must keep the later
 `as_of` precisely so a replay "as of 2019" cannot see it.
@@ -142,8 +148,8 @@ earnings in 2027), which *is* new information and must keep the later
 
 | Mechanism | State |
 |---|---|
-| Append-only triggers and `as_of` sanity checks per store | Done for `financial_facts`; `raw_source_file` (`as_of <= fetched_at`); `entity`, `entity_isin` (one ISIN, one entity); `index_snapshot`, `index_snapshot_constituent`, `index_snapshot_quarantine`; `nse_bhavcopy_row`, `nse_bhavcopy_quarantine`; `upstox_candle` (`as_of` = fetch time, IST date >= trade date), `upstox_candle_quarantine`; `corporate_action` (terms checked per type, `source_row` > 0), `corporate_action_quarantine` |
-| One point-in-time read function per store, `t` required (`core/db/pit.py`) | Done for `financial_facts`, `raw_source_file`, entity links, index snapshots and membership (`index_members_on` takes both the date and `as_of`), bhavcopy rows and the dated ticker -> ISIN map (`symbol_to_isin_as_of`), Upstox candles (newest fetch per day) and their bhavcopy cross-check, corporate actions (newest version per `action_key`), ISIN lineage and price adjustment factors |
+| Append-only triggers and `as_of` sanity checks per store | Done for `financial_facts`; `raw_source_file` (`as_of <= fetched_at`); `entity`, `entity_isin` (one ISIN, one entity); `index_snapshot`, `index_snapshot_constituent`, `index_snapshot_quarantine`; `nse_bhavcopy_row`, `nse_bhavcopy_quarantine`; `upstox_candle` (`as_of` = fetch time, IST date >= trade date), `upstox_candle_quarantine`; `corporate_action` (terms checked per type, `source_row` > 0), `corporate_action_quarantine`; `financial_filing` (IST `as_of` date after the period end and not before the board meeting), `financial_facts_quarantine` |
+| One point-in-time read function per store, `t` required (`core/db/pit.py`) | Done for `financial_facts`, `raw_source_file`, entity links, index snapshots and membership (`index_members_on` takes both the date and `as_of`), bhavcopy rows and the dated ticker -> ISIN map (`symbol_to_isin_as_of`), Upstox candles (newest fetch per day) and their bhavcopy cross-check, corporate actions (newest version per `action_key`), ISIN lineage and price adjustment factors, XBRL filings and their quarantine review |
 | Adapters record publication time, not fetch time (except vendor histories, see above); drop-folder files need a sidecar with an aware `published_at` (`ingest/base.py`) | Done |
 | Naive datetimes rejected before reaching the DB (`core/timezones.py`) | Done |
 | Architecture test: no direct queries against store tables outside PIT functions (`tests/test_architecture.py`) | Done |

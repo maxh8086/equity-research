@@ -59,6 +59,8 @@ class FinancialFact(ProvenanceMixin, Base):
     period_end: Mapped[date] = mapped_column(Date, nullable=False)
     value: Mapped[Decimal] = mapped_column(Numeric(28, 6), nullable=False)
     unit: Mapped[str] = mapped_column(Text, nullable=False)
+    # Rows written before migration 0008 carry 'pre-0008'.
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
 
     __table_args__ = (
         CheckConstraint(
@@ -90,6 +92,7 @@ class FinancialFact(ProvenanceMixin, Base):
             "period_start",
             "period_end",
             "as_of",
+            "rule_version",
             name="uq_financial_facts_version",
             postgresql_nulls_not_distinct=True,
         ),
@@ -680,4 +683,125 @@ class CorporateActionQuarantine(ProvenanceMixin, Base):
         ),
         CheckConstraint("model_version IS NULL", name="ck_corporate_action_quarantine_no_model"),
         Index("ix_corporate_action_quarantine_pit", "as_of"),
+    )
+
+
+class XbrlTaxonomy(StrEnum):
+    IND_AS = "ind_as"
+    NBFC = "nbfc"
+    BANK = "bank"
+    LIFE_INSURANCE = "life_insurance"
+    GENERAL_INSURANCE = "general_insurance"
+
+
+class XbrlIsinBasis(StrEnum):
+    FILING = "filing"  # the ISIN fact inside the XBRL file (banks, insurers)
+    BHAVCOPY = "bhavcopy"  # dated symbol -> ISIN map from NSE bhavcopy rows
+    INDEX_LIST = "index_list"  # symbol -> ISIN from an index constituent list
+
+
+class FinancialFactsQuarantineReason(StrEnum):
+    # Whole file: nothing from it enters a store
+    SHAPE_CHANGED = "shape_changed"
+    UNSUPPORTED_TAXONOMY = "unsupported_taxonomy"
+    PERIOD_UNCONFIRMED = "period_unconfirmed"
+    IMPLAUSIBLE_AS_OF = "implausible_as_of"
+    ISIN_UNRESOLVED = "isin_unresolved"
+    ISIN_CONFLICT = "isin_conflict"
+    # One fact: the rest of the file is stored
+    UNMAPPED_ELEMENT = "unmapped_element"
+    UNEXPECTED_UNIT = "unexpected_unit"
+    UNEXPECTED_SCALE = "unexpected_scale"
+    MALFORMED_VALUE = "malformed_value"
+    CONFLICTING_VALUES = "conflicting_values"
+
+
+XBRL_TAXONOMY = _pg_enum(XbrlTaxonomy, "xbrl_taxonomy")
+XBRL_ISIN_BASIS = _pg_enum(XbrlIsinBasis, "xbrl_isin_basis")
+FINANCIAL_FACTS_QUARANTINE_REASON = _pg_enum(
+    FinancialFactsQuarantineReason, "financial_facts_quarantine_reason"
+)
+
+
+class FinancialFiling(ProvenanceMixin, Base):
+    """One XBRL results file as parsed under one rule_version.
+
+    `period_start`/`period_end` are the filing's current-quarter column; its
+    facts in `financial_facts` share this row's `content_hash` and `as_of`.
+    A reparse under a corrected rule adds a row. Append-only.
+    """
+
+    __tablename__ = "financial_filing"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    isin_basis: Mapped[XbrlIsinBasis] = mapped_column(XBRL_ISIN_BASIS, nullable=False)
+    symbol: Mapped[str | None] = mapped_column(Text, nullable=True)
+    scrip_code: Mapped[str | None] = mapped_column(Text, nullable=True)
+    consolidation: Mapped[Consolidation] = mapped_column(
+        _pg_enum(Consolidation, "consolidation"), nullable=False
+    )
+    taxonomy: Mapped[XbrlTaxonomy] = mapped_column(XBRL_TAXONOMY, nullable=False)
+    reporting_quarter: Mapped[str] = mapped_column(Text, nullable=False)
+    period_start: Mapped[date] = mapped_column(Date, nullable=False)
+    period_end: Mapped[date] = mapped_column(Date, nullable=False)
+    board_meeting_date: Mapped[date] = mapped_column(Date, nullable=False)
+    facts_written: Mapped[int] = mapped_column(Integer, nullable=False)
+    facts_quarantined: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Segment and other dimensional facts, not parsed yet; a later rule reparses from blob.
+    dimensional_facts_deferred: Mapped[int] = mapped_column(Integer, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_financial_filing_isin_format"),
+        CheckConstraint("period_start <= period_end", name="ck_financial_filing_period_order"),
+        CheckConstraint(
+            "(timezone('Asia/Kolkata', as_of))::date > period_end",
+            name="ck_financial_filing_as_of_after_period_end",
+        ),
+        CheckConstraint(
+            "(timezone('Asia/Kolkata', as_of))::date >= board_meeting_date",
+            name="ck_financial_filing_as_of_not_before_board_meeting",
+        ),
+        CheckConstraint(
+            "facts_written >= 0 AND facts_quarantined >= 0 AND dimensional_facts_deferred >= 0",
+            name="ck_financial_filing_counts_non_negative",
+        ),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_financial_filing_content_hash_sha256"),
+        CheckConstraint("model_version IS NULL", name="ck_financial_filing_no_model"),
+        UniqueConstraint("content_hash", "as_of", "rule_version", name="uq_financial_filing_version"),
+        Index("ix_financial_filing_isin_pit", "isin", "as_of"),
+    )
+
+
+class FinancialFactsQuarantine(ProvenanceMixin, Base):
+    """An XBRL file or fact held back for manual review. Never guessed.
+
+    A whole-file entry has `xbrl_element` and `context_ref` NULL. Append-only;
+    see core.db.pit.financial_facts_quarantine_review_as_of.
+    """
+
+    __tablename__ = "financial_facts_quarantine"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str | None] = mapped_column(CHAR(12), nullable=True)
+    xbrl_element: Mapped[str | None] = mapped_column(Text, nullable=True)
+    context_ref: Mapped[str | None] = mapped_column(Text, nullable=True)
+    raw_value: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reason: Mapped[FinancialFactsQuarantineReason] = mapped_column(
+        FINANCIAL_FACTS_QUARANTINE_REASON, nullable=False
+    )
+    detail: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "(xbrl_element IS NULL) = (context_ref IS NULL)",
+            name="ck_financial_facts_quarantine_fact_fields_together",
+        ),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_financial_facts_quarantine_content_hash_sha256"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_financial_facts_quarantine_no_model"),
+        Index("ix_financial_facts_quarantine_pit", "as_of"),
     )

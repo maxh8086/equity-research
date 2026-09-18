@@ -67,6 +67,11 @@ Session 3 is built in slices, one session each:
 Session 4 — XBRL parser
 > Build the BSE/NSE XBRL parser for `financial_facts`. Deterministic element mapping, no LLM. Unmapped elements go to a quarantine table for manual review, never guessed.
 
+Session 4 is built in slices:
+- **4a — parser core** ✅ `ingest/nse_xbrl`: the SEBI results XBRL parser (stdlib ElementTree, DOCTYPE refused), the taxonomy detected from the schemaRef plus the entry namespace, and the reporting period of each column from its stated start and end dates, checked against every context. Every non-dimensional context is stored (quarter and year to date); dimensional facts are counted and deferred. The `nse_xbrl_results_drop` adapter resolves the ISIN from the file, from bhavcopy (10 days) and from index lists (190 days), and quarantines the file if they disagree. Migration 0008 adds `rule_version` to `financial_facts` (in its key), plus `financial_filing` and `financial_facts_quarantine`, both append-only. Contract tests run on 8 real NSE filings (`tests/fixtures/nse_xbrl/SOURCES.md`).
+- **4b — bank, NBFC and insurer mappings** ✅ the element map is hardcoded per taxonomy namespace (627 elements across Ind AS/NBFC, banking 2019 and insurance 2020). Line items keep each element's own meaning; canonical metrics across families come later, in `core/compute`.
+- **Not yet:** a live NSE results-listing adapter (drop folder only for now); pre-2020 taxonomies (quarantined as `unsupported_taxonomy`); segment facts. Results XBRL has no gross block, only net PPE and CWIP in half-yearly and yearly balance sheets, so Session 7 needs another source for gross block (annual report notes or a later taxonomy).
+
 Session 4b — shareholding pattern
 > Parse quarterly shareholding-pattern XBRL into `shareholding_pattern`: share counts (not just percentages) for promoter, FII/FPI, DII by type and public, plus pledged shares. `as_of` must be after quarter end. Same deterministic mapping and quarantine as Session 4.
 

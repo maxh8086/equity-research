@@ -19,6 +19,7 @@ def make_fact(**overrides) -> FinancialFact:
         period_end=date(2024, 3, 31),
         value=Decimal("2360000000000.00"),
         unit="INR",
+        rule_version="tests-1",
         as_of=datetime(2024, 4, 22, 16, 30, tzinfo=IST),
         content_hash=content_hash(b"filing-bytes"),
         source_url="https://www.bseindia.com/example.xml",
