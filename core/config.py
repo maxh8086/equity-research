@@ -75,6 +75,14 @@ class Settings(BaseSettings):
     )
     nse_bhavcopy_min_interval_seconds: float = 3.0
 
+    # Upstox API v3 historical candles (ingest/upstox): official_api, keyed by ISIN.
+    # The access token expires daily and a human logs in to get it (CLAUDE.md
+    # "Integrations"); it is never stored anywhere but this env var.
+    upstox_base_url: str = "https://api.upstox.com/v3"
+    upstox_access_token: SecretStr | None = None
+    upstox_min_interval_seconds: float = 1.0
+    upstox_timeout_seconds: float = 30.0
+
 
 def parse_source_switches(environ: Mapping[str, str]) -> dict[str, bool]:
     """EQUITY_SOURCE_<NAME>_ENABLED → {name: bool}. A value that is not a boolean raises."""

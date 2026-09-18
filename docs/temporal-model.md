@@ -21,6 +21,10 @@ design for stores not yet built.
 - **Historical filings are not backfills:** loading a 2019 filing today stores
   its 2019 publication time in `as_of` and today in `recorded_at`. R2 forbids
   inventing knowledge times for things the system derived.
+- **Vendor histories:** a series a vendor may revise after the fact (Upstox
+  candles, possibly adjusted for later splits) takes `as_of` = fetch time, not
+  the trade date. Only the exchange's own record (bhavcopy) is dated to the
+  trading day. A later fetch adds rows; reads take the newest fetch per day.
 - **Per-store sanity checks:** `financial_facts` requires `as_of` (IST date) >
   `period_end` (implemented). Corporate actions require `as_of` <= ex-date.
   Guidance claims have no such check, because they describe future periods.
@@ -116,9 +120,9 @@ earnings in 2027), which *is* new information and must keep the later
 
 | Mechanism | State |
 |---|---|
-| Append-only triggers and `as_of` sanity checks per store | Done for `financial_facts`; `raw_source_file` (`as_of <= fetched_at`); `entity`, `entity_isin` (one ISIN, one entity); `index_snapshot`, `index_snapshot_constituent`, `index_snapshot_quarantine`; `nse_bhavcopy_row`, `nse_bhavcopy_quarantine` |
-| One point-in-time read function per store, `t` required (`core/db/pit.py`) | Done for `financial_facts`, `raw_source_file`, entity links, index snapshots and membership (`index_members_on` takes both the date and `as_of`), bhavcopy rows and the dated ticker -> ISIN map (`symbol_to_isin_as_of`) |
-| Adapters record publication time, not fetch time; drop-folder files need a sidecar with an aware `published_at` (`ingest/base.py`) | Done |
+| Append-only triggers and `as_of` sanity checks per store | Done for `financial_facts`; `raw_source_file` (`as_of <= fetched_at`); `entity`, `entity_isin` (one ISIN, one entity); `index_snapshot`, `index_snapshot_constituent`, `index_snapshot_quarantine`; `nse_bhavcopy_row`, `nse_bhavcopy_quarantine`; `upstox_candle` (`as_of` = fetch time, IST date >= trade date), `upstox_candle_quarantine` |
+| One point-in-time read function per store, `t` required (`core/db/pit.py`) | Done for `financial_facts`, `raw_source_file`, entity links, index snapshots and membership (`index_members_on` takes both the date and `as_of`), bhavcopy rows and the dated ticker -> ISIN map (`symbol_to_isin_as_of`), Upstox candles (newest fetch per day) and their bhavcopy cross-check |
+| Adapters record publication time, not fetch time (except vendor histories, see above); drop-folder files need a sidecar with an aware `published_at` (`ingest/base.py`) | Done |
 | Naive datetimes rejected before reaching the DB (`core/timezones.py`) | Done |
 | Architecture test: no direct queries against store tables outside PIT functions (`tests/test_architecture.py`) | Done |
 | Derived stores add `rule_version`, evidence links, `recorded_at` | Added as each store is built |

@@ -62,16 +62,34 @@ block. Only confirmed equity series (EQ, BE) are stored, as `nse_bhavcopy_row`
 fail checks land in `nse_bhavcopy_quarantine`, reviewed the same way via
 `core.db.pit.bhavcopy_quarantine_review_as_of`.
 
+Upstox daily candles (`upstox_daily_candles`, `upstox_daily_candles_drop`): the
+v3 historical-candle API, one ISIN at a time (`NSE_EQ|<ISIN>`) for every ISIN
+in any Nifty 50 / Next 50 list known, in fixed decade windows from 2000-01-01.
+Needs `EQUITY_UPSTOX_ACCESS_TOKEN` from a human login (tokens expire daily); a
+401 stops the run. Candles are stored as `upstox_candle` with `as_of` = **fetch
+time**, not the trade date: a vendor history may be adjusted after the fact, so
+it is only known to be the vendor's view from when it arrived. A day's candle is
+not requested before 18:00 IST that day. `core.db.pit.upstox_bhavcopy_crosscheck_as_of`
+compares them with the exchange's own bhavcopy rows. Built against the
+documented response shape until an API app exists
+(`tests/fixtures/upstox/SOURCES.md`). For the drop folder, save the raw response
+body with the request URL as `source_url` and the download time as
+`published_at`. Review quarantine with
+`core.db.pit.upstox_quarantine_review_as_of`, which judges entries against the
+current rule version.
+
 ## Layout
 
 | Path | What |
 |---|---|
 | `core/compute/` | Pure functions. No I/O. Property-tested. |
 | `core/compute/membership.py` | Index membership intervals (member / uncertain) from dated constituent lists |
+| `core/compute/price_crosscheck.py` | Vendor daily bars vs. the exchange's record of the same days |
 | `core/db/base.py` | Provenance mixin: `as_of`, `content_hash`, `source_url`, `extracted_by`, `model_version`, `ingested_at` |
-| `core/db/models.py` | Store ① `financial_facts`; `raw_source_file`; `entity` / `entity_isin`; `index_snapshot`, its constituents and quarantine; `nse_bhavcopy_row` and its quarantine |
+| `core/db/models.py` | Store ① `financial_facts`; `raw_source_file`; `entity` / `entity_isin`; `index_snapshot`, its constituents and quarantine; `nse_bhavcopy_row` and its quarantine; `upstox_candle` and its quarantine |
 | `ingest/nse_indices/` | Nifty 50 / Next 50 constituent lists: NSE archive, drop folder, Wayback captures; one parser |
 | `ingest/nse_bhavcopy/` | Daily NSE bhavcopy: archive host and drop folder; one parser |
+| `ingest/upstox/` | Upstox v3 daily candles by ISIN: API and drop folder; one parser |
 | `core/db/pit.py` | Point-in-time reads — `as_of` is a required argument |
 | `core/blob.py` | The one blob-storage interface (S3-compatible now; Azure later) |
 | `core/sources.py` | Source classes and deployment modes |

@@ -14,6 +14,7 @@ from core.compute.membership import (
     membership_on,
     observed_intervals,
 )
+from core.compute.price_crosscheck import Bar, Mismatch, crosscheck
 from core.db.models import (
     Consolidation,
     EntityIsin,
@@ -25,6 +26,8 @@ from core.db.models import (
     NseBhavcopyQuarantine,
     NseBhavcopyRow,
     RawSourceFile,
+    UpstoxCandle,
+    UpstoxCandleQuarantine,
 )
 from core.timezones import require_aware
 
@@ -433,4 +436,179 @@ def bhavcopy_quarantine_review_as_of(session: Session, *, as_of: datetime) -> li
         else:
             resolved = (row.isin, row.series) in by_url_key.get(row.source_url, set())
         entries.append(BhavcopyQuarantineEntry(row, resolved))
+    return entries
+
+
+def index_universe_isins_as_of(session: Session, *, as_of: datetime) -> set[str]:
+    """Every ISIN listed in any Nifty 50 / Next 50 constituent list published by `as_of`.
+
+    The price universe: a company that was ever a member needs its history,
+    so this is the union over all lists, never today's list alone
+    (survivorship bias, CLAUDE.md "Universe").
+    """
+    require_aware(as_of, "as_of")
+    s, c = IndexSnapshot, IndexSnapshotConstituent
+    rows = session.scalars(
+        select(c.isin).join(s, s.id == c.snapshot_id).where(s.as_of <= as_of, c.as_of <= as_of).distinct()
+    )
+    return set(rows)
+
+
+# --------------------------------------------------------------------------- #
+# Upstox daily candles: the vendor's price history
+# --------------------------------------------------------------------------- #
+
+
+def upstox_source_loaded_as_of(
+    session: Session, *, source_url: str, fetched_as_of: datetime, extracted_by: str, rule_version: str
+) -> bool:
+    """Whether the response fetched from `source_url` at `fetched_as_of` already has a
+    candle or a whole-response quarantine under `rule_version`.
+
+    The loader's backstop, so a drop-folder rerun or a reparse of a current
+    response is a no-op rather than a duplicate insert. `fetched_as_of` is
+    both the response's identity and the visibility bound.
+    """
+    require_aware(fetched_as_of, "fetched_as_of")
+    c, q = UpstoxCandle, UpstoxCandleQuarantine
+    has_candle = session.scalar(
+        select(c.id)
+        .where(c.source_url == source_url, c.as_of == fetched_as_of, c.extracted_by == extracted_by,
+               c.rule_version == rule_version)
+        .limit(1)
+    )  # fmt: skip
+    if has_candle is not None:
+        return True
+    has_quarantine = session.scalar(
+        select(q.id)
+        .where(q.source_url == source_url, q.as_of == fetched_as_of, q.extracted_by == extracted_by,
+               q.rule_version == rule_version, q.candle_index.is_(None))
+        .limit(1)
+    )  # fmt: skip
+    return has_quarantine is not None
+
+
+def upstox_latest_trade_date_as_of(
+    session: Session, *, isin: str, extracted_by: str, as_of: datetime
+) -> date | None:
+    """The latest trade_date `extracted_by` stored a candle for `isin`, known by `as_of`.
+
+    The adapter's per-ISIN resume cursor: the next request starts the day after.
+    """
+    require_aware(as_of, "as_of")
+    c = UpstoxCandle
+    return session.scalar(
+        select(c.trade_date)
+        .where(c.isin == isin, c.extracted_by == extracted_by, c.as_of <= as_of)
+        .order_by(c.trade_date.desc())
+        .limit(1)
+    )
+
+
+def upstox_candles_as_of(
+    session: Session, *, isin: str, start: date, end: date, as_of: datetime
+) -> list[UpstoxCandle]:
+    """Upstox candles for `isin` with trade_date in [start, end], fetched by `as_of`, oldest first.
+
+    A later fetch of the same day (the vendor's newer view) or a reparse
+    under a corrected rule_version adds a row rather than editing the old one;
+    this keeps the newest per trade_date: latest `as_of`, then highest id.
+    """
+    require_aware(as_of, "as_of")
+    c = UpstoxCandle
+    rows = session.scalars(
+        select(c)
+        .where(c.isin == isin, c.trade_date >= start, c.trade_date <= end, c.as_of <= as_of)
+        .order_by(c.as_of, c.id)
+    )
+    latest_by_date: dict[date, UpstoxCandle] = {}
+    for row in rows:
+        latest_by_date[row.trade_date] = row  # ascending (as_of, id): last write wins
+    return sorted(latest_by_date.values(), key=lambda row: row.trade_date)
+
+
+def upstox_bhavcopy_crosscheck_as_of(
+    session: Session, *, isin: str, start: date, end: date, as_of: datetime
+) -> list[Mismatch]:
+    """Upstox candles vs. NSE bhavcopy rows for `isin`, over the dates both cover, as known by `as_of`.
+
+    The window is trimmed to the overlap of what each source has for `isin`
+    (bhavcopy only starts 2024-07-08), so a date outside one source's
+    coverage is not reported as missing. Empty when they do not overlap.
+    """
+    vendor = {
+        r.trade_date: Bar(r.open, r.high, r.low, r.close, r.volume)
+        for r in upstox_candles_as_of(session, isin=isin, start=start, end=end, as_of=as_of)
+    }
+    exchange = {
+        r.trade_date: Bar(r.open, r.high, r.low, r.close, r.volume)
+        for r in bhavcopy_rows_as_of(session, isin=isin, start=start, end=end, as_of=as_of)
+    }
+    if not vendor or not exchange:
+        return []
+    lo, hi = max(min(vendor), min(exchange)), min(max(vendor), max(exchange))
+    return crosscheck(
+        {d: b for d, b in vendor.items() if lo <= d <= hi},
+        {d: b for d, b in exchange.items() if lo <= d <= hi},
+    )
+
+
+def upstox_quarantine_as_of(session: Session, *, as_of: datetime) -> list[UpstoxCandleQuarantine]:
+    """Upstox responses and candles held back for review, fetched by `as_of`, oldest first."""
+    require_aware(as_of, "as_of")
+    q = UpstoxCandleQuarantine
+    return list(session.scalars(select(q).where(q.as_of <= as_of).order_by(q.as_of, q.id)))
+
+
+@dataclass(frozen=True)
+class UpstoxQuarantineEntry:
+    row: UpstoxCandleQuarantine
+    resolved: bool  # the response was re-parsed under the current rule and this was not quarantined again
+
+    @property
+    def needs_review(self) -> bool:
+        return not self.resolved
+
+
+def upstox_quarantine_review_as_of(
+    session: Session, *, current_rule_version: str, as_of: datetime
+) -> list[UpstoxQuarantineEntry]:
+    """Every Upstox quarantine row known by `as_of`, marked once a rule fix has dealt with it.
+
+    A response is identified by (source_url, as_of). An entry under an older
+    rule is resolved once that response has been parsed under
+    `current_rule_version` (it has a candle or a quarantine row under it) and
+    that parse did not quarantine the same candle (same `candle_index`, or
+    the whole response) again. A malformed candle may carry no trade_date, so
+    matching is by position in the response, not by date. Entries under the
+    current rule always need review. Quarantine rows are never deleted
+    (append-only).
+    """
+    rows = upstox_quarantine_as_of(session, as_of=as_of)
+    if not rows:
+        return []
+    c = UpstoxCandle
+    urls = {row.source_url for row in rows}
+    parsed_now = set(
+        session.execute(
+            select(c.source_url, c.as_of)
+            .where(c.source_url.in_(urls), c.rule_version == current_rule_version, c.as_of <= as_of)
+            .distinct()
+        ).tuples()
+    )
+    requarantined = set()
+    for row in rows:
+        if row.rule_version == current_rule_version:
+            parsed_now.add((row.source_url, row.as_of))
+            requarantined.add((row.source_url, row.as_of, row.candle_index))
+
+    entries = []
+    for row in rows:
+        response = (row.source_url, row.as_of)
+        resolved = (
+            row.rule_version != current_rule_version
+            and response in parsed_now
+            and (*response, row.candle_index) not in requarantined
+        )
+        entries.append(UpstoxQuarantineEntry(row, resolved))
     return entries

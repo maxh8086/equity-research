@@ -414,3 +414,103 @@ class NseBhavcopyQuarantine(ProvenanceMixin, Base):
         CheckConstraint("model_version IS NULL", name="ck_nse_bhavcopy_quarantine_no_model"),
         Index("ix_nse_bhavcopy_quarantine_pit", "as_of"),
     )
+
+
+# --------------------------------------------------------------------------- #
+# Upstox v3 daily candles: the vendor's price history, keyed by ISIN
+# --------------------------------------------------------------------------- #
+
+
+class UpstoxQuarantineReason(StrEnum):
+    # Whole response: nothing from it enters a store
+    SHAPE_CHANGED = "shape_changed"
+    UNKNOWN_INSTRUMENT = "unknown_instrument"
+    # One candle: the rest of the response is stored
+    MALFORMED_CANDLE = "malformed_candle"
+    OHLC_INCONSISTENT = "ohlc_inconsistent"
+    DUPLICATE_DATE = "duplicate_date"
+
+
+UPSTOX_QUARANTINE_REASON = _pg_enum(UpstoxQuarantineReason, "upstox_quarantine_reason")
+
+
+class UpstoxCandle(ProvenanceMixin, Base):
+    """One daily candle for one ISIN, exactly as Upstox returned it.
+
+    `as_of` is the fetch time, not the trade date: a vendor history may be
+    revised after the fact (e.g. adjusted for a later split), so a response is
+    only known to be the vendor's view from the moment it was received (R2).
+    Whether these are the exchange's as-traded prices is checked against
+    `nse_bhavcopy_row` (core.db.pit.upstox_bhavcopy_crosscheck_as_of), never
+    assumed. A refetch that overlaps adds rows with a later `as_of`;
+    core.db.pit.upstox_candles_as_of picks the newest per trade_date. Append-only.
+    """
+
+    __tablename__ = "upstox_candle"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    instrument_key: Mapped[str] = mapped_column(Text, nullable=False)
+    trade_date: Mapped[date] = mapped_column(Date, nullable=False)
+    open: Mapped[Decimal] = mapped_column(Numeric(20, 4), nullable=False)
+    high: Mapped[Decimal] = mapped_column(Numeric(20, 4), nullable=False)
+    low: Mapped[Decimal] = mapped_column(Numeric(20, 4), nullable=False)
+    close: Mapped[Decimal] = mapped_column(Numeric(20, 4), nullable=False)
+    volume: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    open_interest: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_upstox_candle_isin_format"),
+        CheckConstraint(
+            "open >= 0 AND high >= 0 AND low >= 0 AND close >= 0",
+            name="ck_upstox_candle_prices_non_negative",
+        ),
+        CheckConstraint(
+            "high >= low AND high >= open AND high >= close AND low <= open AND low <= close",
+            name="ck_upstox_candle_ohlc_consistent",
+        ),
+        CheckConstraint("volume >= 0 AND open_interest >= 0", name="ck_upstox_candle_counts_non_negative"),
+        # A candle cannot be known before its own trading day (IST).
+        CheckConstraint(
+            "(as_of AT TIME ZONE 'Asia/Kolkata')::date >= trade_date", name="ck_upstox_candle_as_of_after_trade"
+        ),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_upstox_candle_content_hash_sha256"),
+        CheckConstraint("model_version IS NULL", name="ck_upstox_candle_no_model"),
+        UniqueConstraint(
+            "isin", "trade_date", "as_of", "rule_version", name="uq_upstox_candle_publication"
+        ),
+        Index("ix_upstox_candle_isin_pit", "isin", "trade_date"),
+    )
+
+
+class UpstoxCandleQuarantine(ProvenanceMixin, Base):
+    """An Upstox response or candle held back for manual review. Never guessed.
+
+    A whole-response entry has `candle_index` NULL. Append-only; resolved once
+    a matching `upstox_candle` exists for the same response (core.db.pit
+    `upstox_quarantine_review_as_of`).
+    """
+
+    __tablename__ = "upstox_candle_quarantine"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str | None] = mapped_column(CHAR(12), nullable=True)
+    trade_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    candle_index: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    raw_candle: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reason: Mapped[UpstoxQuarantineReason] = mapped_column(UPSTOX_QUARANTINE_REASON, nullable=False)
+    detail: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "(candle_index IS NULL) = (raw_candle IS NULL)",
+            name="ck_upstox_candle_quarantine_candle_fields_together",
+        ),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_upstox_candle_quarantine_content_hash_sha256"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_upstox_candle_quarantine_no_model"),
+        Index("ix_upstox_candle_quarantine_pit", "as_of"),
+    )
