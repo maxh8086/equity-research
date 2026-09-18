@@ -42,6 +42,9 @@ from core.db.models import (
     NseBhavcopyRow,
     RatioBasis,
     RawSourceFile,
+    ShareholdingFiling,
+    ShareholdingPattern,
+    ShareholdingQuarantine,
     UpstoxCandle,
     UpstoxCandleQuarantine,
 )
@@ -1036,4 +1039,135 @@ def financial_facts_quarantine_review_as_of(
                 and (*file, row.xbrl_element, row.context_ref) not in requarantined
             )
         entries.append(FinancialFactsQuarantineEntry(row, resolved))
+    return entries
+
+
+# --------------------------------------------------------------------------- #
+# Shareholding-pattern filings (shareholding_pattern)
+# --------------------------------------------------------------------------- #
+
+
+def shareholding_filings_as_of(
+    session: Session, *, isin: str | None = None, as_of: datetime
+) -> list[ShareholdingFiling]:
+    """Parsed shareholding-pattern files known by `as_of`, oldest first; every rule_version's row."""
+    require_aware(as_of, "as_of")
+    f = ShareholdingFiling
+    stmt = select(f).where(f.as_of <= as_of).order_by(f.as_of, f.id)
+    if isin is not None:
+        stmt = stmt.where(f.isin == isin)
+    return list(session.scalars(stmt))
+
+
+def shareholding_filing_loaded_as_of(
+    session: Session, *, content_hash: str, file_as_of: datetime, rule_version: str, as_of: datetime
+) -> tuple[bool, set[tuple[str, str]]]:
+    """Whether one file was parsed into a filing under `rule_version`, and its whole-file quarantines.
+
+    The loader's backstop, as for financial_filing_loaded_as_of.
+    """
+    require_aware(as_of, "as_of")
+    f, q = ShareholdingFiling, ShareholdingQuarantine
+    parsed = session.scalar(
+        select(f.id).where(
+            f.content_hash == content_hash, f.as_of == file_as_of, f.rule_version == rule_version, f.as_of <= as_of
+        ).limit(1)
+    )
+    rejected = session.execute(
+        select(q.reason, q.detail).where(
+            q.content_hash == content_hash, q.as_of == file_as_of, q.rule_version == rule_version,
+            q.xbrl_element.is_(None), q.as_of <= as_of,
+        )  # fmt: skip
+    ).tuples()
+    return parsed is not None, {(str(reason), detail) for reason, detail in rejected}
+
+
+def shareholding_pattern_as_of(
+    session: Session, *, isin: str, as_of: datetime, as_on_date: date | None = None
+) -> dict[date, list[ShareholdingPattern]]:
+    """The shareholding pattern of `isin` for each "as on" date, as known at `as_of`.
+
+    For each "as on" date the newest filing known at `as_of` wins: a revised
+    filing (later as_of) replaces the original, and a reparse under a newer
+    rule_version replaces the older parse. Only that filing's rows are
+    returned, never a mix. Rows are ordered by category, then measure.
+    """
+    require_aware(as_of, "as_of")
+    latest: dict[date, ShareholdingFiling] = {}
+    for filing in shareholding_filings_as_of(session, isin=isin, as_of=as_of):
+        if as_on_date is None or filing.as_on_date == as_on_date:
+            latest[filing.as_on_date] = filing  # oldest first, so the last one wins
+    p = ShareholdingPattern
+    out: dict[date, list[ShareholdingPattern]] = {}
+    for day, filing in sorted(latest.items()):
+        out[day] = list(
+            session.scalars(
+                select(p)
+                .where(
+                    p.content_hash == filing.content_hash, p.as_of == filing.as_of,
+                    p.rule_version == filing.rule_version, p.isin == isin, p.as_of <= as_of,
+                )  # fmt: skip
+                .order_by(p.category, p.measure)
+            )
+        )
+    return out
+
+
+def shareholding_quarantine_as_of(session: Session, *, as_of: datetime) -> list[ShareholdingQuarantine]:
+    """Shareholding files and facts held back for review, known by `as_of`, oldest first."""
+    require_aware(as_of, "as_of")
+    q = ShareholdingQuarantine
+    return list(session.scalars(select(q).where(q.as_of <= as_of).order_by(q.as_of, q.id)))
+
+
+@dataclass(frozen=True)
+class ShareholdingQuarantineEntry:
+    row: ShareholdingQuarantine
+    resolved: bool
+
+    @property
+    def needs_review(self) -> bool:
+        return not self.resolved
+
+
+def shareholding_quarantine_review_as_of(
+    session: Session, *, current_rule_version: str, as_of: datetime
+) -> list[ShareholdingQuarantineEntry]:
+    """Every shareholding quarantine row known by `as_of`, marked once it has been dealt with.
+
+    Same rules as financial_facts_quarantine_review_as_of: a whole-file entry
+    is resolved once that file has produced a filing under the entry's rule or
+    `current_rule_version`; a fact entry once the file was reparsed under
+    `current_rule_version` without quarantining the same (element, context).
+    """
+    rows = shareholding_quarantine_as_of(session, as_of=as_of)
+    if not rows:
+        return []
+    f = ShareholdingFiling
+    hashes = {row.content_hash for row in rows}
+    filings = set(
+        session.execute(
+            select(f.content_hash, f.as_of, f.rule_version)
+            .where(f.content_hash.in_(hashes), f.as_of <= as_of)
+            .distinct()
+        ).tuples()
+    )
+    parsed_now = {(h, t) for h, t, v in filings if v == current_rule_version}
+    requarantined = {
+        (row.content_hash, row.as_of, row.xbrl_element, row.context_ref)
+        for row in rows
+        if row.rule_version == current_rule_version and row.xbrl_element is not None
+    }
+    entries = []
+    for row in rows:
+        file = (row.content_hash, row.as_of)
+        if row.xbrl_element is None:
+            resolved = (*file, row.rule_version) in filings or file in parsed_now
+        else:
+            resolved = (
+                row.rule_version != current_rule_version
+                and file in parsed_now
+                and (*file, row.xbrl_element, row.context_ref) not in requarantined
+            )
+        entries.append(ShareholdingQuarantineEntry(row, resolved))
     return entries

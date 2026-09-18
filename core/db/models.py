@@ -805,3 +805,133 @@ class FinancialFactsQuarantine(ProvenanceMixin, Base):
         CheckConstraint("model_version IS NULL", name="ck_financial_facts_quarantine_no_model"),
         Index("ix_financial_facts_quarantine_pit", "as_of"),
     )
+
+
+class ShareholdingQuarantineReason(StrEnum):
+    # Whole file: nothing from it enters a store
+    SHAPE_CHANGED = "shape_changed"
+    UNSUPPORTED_TAXONOMY = "unsupported_taxonomy"
+    IMPLAUSIBLE_AS_OF = "implausible_as_of"
+    ISIN_UNRESOLVED = "isin_unresolved"
+    ISIN_CONFLICT = "isin_conflict"
+    TOTALS_MISMATCH = "totals_mismatch"  # a category is not the sum of its sub-categories
+    # One fact: the rest of the file is stored
+    UNMAPPED_ELEMENT = "unmapped_element"
+    UNMAPPED_CATEGORY = "unmapped_category"
+    UNEXPECTED_UNIT = "unexpected_unit"
+    MALFORMED_VALUE = "malformed_value"
+    CONFLICTING_VALUES = "conflicting_values"
+
+
+SHAREHOLDING_QUARANTINE_REASON = _pg_enum(ShareholdingQuarantineReason, "shareholding_quarantine_reason")
+
+
+class ShareholdingFiling(ProvenanceMixin, Base):
+    """One shareholding-pattern XBRL file as parsed under one rule_version.
+
+    `as_on_date` is the date the pattern describes (a quarter end, or the
+    allotment date of an off-cycle filing). A revised filing is another file
+    with a later `as_of`; a reparse under a corrected rule adds a row. Append-only.
+    """
+
+    __tablename__ = "shareholding_filing"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    isin_basis: Mapped[XbrlIsinBasis] = mapped_column(XBRL_ISIN_BASIS, nullable=False)
+    symbol: Mapped[str | None] = mapped_column(Text, nullable=True)
+    scrip_code: Mapped[str | None] = mapped_column(Text, nullable=True)
+    as_on_date: Mapped[date] = mapped_column(Date, nullable=False)
+    allotment_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    taxonomy_version: Mapped[str] = mapped_column(Text, nullable=False)
+    rows_written: Mapped[int] = mapped_column(Integer, nullable=False)
+    facts_quarantined: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Named holders and other typed-dimension facts, not parsed yet; a later rule reparses from blob.
+    typed_facts_deferred: Mapped[int] = mapped_column(Integer, nullable=False)
+    percentage_facts_skipped: Mapped[int] = mapped_column(Integer, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_shareholding_filing_isin_format"),
+        CheckConstraint(
+            "(timezone('Asia/Kolkata', as_of))::date > as_on_date",
+            name="ck_shareholding_filing_as_of_after_as_on_date",
+        ),
+        CheckConstraint(
+            "rows_written >= 0 AND facts_quarantined >= 0 AND typed_facts_deferred >= 0"
+            " AND percentage_facts_skipped >= 0",
+            name="ck_shareholding_filing_counts_non_negative",
+        ),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_shareholding_filing_content_hash_sha256"),
+        CheckConstraint("model_version IS NULL", name="ck_shareholding_filing_no_model"),
+        UniqueConstraint("content_hash", "as_of", "rule_version", name="uq_shareholding_filing_version"),
+        Index("ix_shareholding_filing_isin_pit", "isin", "as_of"),
+    )
+
+
+class ShareholdingPattern(ProvenanceMixin, Base):
+    """Store 16: one count for one shareholder category, from one filing.
+
+    Long format: (category, measure) -> value, e.g. ("promoter_group",
+    "pledged_shares"). Categories and measures are keys from
+    ingest/nse_shp/mapping.py; `parent_category` is the category this one
+    rolls up into. Counts only; percentages are computed by code. Rows share
+    their filing's content_hash, as_of and rule_version. Append-only.
+    """
+
+    __tablename__ = "shareholding_pattern"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    as_on_date: Mapped[date] = mapped_column(Date, nullable=False)
+    category: Mapped[str] = mapped_column(Text, nullable=False)
+    parent_category: Mapped[str | None] = mapped_column(Text, nullable=True)
+    measure: Mapped[str] = mapped_column(Text, nullable=False)
+    value: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    xbrl_element: Mapped[str] = mapped_column(Text, nullable=False)
+    xbrl_member: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_shareholding_pattern_isin_format"),
+        CheckConstraint("value >= 0", name="ck_shareholding_pattern_value_non_negative"),
+        CheckConstraint(
+            "(timezone('Asia/Kolkata', as_of))::date > as_on_date",
+            name="ck_shareholding_pattern_as_of_after_as_on_date",
+        ),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_shareholding_pattern_content_hash_sha256"),
+        CheckConstraint("model_version IS NULL", name="ck_shareholding_pattern_no_model"),
+        UniqueConstraint(
+            "content_hash", "as_of", "rule_version", "category", "measure", name="uq_shareholding_pattern_version"
+        ),
+        Index("ix_shareholding_pattern_isin_pit", "isin", "as_on_date", "as_of"),
+    )
+
+
+class ShareholdingQuarantine(ProvenanceMixin, Base):
+    """A shareholding-pattern file or fact held back for manual review. Never guessed.
+
+    A whole-file entry has `xbrl_element` and `context_ref` NULL. Append-only;
+    see core.db.pit.shareholding_quarantine_review_as_of.
+    """
+
+    __tablename__ = "shareholding_quarantine"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str | None] = mapped_column(CHAR(12), nullable=True)
+    xbrl_element: Mapped[str | None] = mapped_column(Text, nullable=True)
+    context_ref: Mapped[str | None] = mapped_column(Text, nullable=True)
+    raw_value: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reason: Mapped[ShareholdingQuarantineReason] = mapped_column(SHAREHOLDING_QUARANTINE_REASON, nullable=False)
+    detail: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "(xbrl_element IS NULL) = (context_ref IS NULL)",
+            name="ck_shareholding_quarantine_fact_fields_together",
+        ),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_shareholding_quarantine_content_hash_sha256"),
+        CheckConstraint("model_version IS NULL", name="ck_shareholding_quarantine_no_model"),
+        Index("ix_shareholding_quarantine_pit", "as_of"),
+    )
