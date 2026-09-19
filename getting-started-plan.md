@@ -87,6 +87,20 @@ Session 5 — ratios
 Session 6 — validation
 > Build a validation script comparing our computed ratios against Screener for the 20-company validation sample (10 Nifty 50 + 10 Next 50, fixed seed, required company types swapped in; see CLAUDE.md "Current phase"). Report divergences with the underlying line items.
 
+- **6a — Screener template** ✅ merged Screener Excel template generator (d095d6d).
+- **6 — validation tooling** ✅, **gate not yet run** (needs data):
+  - **Sample:** `validate/samples.py` `validation-sample/1`, frozen by a test. Seeded SHA-256 draw (`core/compute/sample.py`) over the NSE archive lists published by 2026-09-19. One swap, KOTAKBANK → SBILIFE, with its reason: no insurer was drawn, and the universe has no general insurer. `python -m validate sample` redraws from the recorded lists in the database. It draws from one list, not from computed membership, which is uncertain after the last list.
+  - **Screener adapter:** `screener_export_drop` (`manual_drop`) stores hand-exported Screener workbooks. `screener_export` / `screener_value` are append-only, in absolute rupees. The sidecar names the ISIN and consolidation. The ISIN is checked against the constituent lists at export time, and every period must end before the export.
+  - **Comparison:** `core/compute/screener_compare.py` (`screener_compare/1`) pairs Screener lines with sums of our line items for each filing family. It computes ratios from Screener's lines with the ratios/1 functions.
+  - **Report:** `python -m validate screener [--as-of] [--years] [--isin] [--all]` prints each divergence with its line items, the lease, NCI and ROCE evidence, and the gate. It exits 1 on FAIL.
+  - **Tolerances:** lines within 1% or 0.05 crore; margins and ROCE within 0.005.
+  - **Gated:** Ind AS, NBFC and bank lines, and the Ind AS ratios. Insurer lines, other income, net debt and closing ROCE are reported but not gated.
+- **Session 6 findings so far:**
+  - **Leases:** results XBRL does not tag lease liabilities. The report lists each case where Screener's borrowings exceed ours, beside that year's lease payments.
+  - **NCI:** the report says whether Screener's profit and equity agree with our total or with the owners' share.
+  - **ROCE:** average versus closing stays open. The Data Sheet has no ratios, so answering needs Screener's displayed ROCE.
+  - **Borrowings:** ratios/1 needs both current and non-current borrowings facts. A filing that omits a nil line leaves debt ratios as `missing_input`; if the real data shows this, that is a ratios/2 decision.
+
 **Week 2 exit criteria — the real gate.** Your numbers match Screener for the 20-company validation sample. If they don't, stop and fix. Everything downstream inherits these errors.
 
 ---

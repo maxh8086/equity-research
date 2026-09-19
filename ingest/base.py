@@ -204,6 +204,8 @@ class DropFolderAdapter(Adapter):
     """
 
     source_class = SourceClass.MANUAL_DROP
+    # A source whose sidecar carries more than provenance extends DropFileMeta.
+    meta_model: ClassVar[type[DropFileMeta]] = DropFileMeta
 
     def drop_dir(self, ctx: AdapterContext) -> Path:
         if ctx.settings.drop_folder is None:
@@ -225,7 +227,7 @@ class DropFolderAdapter(Adapter):
             if meta_path not in sidecars:
                 raise DropFileError(f"{path.name} has no {meta_path.name}")
             sidecars.discard(meta_path)
-            out.append((path, DropFileMeta.model_validate_json(meta_path.read_bytes())))
+            out.append((path, self.meta_model.model_validate_json(meta_path.read_bytes())))
         if sidecars:
             raise DropFileError(f"sidecars without a file: {sorted(p.name for p in sidecars)}")
         return out

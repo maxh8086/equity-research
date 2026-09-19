@@ -935,3 +935,74 @@ class ShareholdingQuarantine(ProvenanceMixin, Base):
         CheckConstraint("model_version IS NULL", name="ck_shareholding_quarantine_no_model"),
         Index("ix_shareholding_quarantine_pit", "as_of"),
     )
+
+
+# --------------------------------------------------------------------------- #
+# Screener.in exports: the outside reference for validation (Session 6)
+# --------------------------------------------------------------------------- #
+
+
+class ScreenerExport(ProvenanceMixin, Base):
+    """One Screener Excel export as parsed under one rule_version.
+
+    Reference data for validating our computed numbers, never an input to
+    them: nothing in financial_facts or any ratio reads it. `as_of` is the
+    export time, so each value is what Screener showed then, restatements
+    included. `isin` comes from the sidecar and is cross-checked against the
+    URL's symbol in the constituent lists. Append-only.
+    """
+
+    __tablename__ = "screener_export"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    consolidation: Mapped[Consolidation] = mapped_column(_pg_enum(Consolidation, "consolidation"), nullable=False)
+    company_name: Mapped[str] = mapped_column(Text, nullable=False)
+    template_version: Mapped[str] = mapped_column(Text, nullable=False)
+    rows_written: Mapped[int] = mapped_column(Integer, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_screener_export_isin_format"),
+        CheckConstraint("rows_written > 0", name="ck_screener_export_rows_written"),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_screener_export_content_hash_sha256"),
+        CheckConstraint("model_version IS NULL", name="ck_screener_export_no_model"),
+        UniqueConstraint("content_hash", "as_of", "rule_version", name="uq_screener_export_version"),
+        Index("ix_screener_export_isin_pit", "isin", "consolidation", "as_of"),
+    )
+
+
+class ScreenerValue(ProvenanceMixin, Base):
+    """One number from a Screener export's Data Sheet, in absolute units of `unit`.
+
+    `statement` is pl | quarter | bs | cf; `line` is the parser's name for the
+    Data Sheet row (ingest/screener_export/parser.py). Blank cells are not
+    stored. Rows share their export's content_hash, as_of and rule_version.
+    """
+
+    __tablename__ = "screener_value"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    consolidation: Mapped[Consolidation] = mapped_column(_pg_enum(Consolidation, "consolidation"), nullable=False)
+    statement: Mapped[str] = mapped_column(Text, nullable=False)
+    line: Mapped[str] = mapped_column(Text, nullable=False)
+    period_end: Mapped[date] = mapped_column(Date, nullable=False)
+    value: Mapped[Decimal] = mapped_column(Numeric(28, 6), nullable=False)
+    unit: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_screener_value_isin_format"),
+        CheckConstraint("statement IN ('pl', 'quarter', 'bs', 'cf')", name="ck_screener_value_statement"),
+        CheckConstraint("unit IN ('INR', 'shares', 'INR_per_share')", name="ck_screener_value_unit"),
+        CheckConstraint(
+            "(timezone('Asia/Kolkata', as_of))::date > period_end", name="ck_screener_value_as_of_after_period_end"
+        ),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_screener_value_content_hash_sha256"),
+        CheckConstraint("model_version IS NULL", name="ck_screener_value_no_model"),
+        UniqueConstraint(
+            "content_hash", "as_of", "rule_version", "statement", "line", "period_end", name="uq_screener_value_version"
+        ),
+        Index("ix_screener_value_pit", "isin", "consolidation", "as_of"),
+    )

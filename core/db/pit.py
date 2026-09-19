@@ -44,6 +44,8 @@ from core.db.models import (
     NseBhavcopyRow,
     RatioBasis,
     RawSourceFile,
+    ScreenerExport,
+    ScreenerValue,
     ShareholdingFiling,
     ShareholdingPattern,
     ShareholdingQuarantine,
@@ -175,6 +177,37 @@ def index_members_on(
     """
     require_aware(on, "on")
     return membership_on(index_membership_as_of(session, index_code=index_code, as_of=as_of), on)
+
+
+@dataclass(frozen=True)
+class ListedSnapshot:
+    as_of: datetime
+    content_hash: str
+    isins: frozenset[str]
+    complete: bool
+
+
+def index_lists_as_of(session: Session, *, index_code: IndexCode, as_of: datetime) -> list[ListedSnapshot]:
+    """Each constituent list of `index_code` published by `as_of`, with its file's hash, oldest first.
+
+    Like index_snapshots_as_of, only the newest parse of each file counts.
+    """
+    require_aware(as_of, "as_of")
+    s, c = IndexSnapshot, IndexSnapshotConstituent
+    latest: dict[tuple[str, datetime], IndexSnapshot] = {}
+    for snap in session.scalars(select(s).where(s.index_code == index_code, s.as_of <= as_of).order_by(s.id)):
+        latest[(snap.source_url, snap.as_of)] = snap
+    snapshots = sorted(latest.values(), key=lambda snap: (snap.as_of, snap.id))
+    isins: dict[int, set[str]] = {snap.id: set() for snap in snapshots}
+    if isins:
+        for snapshot_id, isin in session.execute(
+            select(c.snapshot_id, c.isin).where(c.snapshot_id.in_(isins), c.as_of <= as_of)
+        ):
+            isins[snapshot_id].add(isin)
+    return [
+        ListedSnapshot(snap.as_of, snap.content_hash, frozenset(isins[snap.id]), snap.quarantined_rows == 0)
+        for snap in snapshots
+    ]
 
 
 def index_snapshot_keys_as_of(
@@ -1340,3 +1373,60 @@ def shareholding_quarantine_review_as_of(
             )
         entries.append(ShareholdingQuarantineEntry(row, resolved))
     return entries
+
+
+# --------------------------------------------------------------------------- #
+# Screener exports (validation reference, never an input)
+# --------------------------------------------------------------------------- #
+
+
+def screener_export_loaded_as_of(
+    session: Session, *, content_hash: str, file_as_of: datetime, rule_version: str, as_of: datetime
+) -> ScreenerExport | None:
+    """The export row parsed from one stored file under `rule_version`, if any, known by `as_of`."""
+    require_aware(as_of, "as_of")
+    e = ScreenerExport
+    return session.scalar(
+        select(e).where(
+            e.content_hash == content_hash, e.as_of == file_as_of, e.rule_version == rule_version, e.as_of <= as_of
+        ).order_by(e.id).limit(1)
+    )
+
+
+def screener_exports_as_of(session: Session, *, as_of: datetime, isin: str | None = None) -> list[ScreenerExport]:
+    """Parsed Screener exports known by `as_of`, oldest first; every rule_version's row."""
+    require_aware(as_of, "as_of")
+    e = ScreenerExport
+    stmt = select(e).where(e.as_of <= as_of).order_by(e.as_of, e.id)
+    if isin is not None:
+        stmt = stmt.where(e.isin == isin)
+    return list(session.scalars(stmt))
+
+
+def screener_values_as_of(
+    session: Session, *, isin: str, consolidation: Consolidation, as_of: datetime, rule_version: str
+) -> tuple[ScreenerExport | None, list[ScreenerValue]]:
+    """The newest export of `isin` known at `as_of` under `rule_version`, and its values.
+
+    Values are never mixed across exports: one export is one consistent view
+    of Screener at its export time.
+    """
+    require_aware(as_of, "as_of")
+    e, v = ScreenerExport, ScreenerValue
+    export = session.scalar(
+        select(e)
+        .where(e.isin == isin, e.consolidation == consolidation, e.rule_version == rule_version, e.as_of <= as_of)
+        .order_by(e.as_of.desc(), e.id.desc())
+        .limit(1)
+    )
+    if export is None:
+        return None, []
+    values = session.scalars(
+        select(v)
+        .where(
+            v.content_hash == export.content_hash, v.as_of == export.as_of, v.rule_version == rule_version,
+            v.isin == isin, v.consolidation == consolidation,
+        )  # fmt: skip
+        .order_by(v.statement, v.line, v.period_end)
+    )
+    return export, list(values)
