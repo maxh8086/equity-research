@@ -76,7 +76,7 @@ Session 4b — shareholding pattern
 > Parse quarterly shareholding-pattern XBRL into `shareholding_pattern`: share counts (not just percentages) for promoter, FII/FPI, DII by type and public, plus pledged shares. `as_of` must be after quarter end. Same deterministic mapping and quarantine as Session 4.
 
 - **4c — shareholding pattern** ✅ `ingest/nse_shp`: the SEBI Regulation 31 parser for the 2020 layout (2020-09-30 taxonomy) and the 2025 layout (2025-05-31 and 2025-10-31). Share counts per category and measure, including pledged and other encumbered shares, in long format; percentages are skipped and recomputed by code. Every parent category must equal the sum of its children, or the file is rejected. The `nse_shareholding_drop` adapter resolves the ISIN like the results adapter and rejects an `as_of` on or before the "as on" date, or before the file name's timestamp. A revised filing wins from its own `as_of`. Migration 0009 adds `shareholding_filing`, `shareholding_pattern` and `shareholding_quarantine`, all append-only. Contract tests run on 10 real NSE filings (`tests/fixtures/nse_shp/SOURCES.md`).
-- **Not yet:** a live NSE shareholding listing adapter (drop folder only); named-holder facts (typed dimensions: each promoter and each holder above 1%) are counted and deferred.
+- **Not yet:** a live NSE shareholding listing adapter (drop folder only; planned as Session 7d); named-holder facts (typed dimensions: each promoter and each holder above 1%) are counted and deferred.
 
 Session 5 — ratios
 > Implement ratio computation in `core/compute/ratios.py`. Pure functions, Decimal throughout, property tests. ROCE, margins, debt ratios, incremental ROCE.
@@ -100,6 +100,14 @@ Session 7b — technical screens
 
 Session 7c — announcements, ownership events and corporate actions
 > Build the NSE/BSE corporate-announcements adapter (switchable, with a drop-folder fallback). From it, populate `insider_trade` (with mode of acquisition), `stake_disclosure` (large-stake crossings; pledges created, released or invoked), `bulk_block_deal`, the full `corporate_action` lifecycle including fund-raising and dilution, `scheduled_event`, and NSE index change notices as `index_event`. Implement the ownership, dilution and corporate-action rules from CLAUDE.md: false-signal filters, pro-forma EPS, use-of-proceeds claims written to `guidance_claim`, and critical alerts (active once holdings exist).
+
+Session 7d — live shareholding listing
+> Build `nse_shareholding_listing`, a `web_scrape` adapter (switch `EQUITY_SOURCE_NSE_SHAREHOLDING_LISTING_ENABLED`, off in `commercial` mode) that feeds the Session 4c parser and stores, with no drop folder in between. It reads NSE's shareholding-pattern listing (`/api/corporate-share-holdings-master?index=equities&symbol=<SYMBOL>`, the data behind the "Shareholding Patterns" page) for the 100-company universe, throttled and with the client identified, sharing the NSE session handling built in 7c. It then downloads each new XBRL file from `nsearchives.nseindia.com/corporate/xbrl/`, which is `official_archive`.
+> - Every listing response goes to blob storage before parsing, and is kept. The listing overwrites itself: a revised filing replaces the original's row and link (HDFCLIFE, March 2026), so only stored snapshots preserve the original.
+> - `published_at` is the row's `broadcastDate` (IST). The file-name timestamp check stays: NSE has replaced a file weeks after its listed broadcast without a revision flag (HDFCBANK, September 2025), and that file is quarantined as `implausible_as_of`.
+> - The listing's `isin` field is never used: it holds old or non-equity ISINs for several companies (INFY, HDFCBANK, VEDL, INDUSINDBK). The ISIN comes from the file, bhavcopy and index lists, as in 4c.
+> - Revised rows (`revisionDate`, `revisionRemark`) load as another filing with a later `as_of`; the remark is stored as text, and nothing is read from it.
+> - Strict Pydantic model for the listing rows, contract tests on recorded responses, and a daily canary. If NSE blocks the client, never escalate: fall back to the drop folder, where a hand-downloaded listing CSV (the page's "Download (.csv)") can supply `published_at` for the files beside it.
 
 Session 8 — credit ratings
 > Build the rating action parser for CRISIL, ICRA, CARE and India Ratings. Store ⑧ schema. Treat `withdrawn` as severity 2.
