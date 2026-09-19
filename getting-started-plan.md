@@ -81,6 +81,9 @@ Session 4b — shareholding pattern
 Session 5 — ratios
 > Implement ratio computation in `core/compute/ratios.py`. Pure functions, Decimal throughout, property tests. ROCE, margins, debt ratios, incremental ROCE.
 
+- **5 — ratios** ✅ `core/compute/ratios.py` (rule `ratios/1`): operating, EBIT and net margins and interest cover for every reported period; gross and net debt to equity for every balance-sheet date; ROCE on average capital employed (opening and closing balance sheets) and incremental ROCE against the fiscal year three years earlier, for fiscal years only. Ratios are fractions; a zero or negative denominator is undefined (None), never zero or infinite. `core.db.pit.ratios_as_of` computes them at read time from the facts known at `t`, so nothing is stored and a restatement changes a ratio only from when it was known. Each value carries its input facts; a gap is `not_applicable`, `missing_input` (naming the absent facts), `undefined` or `invalid_input`. Only Ind AS non-financial filings are covered: for NBFCs, banks and insurers, finance costs are the cost of the product. Companies' own reported ratios are never used (TATASTEEL tags a debt-equity ratio of 0.01).
+- **Check in Session 6:** Screener counts lease liabilities as borrowings, which results XBRL does not tag separately; whether Screener uses average or closing capital employed; whether its equity and net profit include non-controlling interests. Changing any of these is a new rule version. **Not yet:** ratios for banks, NBFCs and insurers (ROE, NIM, cost to income).
+
 Session 6 — validation
 > Build a validation script comparing our computed ratios against Screener for the 20-company validation sample (10 Nifty 50 + 10 Next 50, fixed seed, required company types swapped in; see CLAUDE.md "Current phase"). Report divergences with the underlying line items.
 

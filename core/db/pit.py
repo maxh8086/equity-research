@@ -4,10 +4,12 @@ from collections.abc import Collection, Iterable, Sequence
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from decimal import Decimal
+from enum import StrEnum
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from core.compute import ratios
 from core.compute.adjustment import (
     PriceFactor,
     adjust_series,
@@ -1040,6 +1042,173 @@ def financial_facts_quarantine_review_as_of(
             )
         entries.append(FinancialFactsQuarantineEntry(row, resolved))
     return entries
+
+
+# --------------------------------------------------------------------------- #
+# Ratios computed from financial_facts at read time
+# --------------------------------------------------------------------------- #
+
+
+class RatioGap(StrEnum):
+    NOT_APPLICABLE = "not_applicable"  # an input came from a filing family the rule does not cover
+    MISSING_INPUT = "missing_input"
+    UNDEFINED = "undefined"  # a denominator is zero or negative
+    INVALID_INPUT = "invalid_input"  # e.g. negative finance costs or borrowings
+
+
+@dataclass(frozen=True)
+class RatioValue:
+    """One ratio for one period, with the facts it was computed from.
+
+    `value` is None exactly when `gap` is set. `missing` names each absent
+    input as "line_item start..end" (instant: "line_item @end").
+    """
+
+    ratio: ratios.Ratio
+    period_start: date | None  # None for a balance-sheet ratio
+    period_end: date
+    value: Decimal | None
+    gap: RatioGap | None
+    inputs: tuple[FinancialFact, ...]
+    missing: tuple[str, ...] = ()
+    rule_version: str = ratios.RULE_VERSION
+
+    @property
+    def known_since(self) -> datetime | None:
+        """When the last input became known; the ratio could not be computed earlier."""
+        return max((f.as_of for f in self.inputs), default=None)
+
+
+_FactKey = tuple[str, date | None, date]  # (line_item, period_start, period_end)
+
+
+def _fact_label(key: _FactKey) -> str:
+    item, start, end = key
+    return f"{item} @{end}" if start is None else f"{item} {start}..{end}"
+
+
+def ratios_as_of(
+    session: Session, *, isin: str, consolidation: Consolidation, as_of: datetime
+) -> list[RatioValue]:
+    """Every ratio core.compute.ratios defines, for every period the facts known at `as_of` cover.
+
+    Margins and interest cover for every reported duration (quarter, year to
+    date, year); debt ratios for every balance-sheet date; ROCE and
+    incremental ROCE for fiscal years. Nothing is stored: a restatement known
+    later changes the ratio only for reads at or after it. Oldest period first.
+    """
+    facts = facts_as_of(
+        session, isin=isin, consolidation=consolidation, as_of=as_of,
+        line_items=ratios.DURATION_LINE_ITEMS + ratios.INSTANT_LINE_ITEMS,
+    )  # fmt: skip
+    by_key: dict[_FactKey, FinancialFact] = {(f.line_item, f.period_start, f.period_end): f for f in facts}
+    f = FinancialFiling
+    families: dict[str, str] = {
+        digest: taxonomy
+        for digest, taxonomy in session.execute(
+            select(f.content_hash, f.taxonomy)
+            .where(f.content_hash.in_({x.content_hash for x in facts}), f.as_of <= as_of)
+            .distinct()
+        ).tuples()
+    }
+
+    def compute(ratio, start, end, needed: dict[str, _FactKey], formula) -> RatioValue:
+        found = {name: by_key[key] for name, key in needed.items() if key in by_key}
+        inputs = tuple(found.values())
+        missing = tuple(_fact_label(key) for name, key in needed.items() if name not in found)
+        if any(families.get(x.content_hash) not in ratios.APPLICABLE_FAMILIES for x in inputs):
+            return RatioValue(ratio, start, end, None, RatioGap.NOT_APPLICABLE, inputs, missing)
+        if missing:
+            return RatioValue(ratio, start, end, None, RatioGap.MISSING_INPUT, inputs, missing)
+        try:
+            value = formula(**{name: x.value for name, x in found.items()})
+        except ValueError:
+            return RatioValue(ratio, start, end, None, RatioGap.INVALID_INPUT, inputs)
+        return RatioValue(ratio, start, end, value, None if value is not None else RatioGap.UNDEFINED, inputs)
+
+    def duration(start: date, end: date, *items: str) -> dict[str, _FactKey]:
+        return {item: (item, start, end) for item in items}
+
+    def instant(end: date, *items: str, suffix: str = "") -> dict[str, _FactKey]:
+        return {item + suffix: (item, None, end) for item in items}
+
+    r = ratios
+    out: list[RatioValue] = []
+    durations = sorted({(s, e) for (item, s, e) in by_key if s is not None})
+    balance_dates = sorted({e for (item, s, e) in by_key if s is None})
+
+    for start, end in durations:
+        pnl = duration(start, end, r.REVENUE, r.TOTAL_EXPENSES, r.FINANCE_COSTS, r.DEPRECIATION)
+        out.append(compute(
+            r.Ratio.OPERATING_MARGIN, start, end, pnl,
+            lambda **v: r.margin(r.operating_profit(
+                v[r.REVENUE], v[r.TOTAL_EXPENSES], v[r.FINANCE_COSTS], v[r.DEPRECIATION]
+            ), v[r.REVENUE]),
+        ))  # fmt: skip
+        out.append(compute(
+            r.Ratio.EBIT_MARGIN, start, end, duration(start, end, r.PROFIT_BEFORE_TAX, r.FINANCE_COSTS, r.REVENUE),
+            lambda **v: r.margin(r.ebit(v[r.PROFIT_BEFORE_TAX], v[r.FINANCE_COSTS]), v[r.REVENUE]),
+        ))  # fmt: skip
+        out.append(compute(
+            r.Ratio.NET_MARGIN, start, end, duration(start, end, r.PROFIT, r.REVENUE),
+            lambda **v: r.margin(v[r.PROFIT], v[r.REVENUE]),
+        ))  # fmt: skip
+        out.append(compute(
+            r.Ratio.INTEREST_COVERAGE, start, end, duration(start, end, r.PROFIT_BEFORE_TAX, r.FINANCE_COSTS),
+            lambda **v: r.interest_coverage(r.ebit(v[r.PROFIT_BEFORE_TAX], v[r.FINANCE_COSTS]), v[r.FINANCE_COSTS]),
+        ))  # fmt: skip
+
+    def borrowings(v: dict[str, Decimal], suffix: str = "") -> Decimal:
+        return r.total_borrowings(v[r.BORROWINGS_CURRENT + suffix], v[r.BORROWINGS_NONCURRENT + suffix])
+
+    def capital(v: dict[str, Decimal], suffix: str = "") -> Decimal:
+        return r.capital_employed(v[r.EQUITY + suffix], borrowings(v, suffix))
+
+    capital_items = (r.EQUITY, r.BORROWINGS_CURRENT, r.BORROWINGS_NONCURRENT)
+    for end in balance_dates:
+        out.append(compute(
+            r.Ratio.DEBT_TO_EQUITY, None, end, instant(end, *capital_items),
+            lambda **v: r.debt_to_equity(borrowings(v), v[r.EQUITY]),
+        ))  # fmt: skip
+        out.append(compute(
+            r.Ratio.NET_DEBT_TO_EQUITY, None, end,
+            instant(end, *capital_items, r.CASH, r.OTHER_BANK_BALANCES, r.CURRENT_INVESTMENTS),
+            lambda **v: r.debt_to_equity(
+                r.net_debt(borrowings(v), v[r.CASH], v[r.OTHER_BANK_BALANCES], v[r.CURRENT_INVESTMENTS]),
+                v[r.EQUITY],
+            ),
+        ))  # fmt: skip
+
+    for start, end in durations:
+        if not r.is_fiscal_year(start, end):
+            continue
+        earnings = duration(start, end, r.PROFIT_BEFORE_TAX, r.FINANCE_COSTS)
+        out.append(compute(
+            r.Ratio.ROCE, start, end,
+            earnings | instant(end, *capital_items) | instant(r.prior_balance_date(start), *capital_items, suffix="@open"),
+            lambda **v: r.roce(
+                r.ebit(v[r.PROFIT_BEFORE_TAX], v[r.FINANCE_COSTS]),
+                r.average_balance(capital(v, "@open"), capital(v)),
+            ),
+        ))  # fmt: skip
+        years = r.INCREMENTAL_ROCE_YEARS
+        before_start, before_end = r.shift_years(start, -years), r.shift_years(end, -years)
+        before = {
+            k + "@before": key
+            for k, key in (duration(before_start, before_end, r.PROFIT_BEFORE_TAX, r.FINANCE_COSTS)
+                           | instant(before_end, *capital_items)).items()
+        }  # fmt: skip
+        out.append(compute(
+            r.Ratio.INCREMENTAL_ROCE, start, end, earnings | instant(end, *capital_items) | before,
+            lambda **v: r.incremental_roce(
+                r.ebit(v[r.PROFIT_BEFORE_TAX], v[r.FINANCE_COSTS]),
+                r.ebit(v[r.PROFIT_BEFORE_TAX + "@before"], v[r.FINANCE_COSTS + "@before"]),
+                capital(v),
+                capital(v, "@before"),
+            ),
+        ))  # fmt: skip
+
+    return sorted(out, key=lambda x: (x.period_end, x.period_start or x.period_end, x.ratio))
 
 
 # --------------------------------------------------------------------------- #
