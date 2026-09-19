@@ -13,6 +13,7 @@ dependencies = [
     "python-dotenv>=1.0",  # .env also carries EQUITY_SOURCE_<NAME>_ENABLED switches
     "boto3>=1.40",  # S3-compatible blob storage (MinIO locally)
     "httpx>=0.28",
+    "openpyxl>=3.1",  # Screener Excel exports (drop folder) and the template generator
 ]
 
 [project.optional-dependencies]
