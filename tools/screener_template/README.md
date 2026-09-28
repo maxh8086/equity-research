@@ -28,6 +28,17 @@ powershell -ExecutionPolicy Bypass -File tools/screener_template/verify.ps1 -Pat
   on two conditions: Excel cannot open the file without repair, or any formula
   shows an error. It also prints spot values for the sample company (Vinati
   Organics, FY13–FY22) to compare with the previous build.
+- `verify-export.ps1` checks a workbook Screener **returned**, which is the one
+  thing `verify.ps1` cannot see: it recalculates the template we send, and the
+  defect fixed in `merged-2` only appears in the file that comes back. It needs
+  no Excel — it reads the Data Sheet XML and fails if any cell holds both an
+  inline string and a value, if the Data Sheet is missing, or if the company
+  name is still the sample company. Run it on the first export after any
+  rebuild:
+
+  ```bash
+  powershell -ExecutionPolicy Bypass -File tools/screener_template/verify-export.ps1 -Path <export>.xlsx
+  ```
 
 Values from build `merged-1`, to compare against after a rebuild:
 
@@ -133,6 +144,17 @@ Planned for later versions, in rough order:
 
 ## Changelog
 
+- `merged-2` (2026-09-28): keep the Data Sheet byte for byte again. openpyxl
+  3.1 rewrites every string as an inline string, so a Data Sheet that left
+  Screener as shared strings came out of a save as `inlineStr`. Screener then
+  wrote its own value in as a bare `<v>` without clearing the stale `<is>` and
+  without setting `t=`, and Excel discarded the whole sheet — which is why
+  exports built from a saved template opened blank. `build()` now grafts the
+  base workbook's Data Sheet part, its shared-string table and its sheet
+  relationships back into the saved zip, and refuses if openpyxl has reordered
+  any style table the sheet indexes by position. No formula or value changed,
+  so the spot values above still apply. Added `verify-export.ps1` and
+  `tests/test_screener_template_build.py`.
 - `merged-1` (2026-09-19): first merge of VM V2.0, Technofunda v3 and
   Analysis.xlsx. Fixes:
   - ROCE now uses capital employed, not total assets.

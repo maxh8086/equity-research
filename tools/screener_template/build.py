@@ -14,16 +14,20 @@ the system.
 from __future__ import annotations
 
 import argparse
+import posixpath
 import re
+import shutil
+import zipfile
 from dataclasses import dataclass
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import column_index_from_string, get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
-TEMPLATE_VERSION = "merged-1 (2026-09-19)"
+TEMPLATE_VERSION = "merged-2 (2026-09-28)"
 DATA = "Data Sheet"
 
 # --------------------------------------------------------------------------- #
@@ -791,6 +795,196 @@ def _check_data_sheet(ws: Worksheet) -> None:
         raise SystemExit("Data Sheet layout differs from DS_ROWS:\n  " + "\n  ".join(wrong))
 
 
+# --------------------------------------------------------------------------- #
+# Keeping the Data Sheet byte for byte
+#
+# openpyxl 3.1 rewrites every string as an inline string, so a Data Sheet that
+# left Screener as shared strings (`t="s"`) comes out of a save as `inlineStr`.
+# Screener's exporter then writes its own value into such a cell as a bare
+# `<v>` without clearing the stale `<is>` and without a `t` attribute, so the
+# returned cell is text sitting in a numeric cell. Excel rejects that and
+# discards the whole sheet, which is why exports from a saved template opened
+# blank.
+#
+# The fix is to put the base workbook's own Data Sheet part back into the saved
+# zip, together with the shared-string table it refers to. The generated sheets
+# use inline strings only, so they index nothing in that table.
+# --------------------------------------------------------------------------- #
+
+PKG_REL_NS = "http://schemas.openxmlformats.org/package/2006/relationships"
+DOC_REL_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+MAIN_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+CT_NS = "http://schemas.openxmlformats.org/package/2006/content-types"
+SST_PART = "xl/sharedStrings.xml"
+SST_REL_TYPE = f"{DOC_REL_NS}/sharedStrings"
+SST_CONTENT_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"
+
+# Style tables the Data Sheet's cells index by position. openpyxl appends to
+# them, so the base's entries must still be the leading entries of the output.
+STYLE_TABLES = ("numFmts", "fonts", "fills", "borders", "cellStyleXfs", "cellXfs", "dxfs")
+
+
+def _data_sheet_part(zf: zipfile.ZipFile) -> str:
+    """The zip entry holding the Data Sheet worksheet part."""
+    book = ET.fromstring(zf.read("xl/workbook.xml"))
+    sheet = next((s for s in book.iter(f"{{{MAIN_NS}}}sheet") if s.get("name") == DATA), None)
+    if sheet is None:
+        raise SystemExit(f"no '{DATA}' sheet in {zf.filename}")
+    rid = sheet.get(f"{{{DOC_REL_NS}}}id")
+    rels = ET.fromstring(zf.read("xl/_rels/workbook.xml.rels"))
+    for rel in rels:
+        if rel.get("Id") == rid:
+            target = rel.get("Target", "")
+            if target.startswith("/"):
+                return target.lstrip("/")
+            return posixpath.normpath(posixpath.join("xl", target))
+    raise SystemExit(f"{zf.filename}: no relationship {rid} for '{DATA}'")
+
+
+def _style_tables(zf: zipfile.ZipFile) -> dict[str, list[bytes]]:
+    root = ET.fromstring(zf.read("xl/styles.xml"))
+    tables = {}
+    for tag in STYLE_TABLES:
+        el = root.find(f"{{{MAIN_NS}}}{tag}")
+        tables[tag] = [] if el is None else [ET.tostring(child) for child in el]
+    return tables
+
+
+def _check_styles_preserved(base_zip: zipfile.ZipFile, out_zip: zipfile.ZipFile) -> None:
+    """The grafted sheet's `s=` and `dxfId=` indices must still mean the same."""
+    base, out = _style_tables(base_zip), _style_tables(out_zip)
+    wrong = [
+        f"{tag}: the saved workbook's first {len(base[tag])} entries are not the base's"
+        for tag in STYLE_TABLES
+        if out[tag][: len(base[tag])] != base[tag]
+    ]
+    if wrong:
+        raise SystemExit(
+            "openpyxl reordered the base workbook's style tables, so the Data Sheet "
+            "cannot be grafted back:\n  " + "\n  ".join(wrong)
+        )
+
+
+def _sheet_rels_part(sheet_part: str) -> str:
+    folder, name = posixpath.split(sheet_part)
+    return f"{folder}/_rels/{name}.rels"
+
+
+def _content_type_override(zf: zipfile.ZipFile, part: str) -> str | None:
+    root = ET.fromstring(zf.read("[Content_Types].xml"))
+    for override in root.iter(f"{{{CT_NS}}}Override"):
+        if override.get("PartName") == "/" + part:
+            return override.get("ContentType")
+    return None
+
+
+def _extra_parts(base_zip: zipfile.ZipFile, base_part: str, out_part: str) -> dict[str, bytes]:
+    """Parts the base Data Sheet needs that a generated workbook does not have.
+
+    The shared-string table, the sheet's own relationships (Screener's Data
+    Sheet carries an external hyperlink), and any internal part those
+    relationships point at.
+    """
+    names = set(base_zip.namelist())
+    extras: dict[str, bytes] = {}
+    if SST_PART in names:
+        extras[SST_PART] = base_zip.read(SST_PART)
+    base_rels = _sheet_rels_part(base_part)
+    if base_rels in names:
+        extras[_sheet_rels_part(out_part)] = base_zip.read(base_rels)
+        for rel in ET.fromstring(base_zip.read(base_rels)):
+            if rel.get("TargetMode") == "External":
+                continue
+            target = rel.get("Target", "")
+            resolved = (
+                target.lstrip("/")
+                if target.startswith("/")
+                else posixpath.normpath(posixpath.join(posixpath.dirname(base_part), target))
+            )
+            if resolved not in names:
+                raise SystemExit(f"the base Data Sheet references a missing part: {resolved}")
+            extras[resolved] = base_zip.read(resolved)
+    return extras
+
+
+def _with_sst_relationship(rels_xml: bytes) -> bytes:
+    root = ET.fromstring(rels_xml)
+    if any(rel.get("Type") == SST_REL_TYPE for rel in root):
+        return rels_xml
+    used = {rel.get("Id") for rel in root}
+    n = 1
+    while f"rId{n}" in used:
+        n += 1
+    ET.SubElement(
+        root,
+        f"{{{PKG_REL_NS}}}Relationship",
+        {"Id": f"rId{n}", "Type": SST_REL_TYPE, "Target": "sharedStrings.xml"},
+    )
+    ET.register_namespace("", PKG_REL_NS)
+    return ET.tostring(root, xml_declaration=True, encoding="UTF-8")
+
+
+def _with_overrides(ct_xml: bytes, overrides: dict[str, str]) -> bytes:
+    root = ET.fromstring(ct_xml)
+    known = {o.get("PartName") for o in root.iter(f"{{{CT_NS}}}Override")}
+    for part, content_type in overrides.items():
+        if "/" + part not in known:
+            ET.SubElement(
+                root,
+                f"{{{CT_NS}}}Override",
+                {"PartName": "/" + part, "ContentType": content_type},
+            )
+    ET.register_namespace("", CT_NS)
+    return ET.tostring(root, xml_declaration=True, encoding="UTF-8")
+
+
+def _graft_data_sheet(base: Path, out: Path) -> None:
+    """Put the base workbook's Data Sheet part back into the saved workbook."""
+    with zipfile.ZipFile(base) as base_zip, zipfile.ZipFile(out) as out_zip:
+        base_part = _data_sheet_part(base_zip)
+        out_part = _data_sheet_part(out_zip)
+        _check_styles_preserved(base_zip, out_zip)
+        generated = {info.filename for info in out_zip.infolist()}
+        if SST_PART in generated:
+            raise SystemExit(
+                "the saved workbook already has a shared-string table; the generated "
+                "sheets are expected to use inline strings only"
+            )
+        sheet_xml = base_zip.read(base_part)
+        extras = _extra_parts(base_zip, base_part, out_part)
+        overrides = {
+            part: _content_type_override(base_zip, part) or SST_CONTENT_TYPE
+            for part in extras
+            if not part.endswith(".rels")
+        }
+        existing = [(info, out_zip.read(info.filename)) for info in out_zip.infolist()]
+
+    # The Data Sheet's own parts are replaced on purpose; openpyxl writes its own
+    # copy of the sheet relationships because it carries the sheet's hyperlink
+    # across. Anything else of the base's landing on a generated part would be a
+    # silent collision, so stop instead.
+    replaced = {out_part, _sheet_rels_part(out_part)}
+    clashes = sorted(part for part in extras if part in generated and part not in replaced)
+    if clashes:
+        raise SystemExit("grafting would overwrite generated parts: " + ", ".join(clashes))
+
+    tmp = out.with_suffix(out.suffix + ".graft")
+    with zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as new_zip:
+        for info, data in existing:
+            if info.filename == out_part:
+                data = sheet_xml
+            elif info.filename in extras:
+                data = extras.pop(info.filename)
+            elif info.filename == "[Content_Types].xml":
+                data = _with_overrides(data, overrides)
+            elif info.filename == "xl/_rels/workbook.xml.rels" and SST_PART in extras:
+                data = _with_sst_relationship(data)
+            new_zip.writestr(info, data)
+        for part, data in extras.items():
+            new_zip.writestr(part, data)
+    shutil.move(str(tmp), str(out))
+
+
 def build(base: Path, out: Path) -> None:
     wb = load_workbook(base)
     if DATA not in wb.sheetnames:
@@ -812,6 +1006,7 @@ def build(base: Path, out: Path) -> None:
     for ws in wb.worksheets:
         ws.sheet_view.tabSelected = ws.title == "Summary"
     wb.save(out)
+    _graft_data_sheet(base, out)
 
 
 def main() -> None:
