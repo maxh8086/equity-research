@@ -1,4 +1,4 @@
-"""python -m validate sample | screener
+"""python -m validate sample | screener | screener-sidecars
 
 `sample` recomputes the current sample's draw from the constituent list it
 records, read from the database, and checks it against the frozen definition.
@@ -7,6 +7,9 @@ records, read from the database, and checks it against the frozen definition.
 newest Screener export known at `--as-of`, for every company in the sample
 (or `--isin`). It prints the non-matching comparisons with their line items,
 then the evidence on leases, non-controlling interests and ROCE.
+
+`screener-sidecars` writes the sidecar for each Screener export saved into
+<EQUITY_DROP_FOLDER>/screener_export_drop/ without one (validate/sidecars.py).
 
 Exit codes: 0 when everything checked passes; 1 when anything fails (the
 Week 2 gate); 2 for bad arguments.
@@ -17,16 +20,18 @@ from __future__ import annotations
 import argparse
 import sys
 from datetime import datetime
+from pathlib import Path
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from core.compute.sample import seeded_draw
 from core.config import get_settings
-from core.db.pit import index_lists_as_of
+from core.db.pit import index_list_names_as_of, index_lists_as_of
 from core.timezones import IST, require_aware
 from validate.report import company_report, render_company, render_findings
 from validate.samples import CURRENT, SAMPLES, SampleDefinition
+from validate.sidecars import Company, write_sidecars
 
 DEFAULT_YEARS = (2022, 2023, 2024, 2025)
 
@@ -87,6 +92,27 @@ def check_screener(session: Session, isins: list[str], symbols: dict[str, str], 
     return 0 if verdict == "PASS" else 1
 
 
+def sample_companies(session: Session, sample: SampleDefinition, as_of: datetime) -> list[Company]:
+    """The final sample, named as in the constituent lists it was drawn from."""
+    names: dict[str, str] = {}
+    for d in sample.draws:
+        names |= index_list_names_as_of(session, content_hash=d.list_content_hash, as_of=as_of)
+    return [Company(i, sample.symbols[i], names[i]) for i in sample.isins() if i in names]
+
+
+def check_sidecars(session: Session, sample: SampleDefinition, folder: Path, *, consolidated: bool) -> int:
+    if not folder.is_dir():
+        print(f"{folder} does not exist")
+        return 1
+    companies = sample_companies(session, sample, datetime.now(IST))
+    if len(companies) != len(sample.isins()):
+        print("the sample's constituent lists are not loaded; run the index list loader first")
+        return 1
+    lines, failures = write_sidecars(folder, companies, consolidated=consolidated)
+    print("\n".join([f"{folder}:", *lines] if lines else [f"{folder}: no .xlsx files"]))
+    return 1 if failures else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m validate")
     parser.add_argument("--sample", default=CURRENT.version, choices=sorted(SAMPLES))
@@ -98,6 +124,8 @@ def main(argv: list[str] | None = None) -> int:
     c.add_argument("--years", type=int, nargs="+", default=list(DEFAULT_YEARS), help="fiscal years (FY ending March)")
     c.add_argument("--isin", nargs="+", help="compare these instead of the sample")
     c.add_argument("--all", action="store_true", help="print matching comparisons too")
+    w = sub.add_parser("screener-sidecars")
+    w.add_argument("--standalone", action="store_true", help="the files are standalone exports")
     args = parser.parse_args(argv)
 
     sample = SAMPLES[args.sample]
@@ -105,6 +133,12 @@ def main(argv: list[str] | None = None) -> int:
     with Session(engine) as session:
         if args.command == "sample":
             return check_sample(session, sample, args.as_of or sample.membership_on)
+        if args.command == "screener-sidecars":
+            folder = get_settings().drop_folder
+            if folder is None:
+                print("EQUITY_DROP_FOLDER is not set")
+                return 2
+            return check_sidecars(session, sample, folder / "screener_export_drop", consolidated=not args.standalone)
         isins = args.isin or list(sample.isins())
         as_of = args.as_of or datetime.now(IST)
         return check_screener(session, isins, sample.symbols, args.years, as_of, args.all)

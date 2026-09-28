@@ -210,6 +210,19 @@ def index_lists_as_of(session: Session, *, index_code: IndexCode, as_of: datetim
     ]
 
 
+def index_list_names_as_of(session: Session, *, content_hash: str, as_of: datetime) -> dict[str, str]:
+    """ISIN -> company name in the constituent list file `content_hash`, as parsed by `as_of`.
+
+    The newest parse of the file wins, as in index_lists_as_of.
+    """
+    require_aware(as_of, "as_of")
+    c = IndexSnapshotConstituent
+    rows = session.execute(
+        select(c.isin, c.company_name).where(c.content_hash == content_hash, c.as_of <= as_of).order_by(c.id)
+    )
+    return {isin: name for isin, name in rows}
+
+
 def index_snapshot_keys_as_of(
     session: Session, *, source_url: str, rule_version: str, as_of: datetime
 ) -> set[tuple[IndexCode, datetime]]:
