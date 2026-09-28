@@ -1,7 +1,8 @@
 # Indian Equity Knowledge System
 
 A point-in-time knowledge system for NSE/BSE equity research. Long-horizon
-buy-and-hold (>12 months), family use only.
+buy-and-hold (>12 months), plus event-driven special situations with defined
+exit conditions (see Special situations). Family use only.
 
 ## Non-negotiable rules
 
@@ -314,6 +315,61 @@ independent category for the `ADD_REVIEW` gates.
 - **Timeline:** a point-in-time read merging news, filings, rating actions
   and technical signals in `as_of` order. A CLI report until a frontend is in
   scope.
+
+### Special situations
+
+Event-driven positions with a defined exit, the exception to the long-horizon
+mandate. All four are detectors in `core/compute/` under a `rule_version`.
+None of them produces an order: each raises `ADD_REVIEW` or a watchlist entry,
+and every parameter is fitted on one period with hit rates measured on a
+separate, later period before it triggers anything. Screener's
+`/full-text-search/?q=` is not a source: its robots.txt disallows `/*?q=` and
+`/user/*`. Exchange announcements are, and they carry the broadcast time and
+the evidence URL that the stores require.
+
+- **Order wins ⑦.** Candidates come from the announcement feed by a hardcoded
+  keyword table (`order received`, `award of order`, `Notification of Award`,
+  `letter of intent`, `large order`, `Order for Procurement`,
+  `Awarding of order`, `bagged an order`, `Letter of Award`, `repeat order`,
+  `additional order`, `Contract Award`), with `Commissioner`, `tax`, `gst`
+  and court, tribunal, NCLT and SEBI orders excluded: those are the
+  tax-demand and litigation senses of the word. Matching is on the
+  announcement subject and description only, by code. Order value, customer
+  and execution period live in the PDF body, so a model returns the verbatim
+  quote and code parses the number from it, checks the digits appear in the
+  source and converts crore, lakh and million itself; anything else is
+  quarantined (R1, as for brokerage target prices). The metric is **order
+  value ÷ trailing twelve-month revenue**, annualised over the stated
+  execution period — never the absolute value. A run-up before the
+  announcement suppresses the signal: return and volume over the N sessions
+  before the broadcast time, against the stock's own baseline, reported with
+  the gate that blocked it.
+- **Buyback tenders ⑮.** From the tender-offer filing: buyback price, size,
+  record date, tender window and the reserved small-shareholder portion.
+  Expected return is computed by code as
+  `accepted × (buyback price − cost) + unaccepted × (assumed exit − cost) −
+  costs`. The acceptance ratio is not knowable at entry, so it is a stored
+  assumption with its assumption-set hash, and past ratios come from
+  post-buyback outcome filings. Unaccepted shares carry price risk after the
+  record date and the calculation says so. The return threshold is a
+  hardcoded parameter. Open-market buybacks are tracked but never scored this
+  way. Per-holder allocation is a report; tendering is done by a human in the
+  broker's app.
+- **Post-earnings drift.** Quarterly `financial_facts` and adjusted closes
+  only, no new source. Growth in sales and PAT year on year against a
+  threshold, surprise measured against the company's own trailing trend and
+  against its `guidance_claim` ledger — there is no consensus estimate in this
+  system and none is inferred. Forward PE annualises the latest quarter using
+  the diluted share count known at `t`. The score is a hardcoded formula, not
+  a fitted model.
+- **Demergers ⑮.** The milestone chain — scheme of arrangement, board,
+  shareholder and creditor approval, NCLT order, record date, listing — is
+  stored as `scheduled_event` rows with severity computed by code. The share
+  entitlement ratio comes from the scheme document and needs human
+  verification before it adjusts any price. A loss-making segment being
+  separated is read from XBRL segment data, never asserted. Post-listing
+  prices of the two entities are not forecast: the system tracks milestones
+  and measures realised outcomes across past demergers by replay.
 
 ## Integrations: brokers and MCP
 
