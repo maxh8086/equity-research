@@ -57,6 +57,13 @@ from core.compute.guidance_resolution import (
     select_claims,
 )
 from core.compute.price_crosscheck import Bar, Mismatch, crosscheck
+from core.compute.guidance_report import (
+    ClaimView,
+    InputFact,
+    SourceRef,
+    build_report,
+    GuidanceReport,
+)
 from core.db.models import (
     BulkBlockDeal,
     IndexEvent,
@@ -1979,6 +1986,97 @@ def guidance_quarantine_review_as_of(
             )
         entries.append(GuidanceQuarantineEntry(row, resolved))
     return entries
+
+
+def guidance_report_as_of(
+    session: Session, *, isin: str, symbol: str, as_of: datetime, quarter_start: date
+) -> GuidanceReport:
+    """The guidance report: what management promised, what landed, what went silent.
+
+    Reads the guidance claims, resolutions, silence markers, and delivery rate
+    at `as_of`, then assembles them into a GuidanceReport via build_report.
+    Every fact contributing to an actual has its source (URL and as_of) looked
+    up from the stored FinancialFact rows; if not found, source is None.
+    """
+    require_aware(as_of, "as_of")
+
+    # Read all guidance data at as_of
+    resolutions = guidance_resolutions_as_of(session, isin=isin, as_of=as_of)
+    silence_items = _with_silence(session, isin=isin, as_of=as_of, resolved=resolutions)
+    silence_map = {item.claim.id: item.silent for item in silence_items}
+    delivery = guidance_delivery_as_of(session, isin=isin, as_of=as_of)
+
+    # Build a map of (line_item, period_end) -> (source_url, source_as_of) from FinancialFact
+    # Try consolidated first, then standalone if needed
+    facts = facts_as_of(session, isin=isin, consolidation=Consolidation.CONSOLIDATED, as_of=as_of)
+    if not facts:
+        facts = facts_as_of(session, isin=isin, consolidation=Consolidation.STANDALONE, as_of=as_of)
+    fact_sources: dict[tuple[str, date], tuple[str, datetime]] = {}
+    for fact in facts:
+        key = (fact.line_item, fact.period_end)
+        fact_sources[key] = (fact.source_url, fact.as_of)
+
+    # Build ClaimView for each resolution
+    claims: list[ClaimView] = []
+    for item in resolutions:
+        claim = item.claim
+        resolution = item.resolution
+        silent = silence_map.get(claim.id, False)
+
+        # Build InputFact for each input in the resolution
+        inputs: list[InputFact] = []
+        for line_item, period_end, value in resolution.inputs:
+            source_key = (line_item, period_end)
+            source_info = fact_sources.get(source_key)
+            if source_info:
+                source = SourceRef(url=source_info[0], as_of=source_info[1])
+            else:
+                source = None
+
+            input_fact = InputFact(
+                line_item=line_item,
+                period_end=period_end,
+                value=value,
+                source=source,
+            )
+            inputs.append(input_fact)
+
+        # Build SourceRef for the claim itself
+        claim_source = SourceRef(
+            url=claim.source_url,
+            as_of=claim.as_of,
+        )
+
+        # Build ClaimView
+        claim_view = ClaimView(
+            metric=claim.metric,
+            period_label=claim.period_label,
+            call_date=claim.call_date,
+            hedge=HedgeStrength(claim.hedge_strength),
+            hedge_verbatim=claim.hedge_verbatim,
+            guided_low=claim.value_low,
+            guided_high=claim.value_high,
+            unit=Unit(claim.value_unit),
+            claim_source=claim_source,
+            status=resolution.status,
+            reason=resolution.reason,
+            actual=resolution.actual,
+            actual_unit=resolution.unit,
+            period_end=resolution.period.period_end if resolution.period else None,
+            inputs=tuple(inputs),
+            silent=silent,
+        )
+        claims.append(claim_view)
+
+    # Build and return the report
+    return build_report(
+        isin=isin,
+        symbol=symbol,
+        as_of=as_of,
+        quarter_start=quarter_start,
+        claims=claims,
+        delivery=delivery,
+    )
 
 
 # --- S7b technical screens ---
