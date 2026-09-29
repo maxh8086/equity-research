@@ -181,14 +181,78 @@ class TestSeparateAcceptanceRatios:
             acceptance_ratio_reserved=assumption_with_both_ratios.acceptance_ratio_reserved,
         )
 
-        # Reserved holder should only get from reserved pool (25% of authorized)
-        # Using reserved ratio (0.80)
-        assert allocation.reserved_portion > Decimal("0")
-        assert allocation.general_portion == Decimal("0")  # zero for reserved holders
+        # Reserved holder: 100 shares × 0.80 (reserved ratio) = 80 shares accepted
+        assert allocation.reserved_portion == Decimal("80")
+        assert allocation.general_portion == Decimal("0")
+
+    def test_general_holder_allocation_exact(self, tender_terms_at_2026_09_15):
+        """General holder allocation is holder_shares × acceptance_ratio_general."""
+        allocation = holder_allocation_report(
+            holder_shares=100,
+            quantity_authorized=tender_terms_at_2026_09_15["quantity_authorized"],
+            reserved_small_shareholder_fraction=Decimal("0.25"),
+            holder_category=HolderCategory.GENERAL,
+            acceptance_ratio_general=Decimal("0.70"),
+            acceptance_ratio_reserved=Decimal("0.80"),
+        )
+
+        # General holder: 100 shares × 0.70 = 70 shares accepted
+        assert allocation.general_portion == Decimal("70")
+        assert allocation.reserved_portion == Decimal("0")
 
 
 class TestExpectedReturnComputation:
     """Expected return accounting for record-date price risk."""
+
+    def test_general_category_uses_general_ratio(self, tender_terms_at_2026_09_15):
+        """General category holder uses acceptance_ratio_general."""
+        assumption = BuybackAssumption(
+            acceptance_ratio_general=Decimal("0.75"),
+            acceptance_ratio_reserved=Decimal("0.50"),  # different from general
+            assumed_exit_price=Decimal("2400.00"),
+        )
+        validate_tender_offer(
+            t=datetime(2026, 10, 20, 12, 0, 0, tzinfo=timezone.utc),
+            **tender_terms_at_2026_09_15
+        )
+
+        result = compute_expected_return(
+            buyback_price=tender_terms_at_2026_09_15["buyback_price"],
+            quantity_authorized=tender_terms_at_2026_09_15["quantity_authorized"],
+            quantity_available_to_category=tender_terms_at_2026_09_15["quantity_authorized"],
+            holder_category=HolderCategory.GENERAL,
+            assumption=assumption,
+            cost_per_share=Decimal("2000.00"),
+        )
+
+        # 0.75 × (2500 - 2000) + 0.25 × (2400 - 2000)
+        # = 375 + 100 = 475 per share (uses 0.75, not 0.50)
+        assert result.expected_return_per_share == Decimal("475.00")
+
+    def test_reserved_category_uses_reserved_ratio(self, tender_terms_at_2026_09_15):
+        """Reserved category holder uses acceptance_ratio_reserved."""
+        assumption = BuybackAssumption(
+            acceptance_ratio_general=Decimal("0.75"),
+            acceptance_ratio_reserved=Decimal("0.50"),  # different from general
+            assumed_exit_price=Decimal("2400.00"),
+        )
+        validate_tender_offer(
+            t=datetime(2026, 10, 20, 12, 0, 0, tzinfo=timezone.utc),
+            **tender_terms_at_2026_09_15
+        )
+
+        result = compute_expected_return(
+            buyback_price=tender_terms_at_2026_09_15["buyback_price"],
+            quantity_authorized=tender_terms_at_2026_09_15["quantity_authorized"],
+            quantity_available_to_category=int(tender_terms_at_2026_09_15["quantity_authorized"]) * 25 // 100,
+            holder_category=HolderCategory.RESERVED,
+            assumption=assumption,
+            cost_per_share=Decimal("2000.00"),
+        )
+
+        # 0.50 × (2500 - 2000) + 0.50 × (2400 - 2000)
+        # = 250 + 200 = 450 per share (uses 0.50, not 0.75)
+        assert result.expected_return_per_share == Decimal("450.00")
 
     def test_full_acceptance_general_category(self, tender_terms_at_2026_09_15, assumption_with_both_ratios):
         """100% acceptance for general category."""
@@ -206,6 +270,7 @@ class TestExpectedReturnComputation:
             buyback_price=tender_terms_at_2026_09_15["buyback_price"],
             quantity_authorized=tender_terms_at_2026_09_15["quantity_authorized"],
             quantity_available_to_category=Decimal(int(tender_terms_at_2026_09_15["quantity_authorized"]) * 75 // 100),
+            holder_category=HolderCategory.GENERAL,
             assumption=assume_full,
             cost_per_share=Decimal("2000.00"),
         )
@@ -229,6 +294,7 @@ class TestExpectedReturnComputation:
             buyback_price=tender_terms_at_2026_09_15["buyback_price"],
             quantity_authorized=tender_terms_at_2026_09_15["quantity_authorized"],
             quantity_available_to_category=tender_terms_at_2026_09_15["quantity_authorized"],
+            holder_category=HolderCategory.GENERAL,
             assumption=assume_zero,
             cost_per_share=Decimal("2000.00"),
         )
@@ -247,6 +313,7 @@ class TestExpectedReturnComputation:
             buyback_price=tender_terms_at_2026_09_15["buyback_price"],
             quantity_authorized=tender_terms_at_2026_09_15["quantity_authorized"],
             quantity_available_to_category=tender_terms_at_2026_09_15["quantity_authorized"],
+            holder_category=HolderCategory.GENERAL,
             assumption=assumption_with_both_ratios,
             cost_per_share=Decimal("2000.00"),
         )
@@ -271,6 +338,7 @@ class TestExpectedReturnComputation:
             buyback_price=tender_terms_at_2026_09_15["buyback_price"],
             quantity_authorized=tender_terms_at_2026_09_15["quantity_authorized"],
             quantity_available_to_category=tender_terms_at_2026_09_15["quantity_authorized"],
+            holder_category=HolderCategory.GENERAL,
             assumption=assume_downside,
             cost_per_share=Decimal("2000.00"),
         )
@@ -390,6 +458,7 @@ class TestRuleVersion:
             buyback_price=tender_terms_at_2026_09_15["buyback_price"],
             quantity_authorized=tender_terms_at_2026_09_15["quantity_authorized"],
             quantity_available_to_category=tender_terms_at_2026_09_15["quantity_authorized"],
+            holder_category=HolderCategory.GENERAL,
             assumption=assumption_with_both_ratios,
             cost_per_share=Decimal("2000.00"),
         )

@@ -226,6 +226,7 @@ def compute_expected_return(
     buyback_price: Decimal,
     quantity_authorized: int,
     quantity_available_to_category: int,
+    holder_category: HolderCategory,
     assumption: BuybackAssumption,
     cost_per_share: Decimal,
 ) -> ExpectedReturnResult:
@@ -243,6 +244,7 @@ def compute_expected_return(
         buyback_price: Price the company is offering per share.
         quantity_authorized: Total shares the company authorized for buyback.
         quantity_available_to_category: Shares available to this holder's category.
+        holder_category: Whether this is GENERAL or RESERVED category.
         assumption: Assumptions including both acceptance ratios and exit price.
         cost_per_share: Entry cost of the holding.
 
@@ -250,8 +252,11 @@ def compute_expected_return(
         ExpectedReturnResult with total and per-share returns.
     """
     # Decimal arithmetic, never float
-    # Use the general ratio for computation; caller chooses category
-    acceptance_ratio = assumption.acceptance_ratio_general
+    # Select the ratio based on holder category
+    if holder_category == HolderCategory.GENERAL:
+        acceptance_ratio = assumption.acceptance_ratio_general
+    else:  # RESERVED
+        acceptance_ratio = assumption.acceptance_ratio_reserved
 
     qty = Decimal(quantity_available_to_category)
     accepted_qty = qty * acceptance_ratio
@@ -311,20 +316,16 @@ def holder_allocation_report(
     Returns:
         HolderAllocation with general and reserved portions.
     """
-    qty = Decimal(quantity_authorized)
-    general_qty = qty * (Decimal("1") - reserved_small_shareholder_fraction)
-    reserved_qty = qty * reserved_small_shareholder_fraction
-
     holder_decimal = Decimal(holder_shares)
 
     if holder_category == HolderCategory.GENERAL:
-        # General holder: all allocation from general portion
-        general_allocation = (general_qty / qty) * holder_decimal * acceptance_ratio_general
+        # General holder: can tender all their shares; acceptance_ratio_general determines allocation
+        general_allocation = holder_decimal * acceptance_ratio_general
         reserved_allocation = Decimal("0")
     else:  # RESERVED
-        # Reserved holder: all allocation from reserved portion
+        # Reserved holder: can tender all their shares; acceptance_ratio_reserved determines allocation
         general_allocation = Decimal("0")
-        reserved_allocation = (reserved_qty / qty) * holder_decimal * acceptance_ratio_reserved
+        reserved_allocation = holder_decimal * acceptance_ratio_reserved
 
     return HolderAllocation(
         general_portion=general_allocation,
