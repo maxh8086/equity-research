@@ -28,6 +28,7 @@ Reference for completed work, moved out of `getting-started-plan.md` so the plan
 ## Session 6 — validation (finished slices)
 
 - **6a — Screener template** ✅ merged Screener Excel template generator (d095d6d).
+- **6b — automated Screener export** ✅ built, **NOT verified live** (no request was ever made). `screener_export_live` (`ingest/screener_export_live/`, `web_scrape`, default off, forced off in commercial mode) logs in with `SCREENER_USERNAME` / `SCREENER_PASSWORD`, then for each `validation-sample/1` company downloads the Excel export and hands it to the drop adapter's `load_export`, so `screener_export` / `screener_value` rows are identical to a hand drop. One session, at least 3 s between requests, honest User-Agent. It stops the run on 401/403/429/451, a robots disallow, a failed login or any redirect back to /login/; one polite backoff on 502/503/504 or a timeout, nothing else retried. A rerun that gets the same bytes stores and loads nothing new. An unresolved or mismatching ISIN is quarantined (no request, reported in the run result), never guessed. The export endpoint and form fields are constants in `adapters.py` (`EXPORT_PATH` and friends), written to the best documented shape and unconfirmed. **Before enabling:** put `SCREENER_USERNAME` and `SCREENER_PASSWORD` in the local `.env` once, and confirm that Screener's terms permit automated, logged-in export. The hand-drop path stays the fallback.
 
 ## Session 7 — capacity detector
 
