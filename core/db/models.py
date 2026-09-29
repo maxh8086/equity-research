@@ -18,6 +18,7 @@ from sqlalchemy import (
     UniqueConstraint,
     CHAR,
 )
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from core.compute.guidance import ClaimSection, HedgeStrength, Specificity, Unit
@@ -1744,4 +1745,122 @@ class IndexEvent(ProvenanceMixin, Base):
         ),
         Index("ix_index_event_isin", "isin"),
         Index("ix_index_event_code_status", "index_code", "status"),
+    )
+
+
+# --- Order wins (session 7e) ---
+
+
+class OrderWinQuarantineReason(StrEnum):
+    """Why an announcement that looked like an order was held back.
+
+    `core.compute.order_wins.QuarantineReason` minus NOT_AN_ORDER (most
+    announcements are not orders; they are counted, never stored), plus the
+    one reason only the adapter can see.
+    """
+
+    PRE_AWARD = "pre_award"
+    EXCLUDED = "excluded"
+    AMBIGUOUS = "ambiguous"
+    NO_VALUE = "no_value"
+    MULTIPLE_VALUES = "multiple_values"
+    INVALID_ISIN = "invalid_isin"
+
+
+ORDER_WIN_QUARANTINE_REASON = _pg_enum(OrderWinQuarantineReason, "order_win_quarantine_reason")
+
+
+class OrderWinFact(ProvenanceMixin, Base):
+    """An order win read from one NSE announcement, every field traceable to its quote.
+
+    `announcement_key` is the sha256 of the announcement's own text and time, so
+    the same announcement seen in two overlapping listings is one fact.
+    `content_hash` is the raw listing file it came from (`raw_source_file`);
+    `as_of` is the announcement's dissemination time. A new `rule_version` is a
+    new version of the same announcement. Gaps are named in `missing`, never
+    filled. Append-only; read through core.db.pit.order_wins_as_of.
+    """
+
+    __tablename__ = "order_win"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    announcement_key: Mapped[str] = mapped_column(CHAR(64), nullable=False)
+    announced_on: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    order_value_inr: Mapped[Decimal] = mapped_column(Numeric(28, 6), nullable=False)
+    value_quote: Mapped[str] = mapped_column(Text, nullable=False)
+    counterparty: Mapped[str | None] = mapped_column(Text, nullable=True)
+    counterparty_quote: Mapped[str | None] = mapped_column(Text, nullable=True)
+    execution_months: Mapped[Decimal | None] = mapped_column(Numeric(12, 4), nullable=True)
+    execution_end: Mapped[date | None] = mapped_column(Date, nullable=True)
+    period_quote: Mapped[str | None] = mapped_column(Text, nullable=True)
+    matched_phrase: Mapped[str] = mapped_column(Text, nullable=False)
+    missing: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_order_win_isin_format"),
+        CheckConstraint(
+            "announcement_key ~ '^[0-9a-f]{64}$'", name="ck_order_win_announcement_key_sha256"
+        ),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_order_win_content_hash_sha256"),
+        CheckConstraint("model_version IS NULL", name="ck_order_win_no_model"),
+        CheckConstraint("order_value_inr > 0", name="ck_order_win_value_positive"),
+        CheckConstraint(
+            "(counterparty IS NULL) = (counterparty_quote IS NULL)",
+            name="ck_order_win_counterparty_with_quote",
+        ),
+        CheckConstraint(
+            "(execution_months IS NULL) = (period_quote IS NULL)",
+            name="ck_order_win_period_with_quote",
+        ),
+        CheckConstraint(
+            "execution_end IS NULL OR execution_months IS NOT NULL",
+            name="ck_order_win_end_needs_period",
+        ),
+        CheckConstraint(
+            "(counterparty IS NULL) = ('counterparty' = ANY(missing))"
+            " AND (execution_months IS NULL) = ('execution_period' = ANY(missing))",
+            name="ck_order_win_missing_names_the_gaps",
+        ),
+        UniqueConstraint("announcement_key", "rule_version", name="uq_order_win_announcement_rule"),
+        Index("ix_order_win_isin_announced", "isin", "announced_on"),
+    )
+
+
+class OrderWinQuarantine(ProvenanceMixin, Base):
+    """An order-like announcement held back for review, with the reason and the text that decided it.
+
+    `isin` is NULL only when the listing's ISIN was malformed (the raw value is
+    then in `quote`). Append-only.
+    """
+
+    __tablename__ = "order_win_quarantine"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str | None] = mapped_column(CHAR(12), nullable=True)
+    announcement_key: Mapped[str] = mapped_column(CHAR(64), nullable=False)
+    announced_on: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    reason: Mapped[OrderWinQuarantineReason] = mapped_column(
+        ORDER_WIN_QUARANTINE_REASON, nullable=False
+    )
+    quote: Mapped[str | None] = mapped_column(Text, nullable=True)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "isin IS NULL OR isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_order_win_quarantine_isin_format"
+        ),
+        CheckConstraint(
+            "announcement_key ~ '^[0-9a-f]{64}$'",
+            name="ck_order_win_quarantine_announcement_key_sha256",
+        ),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_order_win_quarantine_content_hash_sha256"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_order_win_quarantine_no_model"),
+        UniqueConstraint(
+            "announcement_key", "rule_version", name="uq_order_win_quarantine_announcement_rule"
+        ),
+        Index("ix_order_win_quarantine_pit", "as_of"),
     )

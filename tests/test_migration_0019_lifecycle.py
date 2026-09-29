@@ -35,9 +35,9 @@ DEMERGER_EVENTS = (
 )
 
 
-def test_0019_is_the_single_head():
+def test_0019_follows_0018_in_a_single_chain():
     script = ScriptDirectory.from_config(Config(str(REPO_ROOT / "alembic.ini")))
-    assert script.get_heads() == ["0019"]
+    assert len(script.get_heads()) == 1
     assert script.get_revision("0019").down_revision == "0018"
 
 
