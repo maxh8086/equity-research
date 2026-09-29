@@ -1864,3 +1864,100 @@ class OrderWinQuarantine(ProvenanceMixin, Base):
         ),
         Index("ix_order_win_quarantine_pit", "as_of"),
     )
+
+
+# --- Broker holdings drop (read-only) ---
+
+
+class BrokerHoldingQuarantineReason(StrEnum):
+    """Why a row of a broker holdings file was held back instead of stored."""
+
+    MISSING_ISIN = "missing_isin"
+    INVALID_ISIN = "invalid_isin"
+    NEGATIVE_QUANTITY = "negative_quantity"
+    UNPARSEABLE_NUMBER = "unparseable_number"
+    UNKNOWN_EXCHANGE = "unknown_exchange"
+    DUPLICATE_ROW = "duplicate_row"
+
+
+BROKER_HOLDING_QUARANTINE_REASON = _pg_enum(
+    BrokerHoldingQuarantineReason, "broker_holding_quarantine_reason"
+)
+
+
+class BrokerHoldingSnapshot(ProvenanceMixin, Base):
+    """One position of one account in one dropped broker holdings file, keyed by ISIN.
+
+    `snapshot_at` is when the broker reported the position; `as_of` is when this
+    system could first know it (the sidecar's `published_at`), never earlier.
+    `content_hash` is the dropped file in `raw_source_file`. The same company
+    may appear once per exchange, so one ISIN can have an NSE and a BSE row in
+    the same snapshot. No trading symbol is stored: a series suffix such as
+    "-BE" is not a different security. Append-only; read through
+    core.db.pit.holdings_as_of.
+    """
+
+    __tablename__ = "broker_holding_snapshot"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    account_label: Mapped[str] = mapped_column(Text, nullable=False)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    exchange: Mapped[str] = mapped_column(Text, nullable=False)
+    quantity: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    average_price: Mapped[Decimal] = mapped_column(Numeric(28, 6), nullable=False)
+    last_price: Mapped[Decimal] = mapped_column(Numeric(28, 6), nullable=False)
+    snapshot_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_broker_holding_snapshot_isin_format"),
+        CheckConstraint("exchange IN ('NSE', 'BSE')", name="ck_broker_holding_snapshot_exchange"),
+        CheckConstraint("quantity >= 0", name="ck_broker_holding_snapshot_quantity"),
+        CheckConstraint("average_price >= 0", name="ck_broker_holding_snapshot_average_price"),
+        CheckConstraint("last_price >= 0", name="ck_broker_holding_snapshot_last_price"),
+        CheckConstraint("account_label <> ''", name="ck_broker_holding_snapshot_account"),
+        CheckConstraint("as_of >= snapshot_at", name="ck_broker_holding_snapshot_known_after_taken"),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_broker_holding_snapshot_content_hash_sha256"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_broker_holding_snapshot_no_model"),
+        UniqueConstraint(
+            "account_label",
+            "isin",
+            "exchange",
+            "snapshot_at",
+            "content_hash",
+            name="uq_broker_holding_snapshot_key",
+        ),
+        Index("ix_broker_holding_snapshot_pit", "account_label", "isin", "snapshot_at"),
+    )
+
+
+class BrokerHoldingQuarantine(ProvenanceMixin, Base):
+    """A row of a broker holdings file held back for review, with the reason.
+
+    `isin` is the raw value from the file (absent or malformed for two of the
+    reasons). `row_number` counts from 1 in the file's list. Append-only.
+    """
+
+    __tablename__ = "broker_holding_quarantine"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    account_label: Mapped[str] = mapped_column(Text, nullable=False)
+    isin: Mapped[str | None] = mapped_column(Text, nullable=True)
+    row_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    reason: Mapped[BrokerHoldingQuarantineReason] = mapped_column(
+        BROKER_HOLDING_QUARANTINE_REASON, nullable=False
+    )
+    detail: Mapped[str] = mapped_column(Text, nullable=False)
+    snapshot_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("row_number >= 1", name="ck_broker_holding_quarantine_row_number"),
+        CheckConstraint("as_of >= snapshot_at", name="ck_broker_holding_quarantine_known_after_taken"),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_broker_holding_quarantine_content_hash_sha256"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_broker_holding_quarantine_no_model"),
+        UniqueConstraint("content_hash", "row_number", name="uq_broker_holding_quarantine_row"),
+        Index("ix_broker_holding_quarantine_pit", "as_of"),
+    )
