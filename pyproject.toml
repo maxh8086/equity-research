@@ -13,6 +13,7 @@ dependencies = [
     "python-dotenv>=1.0",  # .env also carries EQUITY_SOURCE_<NAME>_ENABLED switches
     "boto3>=1.40",  # S3-compatible blob storage (MinIO locally)
     "httpx>=0.28",
+    "pypdf>=5.1",  # text layer of concall transcript PDFs; no OCR, a scan is quarantined
 ]
 
 [project.optional-dependencies]
@@ -20,13 +21,19 @@ dev = [
     "pytest>=8.3",
     "hypothesis>=6.115",
 ]
+# Only gateway/providers.py imports this, and only inside the method that
+# calls the API: the architecture tests and every offline test must read the
+# gateway with no provider SDK installed. An extraction run needs it.
+llm = [
+    "anthropic>=1.9",
+]
 
 [build-system]
 requires = ["setuptools>=75"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["core*", "ingest*"]
+include = ["core*", "extract*", "gateway*", "ingest*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

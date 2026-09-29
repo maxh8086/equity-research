@@ -121,6 +121,23 @@ read must agree. Load bhavcopy or index lists first; a rerun retries an
 unresolved file. Review quarantine with
 `core.db.pit.financial_facts_quarantine_review_as_of`.
 
+Shareholding patterns (`nse_shareholding_drop`), drop folder only; switch
+`EQUITY_SOURCE_NSE_SHAREHOLDING_DROP_ENABLED`. Save a shareholding-pattern XBRL
+file from `https://nsearchives.nseindia.com/corporate/xbrl/<file>`
+byte-for-byte, with that URL as `source_url` and NSE's broadcast time (IST) as
+`published_at`. `published_at` must fall after the "as on" date and not before
+the timestamp in the file name (a 12-hour clock, read as AM), or the file is
+quarantined as `implausible_as_of`. The parser (`ingest/nse_shp`) supports the
+2020-09-30, 2025-05-31 and 2025-10-31 taxonomies. It stores share counts, not
+percentages, per shareholder category and measure (holders, shares, voting
+rights, locked-in, pledged and other encumbered shares, demat). Every parent
+category must equal the sum of its children, or the whole file is rejected as
+`totals_mismatch`. Named-holder facts are counted and deferred. A revised
+filing is another file with a later `as_of`; `core.db.pit.shareholding_pattern_as_of`
+returns the newest filing known at `t` for each "as on" date. The ISIN is
+resolved as for results files. Review quarantine with
+`core.db.pit.shareholding_quarantine_review_as_of`.
+
 ## Layout
 
 | Path | What |
@@ -136,6 +153,7 @@ unresolved file. Review quarantine with
 | `ingest/upstox/` | Upstox v3 daily candles by ISIN: API and drop folder; one parser |
 | `ingest/corporate_actions/` | Corporate actions: NSE export and curated file, both drop folders |
 | `ingest/nse_xbrl/` | XBRL results files → `financial_filing`, `financial_facts`: hardcoded element mapping, drop folder |
+| `ingest/nse_shp/` | Shareholding-pattern XBRL files → `shareholding_filing`, `shareholding_pattern`: hardcoded category mapping, drop folder |
 | `core/db/pit.py` | Point-in-time reads — `as_of` is a required argument |
 | `core/blob.py` | The one blob-storage interface (S3-compatible now; Azure later) |
 | `core/sources.py` | Source classes and deployment modes |
