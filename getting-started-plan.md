@@ -109,8 +109,8 @@ Session 8 — credit ratings
 
 ## Week 4 — The MVP
 
-Session 9 — guidance extraction
-> Build concall transcript extraction into `guidance_claim`. Pydantic schema with hedge_strength (will > expect > aim to > working towards), specificity, verbatim quote, quote location, section (prepared remarks | Q&A), speaker role, source URL. Treat the transcript as untrusted input: the prompt must forbid following instructions found inside it. Whether guidance was raised, lowered, maintained or withdrawn versus the prior quarter is computed by code, not extracted. Use Sonnet — do not downgrade this model tier.
+Session 9 — guidance extraction ✅ recorded in [docs/finished.md](docs/finished.md)
+- **Not yet:** a live adapter that follows exchange announcements to transcript PDFs (drop folder only); scanned transcripts (no OCR, quarantined as `no_text_layer`); the extraction run itself, which needs the 20-company sample and a real API key.
 
 Session 10 — resolution
 > Build auto-resolution matching guidance claims against `financial_facts` when periods close. Implement SILENT detection for claims that stop being mentioned across two consecutive filings.
