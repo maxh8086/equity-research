@@ -78,6 +78,11 @@ A counter-thesis produces falsifiable conditions with observation dates;
 deterministic code checks them later. The model does not get to reinterpret
 its own conditions after the fact.
 
+### R4 — Tests first
+Write the failing test before the code. Run it, see it fail for the right reason,
+then implement. This ensures tests are meaningful, specifications are clear, and
+code is written to the contract rather than justifying itself.
+
 ## Stack
 
 - Python 3.12, FastAPI, SQLAlchemy
