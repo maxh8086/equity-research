@@ -41,6 +41,8 @@ from core.compute.price_crosscheck import Bar, Mismatch, crosscheck
 from core.db.models import (
     ConcallDocument,
     ConcallTranscript,
+    CompanyEvent,
+    CompanyEventType,
     Consolidation,
     CorporateAction,
     CorporateActionQuarantine,
@@ -1838,3 +1840,37 @@ def latest_rating_as_of(
         .order_by(ra.action_date.desc(), ra.id.desc())
         .limit(1)
     )
+
+
+# --- S7 company_event ---
+
+
+def company_events_as_of(
+    session: Session, *, isin: str, t: datetime
+) -> list[CompanyEvent]:
+    """Company events for isin known by t, most recent first.
+
+    All arithmetic reads use only data with as_of <= t (R2).
+    """
+    require_aware(t, "t")
+    e = CompanyEvent
+    stmt = (
+        select(e)
+        .where(e.isin == isin, e.as_of <= t)
+        .order_by(e.event_date.desc(), e.id.desc())
+    )
+    return list(session.scalars(stmt))
+
+
+def company_events_by_type_as_of(
+    session: Session, *, isin: str, event_type: CompanyEventType, t: datetime
+) -> list[CompanyEvent]:
+    """Company events of event_type for isin known by t, most recent first."""
+    require_aware(t, "t")
+    e = CompanyEvent
+    stmt = (
+        select(e)
+        .where(e.isin == isin, e.event_type == event_type, e.as_of <= t)
+        .order_by(e.event_date.desc(), e.id.desc())
+    )
+    return list(session.scalars(stmt))

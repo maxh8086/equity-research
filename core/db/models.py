@@ -1413,3 +1413,67 @@ class RatingAction(ProvenanceMixin, Base):
         ),
         Index("ix_rating_action_isin_date", "isin", "action_date"),
     )
+
+
+# --- S7 company_event ---
+
+
+class CompanyEventSeverity(StrEnum):
+    CRITICAL = "critical"
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+
+class CompanyEventType(StrEnum):
+    CWIP_TO_GROSS_BLOCK = "cwip_to_gross_block"
+    REVENUE_STEP_UP = "revenue_step_up"
+    MARGIN_COMPRESSION = "margin_compression"
+    DEBT_SPIKE = "debt_spike"
+    PROMOTER_PLEDGE = "promoter_pledge"
+    PROMOTER_PLEDGE_INVOKED = "promoter_pledge_invoked"
+    RATING_DOWNGRADE = "rating_downgrade"
+    RATING_WITHDRAWAL = "rating_withdrawal"
+    RAID_REGULATORY = "raid_regulatory"
+
+
+class CompanyEvent(ProvenanceMixin, Base):
+    """Store : Red flags and commissioning signals, computed by code.
+
+    Severity is always computed by code, never asserted by a model (R1).
+    Every row requires an evidence_url (CLAUDE.md). Append-only.
+    """
+
+    __tablename__ = "company_event"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    event_type: Mapped[CompanyEventType] = mapped_column(
+        _pg_enum(CompanyEventType, "company_event_type"), nullable=False
+    )
+    severity: Mapped[CompanyEventSeverity] = mapped_column(
+        _pg_enum(CompanyEventSeverity, "company_event_severity"), nullable=False
+    )
+    event_date: Mapped[date] = mapped_column(Date, nullable=False)
+    metric: Mapped[str | None] = mapped_column(Text, nullable=True)
+    value: Mapped[Decimal | None] = mapped_column(Numeric(28, 6), nullable=True)
+    threshold: Mapped[Decimal | None] = mapped_column(Numeric(28, 6), nullable=True)
+    evidence_url: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+    detail: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    __table_args__ = (
+        CheckConstraint(
+            "isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_company_event_isin_format"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_company_event_no_model"),
+        CheckConstraint(
+            "evidence_url IS NOT NULL AND evidence_url != ''",
+            name="ck_company_event_evidence_url_required",
+        ),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_company_event_content_hash_sha256"
+        ),
+        Index("ix_company_event_isin_date", "isin", "event_date"),
+        Index("ix_company_event_type_date", "event_type", "event_date"),
+    )
