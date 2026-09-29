@@ -92,6 +92,10 @@ class Settings(BaseSettings):
     upstox_min_interval_seconds: float = 1.0
     upstox_timeout_seconds: float = 30.0
 
+    # Screener company schedules API (ingest/screener_schedules): web_scrape adapter.
+    screener_schedules_base_url: str = "https://www.screener.in"
+    screener_schedules_min_interval_seconds: float = 3.0
+
 
 def parse_source_switches(environ: Mapping[str, str]) -> dict[str, bool]:
     """EQUITY_SOURCE_<NAME>_ENABLED → {name: bool}. A value that is not a boolean raises."""

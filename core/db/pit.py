@@ -2490,3 +2490,61 @@ def drift_watch_as_of(
         diluted_share_count=diluted_share_count,
         evidence_url=evidence_url,
     )
+
+
+def screener_schedules_fact_as_of(
+    session: Session,
+    *,
+    isin: str,
+    period_end: date,
+    line_item: str,
+    as_of: datetime | None,
+) -> FinancialFact | None:
+    """Check if a Screener schedules fact has already been written (idempotence).
+
+    Returns the fact if found, None otherwise. Used by the adapter to avoid
+    duplicate writes on reruns.
+
+    Args:
+        isin: Company ISIN
+        period_end: Fiscal year end date
+        line_item: e.g., "property_plant_and_equipment_gross"
+        as_of: Clock time (None = use latest). For reruns, use the same as_of
+               to get the old fact; use a later as_of to ignore it (new clock).
+
+    Returns:
+        The fact if it exists and is visible at as_of, None otherwise.
+    """
+    from datetime import datetime as dt
+    if as_of is None:
+        as_of = dt.now(dt.now().astimezone().tzinfo)
+    require_aware(as_of, "as_of")
+
+    m = FinancialFact
+    stmt = (
+        select(m)
+        .where(
+            m.isin == isin,
+            m.period_end == period_end,
+            m.line_item == line_item,
+            m.extracted_by == "ingest.screener_schedules.adapters.ScreenerSchedules",
+            m.as_of <= as_of,
+        )
+        .order_by(m.as_of.desc(), m.id.desc())
+        .limit(1)
+    )
+    return session.scalar(stmt)
+
+
+def index_universe_symbols_as_of(session: Session, *, as_of: datetime) -> list[str]:
+    """Every symbol in any constituent list published by `as_of`, sorted.
+
+    The union over all lists (never today's list alone, CLAUDE.md "Universe").
+    A symbol is a lookup key only: its ISIN comes from `symbol_to_isin_as_of`.
+    """
+    require_aware(as_of, "as_of")
+    s, c = IndexSnapshot, IndexSnapshotConstituent
+    rows = session.scalars(
+        select(c.symbol).join(s, s.id == c.snapshot_id).where(s.as_of <= as_of, c.as_of <= as_of).distinct()
+    )
+    return sorted(set(rows))
