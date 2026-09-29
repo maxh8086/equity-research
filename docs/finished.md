@@ -27,3 +27,19 @@ Reference for completed work, moved out of `getting-started-plan.md` so the plan
 ## Session 6 — validation (finished slices)
 
 - **6a — Screener template** ✅ merged Screener Excel template generator (d095d6d).
+
+## Session 7 — capacity detector
+
+- **7 — CWIP to gross block** ✅ `core/compute/cwip_detector.py` (`detect_cwip_commissioning`): pure arithmetic, flags a quarter where gross block rises 20% or more QoQ while CWIP falls. `core/resolve/cwip_commissioning.py` maps an event to a `company_event` row, severity by code (50% or more CRITICAL, 30% or more HIGH, 20% or more MEDIUM). Migration 0017 adds `company_event` (append-only). **Not yet:** nothing feeds it gross block, because results XBRL carries only net PPE and CWIP; the source is still open. `CompanyEventType` also holds eight members no detector writes yet.
+
+## Session 7b — technical screens
+
+- **7b — technical screens** ✅ `core/compute/technical.py` and the `technical_signal` store (migration 0015): volume spike with unusual move, consolidation breakout and breakdown, and all-time-high breakout, on daily closes adjusted with factors known at `t`. Signals open `watchlist_entry` rows (never `ADD_REVIEW`); readers are `technical_signals_as_of` and `watchlist_entries_as_of`. **Not yet:** attaching same-day exchange announcements to volume spikes (needs the 7c live feed), and creating `watchlist_entry` rows from signals outside tests.
+
+## Session 7c — ownership events (schema and drop folders)
+
+- **7c, first slice** ✅ `insider_trade`, `stake_disclosure`, `bulk_block_deal`, `scheduled_event` and `index_event` (migration 0018, all append-only, each with provenance), five drop-folder adapters in `ingest/ownership_events` with strict Pydantic rows, and five `as_of` readers in `core/db/pit.py`. `IndexCode` gained MSCI_EM, MSCI_INDIA, FTSE_ALL_WORLD and BSE_SENSEX. `DealSide` is INFLOW/OUTFLOW, not BUY/SELL, to pass the `no_verdicts` rule. The rest of 7c stays in `getting-started-plan.md`.
+
+## Session 8 — credit ratings
+
+- **8 — credit ratings** ✅ `core/compute/ratings.py` maps CRISIL, ICRA, CARE and India Ratings scales to a common scale, with outlook and action parsing; `ingest/rating_action` reads `rating_action_drop/` (CSV: date, isin, agency, instrument_type, raw_rating, evidence_url). Migration 0016 adds `rating_action` (append-only); readers `rating_actions_as_of` and `latest_rating_as_of`. Severity is computed by `compute_severity` (withdrawn is 2, downgrade to D is 5).

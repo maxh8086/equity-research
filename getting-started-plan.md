@@ -100,16 +100,8 @@ Session 6 — validation
 
 ## Week 3 — First real signal
 
-Session 7 — capacity detector
-> Build the CWIP to gross block step-function detector. Pure arithmetic. Flag when gross block rises ≥20% QoQ while CWIP falls. Output to `company_event` with severity computed by code.
-
-This is your first genuine output — capacity commissioning leads revenue by 2–4 quarters, and nobody sells it.
-
-Session 7b — technical screens
-> Build `core/compute/technical.py` and the `technical_signal` store with three screens. (1) Volume spike with an unusual price move, in both directions: volume versus its 50-day median, and return versus the stock's usual volatility. (2) Consolidation breakout and breakdown. (3) All-time-high breakout, labelled "high since 2000" where history starts later than listing. Use daily closes only, adjusted with corporate-action factors known at `t`. Signals open `watchlist_entry` rows, never `ADD_REVIEW`. Attach same-day exchange announcements to volume spikes, marking each explained or unexplained. Property tests: adding future bars never changes a past signal; split adjustment never creates or removes a signal; a mirrored series swaps up and down signals.
-
-Session 7c — announcements, ownership events and corporate actions
-> Build the NSE/BSE corporate-announcements adapter (switchable, with a drop-folder fallback). From it, populate `insider_trade` (with mode of acquisition), `stake_disclosure` (large-stake crossings; pledges created, released or invoked), `bulk_block_deal`, the full `corporate_action` lifecycle including fund-raising and dilution, `scheduled_event`, and NSE index change notices as `index_event`. Implement the ownership, dilution and corporate-action rules from CLAUDE.md: false-signal filters, pro-forma EPS, use-of-proceeds claims written to `guidance_claim`, and critical alerts (active once holdings exist). Store the demerger milestone chain (scheme of arrangement, board, shareholder and creditor approval, NCLT order, record date, listing) as `scheduled_event` rows; the entitlement ratio from the scheme document adjusts no price until a human verifies it.
+Session 7c — announcements, corporate actions and live adapters (remainder)
+> The five ownership and catalyst tables and their drop-folder adapters are done (see `docs/finished.md`). What remains: the NSE/BSE corporate-announcements adapter (switchable, with a drop-folder fallback) that feeds them live; the full `corporate_action` lifecycle including fund-raising and dilution; the ownership, dilution and corporate-action rules from CLAUDE.md (false-signal filters, pro-forma EPS, use-of-proceeds claims written to `guidance_claim`, critical alerts, active once holdings exist); and the demerger milestone chain (scheme of arrangement, board, shareholder and creditor approval, NCLT order, record date, listing) as `scheduled_event` rows, where the entitlement ratio from the scheme document adjusts no price until a human verifies it.
 
 Session 7d — live shareholding listing
 > Build `nse_shareholding_listing`, a `web_scrape` adapter (switch `EQUITY_SOURCE_NSE_SHAREHOLDING_LISTING_ENABLED`, off in `commercial` mode) that feeds the Session 4c parser and stores, with no drop folder in between. It reads NSE's shareholding-pattern listing (`/api/corporate-share-holdings-master?index=equities&symbol=<SYMBOL>`, the data behind the "Shareholding Patterns" page) for the 100-company universe, throttled and with the client identified, sharing the NSE session handling built in 7c. It then downloads each new XBRL file from `nsearchives.nseindia.com/corporate/xbrl/`, which is `official_archive`.
@@ -127,9 +119,6 @@ Session 7g — post-earnings drift
 
 Session 7h — buyback tenders
 > Build `core/compute/buyback.py` on the tender-offer filings loaded in 7c: buyback price, size, record date, tender window and the reserved small-shareholder portion. Expected return computed by code, with the acceptance ratio as a stored assumption carrying its assumption-set hash and past ratios taken from post-buyback outcome filings. Price risk on unaccepted shares after the record date is part of the calculation, not a footnote. Open-market buybacks are tracked but never scored this way. Per-holder allocation is a report; a human tenders in the broker's app.
-
-Session 8 — credit ratings
-> Build the rating action parser for CRISIL, ICRA, CARE and India Ratings. Store ⑧ schema. Treat `withdrawn` as severity 2.
 
 ---
 
