@@ -38,6 +38,13 @@ from core.compute.guidance import (
     compare_claims,
     compare_hedges,
 )
+from core.compute.guidance_report import (
+    ClaimView,
+    GuidanceReport,
+    InputFact,
+    SourceRef,
+    build_report,
+)
 from core.compute.guidance_resolution import (
     METRIC_RESOLVERS,
     Basis,
@@ -57,13 +64,6 @@ from core.compute.guidance_resolution import (
     select_claims,
 )
 from core.compute.price_crosscheck import Bar, Mismatch, crosscheck
-from core.compute.guidance_report import (
-    ClaimView,
-    InputFact,
-    SourceRef,
-    build_report,
-    GuidanceReport,
-)
 from core.db.models import (
     BulkBlockDeal,
     IndexEvent,
