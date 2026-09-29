@@ -27,9 +27,8 @@ def test_set_attributes_dict_entry_is_ignored():
         },
     }
     facts = _parse(data)
-    assert len(facts) == 1
-    assert facts[0].period_end == date(2025, 3, 31)
-    assert facts[0].value == Decimal("294040000000")
+    assert [f.period_end for f in facts] == [date(2024, 3, 31), date(2025, 3, 31)]
+    assert facts[1].value == Decimal("294040000000")
 
 
 def test_only_set_attributes_yields_no_facts():
@@ -47,7 +46,8 @@ def test_non_period_string_keys_are_ignored():
 
 
 def test_other_months_use_last_day_of_month():
-    assert _parse({"Gross Block": {"Sep 2025": "10", "Feb 2024": "5"}})[0].period_end == date(2025, 9, 30)
+    facts = _parse({"Gross Block": {"Sep 2025": "10", "Feb 2024": "5"}})
+    assert [f.period_end for f in facts] == [date(2024, 2, 29), date(2025, 9, 30)]
 
 
 def test_leap_february_last_day():

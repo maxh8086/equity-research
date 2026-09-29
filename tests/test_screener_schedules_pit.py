@@ -10,7 +10,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 from core.db.models import FinancialFact, Consolidation, FactKind
-from core.db.pit import screener_schedules_fact_as_of
+from core.db.pit import screener_schedules_fact_as_of, screener_schedules_series_as_of
 from core.timezones import IST
 
 
@@ -142,3 +142,102 @@ class TestScreenerSchedulesPIT:
         )
 
         assert result is None
+
+
+_LINE = "property_plant_and_equipment_gross"
+_EXTRACTOR = "ingest.screener_schedules.adapters.ScreenerSchedules"
+
+
+def _put(session, *, isin="INE467B01029", period_end, value, as_of, extracted_by=_EXTRACTOR):
+    session.add(
+        FinancialFact(
+            isin=isin,
+            consolidation=Consolidation.CONSOLIDATED,
+            fact_kind=FactKind.COMPUTED,
+            line_item=_LINE,
+            xbrl_element=None,
+            period_start=None,
+            period_end=period_end,
+            value=value,
+            unit="INR",
+            rule_version="screener_schedules/1",
+            as_of=as_of,
+            content_hash="0" * 64,
+            source_url="test",
+            extracted_by=extracted_by,
+            model_version=None,
+        )
+    )
+    session.flush()
+
+
+class TestScreenerSchedulesSeries:
+    """Series reader: one row per period, latest version known at as_of, oldest first."""
+
+    T1 = datetime(2026, 6, 1, 12, 0, tzinfo=IST)
+    T2 = datetime(2026, 9, 1, 12, 0, tzinfo=IST)
+    ASOF = datetime(2026, 9, 29, 12, 0, tzinfo=IST)
+
+    def test_returns_every_period_oldest_first(self, session: Session):
+        _put(session, period_end=date(2025, 3, 31), value=300, as_of=self.T1)
+        _put(session, period_end=date(2023, 3, 31), value=100, as_of=self.T1)
+        _put(session, period_end=date(2024, 3, 31), value=200, as_of=self.T1)
+
+        series = screener_schedules_series_as_of(
+            session, isin="INE467B01029", line_item=_LINE, as_of=self.ASOF
+        )
+
+        assert [(f.period_end, f.value) for f in series] == [
+            (date(2023, 3, 31), 100),
+            (date(2024, 3, 31), 200),
+            (date(2025, 3, 31), 300),
+        ]
+
+    def test_hides_values_first_known_after_as_of(self, session: Session):
+        _put(session, period_end=date(2024, 3, 31), value=200, as_of=self.T1)
+        _put(session, period_end=date(2025, 3, 31), value=300, as_of=self.T2)
+
+        series = screener_schedules_series_as_of(
+            session, isin="INE467B01029", line_item=_LINE, as_of=self.T1
+        )
+
+        assert [f.period_end for f in series] == [date(2024, 3, 31)]
+
+    def test_restatement_visible_only_after_it_was_known(self, session: Session):
+        _put(session, period_end=date(2024, 3, 31), value=200, as_of=self.T1)
+        _put(session, period_end=date(2024, 3, 31), value=210, as_of=self.T2)
+
+        before = screener_schedules_series_as_of(
+            session, isin="INE467B01029", line_item=_LINE, as_of=self.T1
+        )
+        after = screener_schedules_series_as_of(
+            session, isin="INE467B01029", line_item=_LINE, as_of=self.ASOF
+        )
+
+        assert [f.value for f in before] == [200]
+        assert [f.value for f in after] == [210]
+
+    def test_filters_isin_and_extractor(self, session: Session):
+        _put(session, period_end=date(2024, 3, 31), value=200, as_of=self.T1)
+        _put(session, isin="INE002A01012", period_end=date(2024, 3, 31), value=1, as_of=self.T1)
+        _put(session, period_end=date(2023, 3, 31), value=2, as_of=self.T1, extracted_by="other")
+
+        series = screener_schedules_series_as_of(
+            session, isin="INE467B01029", line_item=_LINE, as_of=self.ASOF
+        )
+
+        assert [(f.period_end, f.value) for f in series] == [(date(2024, 3, 31), 200)]
+
+    def test_empty_when_nothing_stored(self, session: Session):
+        assert (
+            screener_schedules_series_as_of(
+                session, isin="INE467B01029", line_item=_LINE, as_of=self.ASOF
+            )
+            == []
+        )
+
+    def test_naive_as_of_rejected(self, session: Session):
+        with pytest.raises(ValueError):
+            screener_schedules_series_as_of(
+                session, isin="INE467B01029", line_item=_LINE, as_of=datetime(2026, 9, 29)
+            )

@@ -44,8 +44,8 @@ FIXTURE_TCS_SCHEDULES = {
 class TestParseSchedules:
     """Test parser on synthetic Screener API responses."""
 
-    def test_parse_gross_block_latest_period(self):
-        """Parse Gross Block for the latest available period."""
+    def test_parse_gross_block_every_period(self):
+        """Parse Gross Block for every period column, oldest first."""
         raw = json.dumps(FIXTURE_TCS_SCHEDULES).encode()
         facts = parse_schedules(
             raw,
@@ -54,13 +54,18 @@ class TestParseSchedules:
             consolidation="consolidated",
         )
 
-        # Should extract Gross Block for Mar 2025 (latest)
-        assert facts
-        gross_fact = next(
-            (f for f in facts if f.line_item == "property_plant_and_equipment_gross"),
-            None,
-        )
-        assert gross_fact is not None
+        assert [f.period_end for f in facts] == [
+            date(2015, 3, 31),
+            date(2024, 3, 31),
+            date(2025, 3, 31),
+        ]
+        assert [f.value for f in facts] == [
+            Decimal("1234560000000"),
+            Decimal("2345670000000"),
+            Decimal("3456780000000"),
+        ]
+        assert {f.line_item for f in facts} == {"property_plant_and_equipment_gross"}
+        gross_fact = facts[-1]
         # 345,678 crore = 345678 * 10^7 = 3456780000000
         assert gross_fact.value == Decimal("3456780000000")
         assert gross_fact.period_end == date(2025, 3, 31)
@@ -123,10 +128,9 @@ class TestParseSchedules:
         raw = json.dumps(data).encode()
         facts = parse_schedules(raw, symbol="TEST", isin="INE000000000", consolidation="standalone")
 
-        # Should use the latest valid period (Mar 2025)
-        assert len(facts) == 1
-        assert facts[0].period_end == date(2025, 3, 31)
-        assert facts[0].value == Decimal("3000000000")
+        # The invalid label is skipped; both valid periods are kept.
+        assert [f.period_end for f in facts] == [date(2024, 3, 31), date(2025, 3, 31)]
+        assert facts[1].value == Decimal("3000000000")
 
     def test_non_numeric_value(self):
         """Skip non-numeric Gross Block values."""
@@ -139,7 +143,7 @@ class TestParseSchedules:
         raw = json.dumps(data).encode()
         facts = parse_schedules(raw, symbol="TEST", isin="INE000000000", consolidation="standalone")
 
-        # Should use the latest valid numeric value (Mar 2025)
+        # The non-numeric column is skipped, the numeric one kept.
         assert len(facts) == 1
         assert facts[0].period_end == date(2025, 3, 31)
 
@@ -154,4 +158,4 @@ class TestParseSchedules:
         raw = json.dumps(data).encode()
         facts = parse_schedules(raw, symbol="TEST", isin="INE000000000", consolidation="standalone")
 
-        assert facts[0].period_end == date(2021, 3, 31)
+        assert [f.period_end for f in facts] == [date(2020, 3, 31), date(2021, 3, 31)]

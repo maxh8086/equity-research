@@ -175,8 +175,20 @@ def test_full_ingest_flow(session, s3_store):
     result = adapter.run(ctx)
 
     assert result.status is RunStatus.SUCCEEDED
-    assert result.rows_written == 2
-    facts = {f.isin: f for f in _facts(session)}
+    assert result.rows_written == 4  # two periods each
+    all_facts = _facts(session)
+    assert sorted((f.isin, f.period_end) for f in all_facts) == sorted(
+        [
+            (TCS_ISIN, date(2024, 3, 31)),
+            (TCS_ISIN, date(2025, 3, 31)),
+            (INFY_ISIN, date(2024, 3, 31)),
+            (INFY_ISIN, date(2025, 3, 31)),
+        ]
+    )
+    assert all(f.as_of == NOW for f in all_facts)
+    by_period = {(f.isin, f.period_end): f for f in all_facts}
+    assert by_period[(TCS_ISIN, date(2024, 3, 31))].value == Decimal("2345670000000")
+    facts = {f.isin: f for f in all_facts if f.period_end == date(2025, 3, 31)}
     assert facts[TCS_ISIN].value == Decimal("3456780000000")  # 345,678 crore
     assert facts[TCS_ISIN].period_end == date(2025, 3, 31)
     assert facts[TCS_ISIN].line_item == "property_plant_and_equipment_gross"
@@ -207,7 +219,7 @@ def test_idempotent_rerun_writes_nothing(session, s3_store):
     _seed_universe(session, ("TCS", TCS_ISIN), ("INFY", INFY_ISIN))
     adapter, _ = _adapter(FakeTime())
     first = adapter.run(AdapterContext(session, s3_store, _settings(), lambda: NOW))
-    assert first.rows_written == 2
+    assert first.rows_written == 4
     before = len(_facts(session))
 
     later = NOW + timedelta(days=1)  # a later clock: the raw-file key includes fetched_at
@@ -259,3 +271,48 @@ def test_forced_off_in_commercial_mode():
     settings = _settings(deployment_mode=DeploymentMode.COMMERCIAL, web_scraping_enabled=False)
     with pytest.raises(StartupRefused, match="screener_schedules"):
         check_startup(settings, adapters)
+
+
+def _gross(session, isin):
+    return sorted(
+        (f.period_end, f.value, f.as_of)
+        for f in session.scalars(select(FinancialFact).where(FinancialFact.isin == isin))
+    )
+
+
+def test_restated_period_is_a_new_version_and_old_one_stays(session, s3_store):
+    _seed_universe(session, ("INFY", INFY_ISIN))
+    adapter, _ = _adapter(FakeTime())
+    adapter.run(AdapterContext(session, s3_store, _settings(), lambda: NOW))
+
+    later = NOW + timedelta(days=30)
+    saved = dict(SCHEDULES["9002"]["Gross Block"])
+    try:
+        SCHEDULES["9002"]["Gross Block"]["Mar 2024"] = "101,000"  # restated; Mar 2025 unchanged
+        second = adapter.run(AdapterContext(session, s3_store, _settings(), lambda: later))
+    finally:
+        SCHEDULES["9002"]["Gross Block"] = saved
+
+    assert second.rows_written == 1
+    assert _gross(session, INFY_ISIN) == [
+        (date(2024, 3, 31), Decimal("1000000000000"), NOW),
+        (date(2024, 3, 31), Decimal("1010000000000"), later),
+        (date(2025, 3, 31), Decimal("1100000000000"), NOW),
+    ]
+
+
+def test_new_period_on_rerun_writes_only_that_period(session, s3_store):
+    _seed_universe(session, ("INFY", INFY_ISIN))
+    adapter, _ = _adapter(FakeTime())
+    adapter.run(AdapterContext(session, s3_store, _settings(), lambda: NOW))
+
+    later = NOW + timedelta(days=400)
+    saved = dict(SCHEDULES["9002"]["Gross Block"])
+    try:
+        SCHEDULES["9002"]["Gross Block"]["Mar 2026"] = "120,000"
+        second = adapter.run(AdapterContext(session, s3_store, _settings(), lambda: later))
+    finally:
+        SCHEDULES["9002"]["Gross Block"] = saved
+
+    assert second.rows_written == 1
+    assert len(_gross(session, INFY_ISIN)) == 3
