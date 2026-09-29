@@ -2396,12 +2396,12 @@ def drift_watchlist_as_of(
     require_aware(as_of, "as_of")
 
     # Get all financial filings for this ISIN to find latest period_end
-    filings = financial_filings_as_of(session, isin=isin, consolidation=Consolidation.CONSOLIDATED, as_of=as_of)
+    filings = financial_filings_as_of(session, isin=isin, as_of=as_of)
     if not filings:
         return []
 
-    # Group by period_end and take the latest (most recent quarter)
-    latest_filing = filings[-1]  # Newest first by default ordering
+    # Take the latest filing (newest by as_of)
+    latest_filing = filings[-1]
     period_end = latest_filing.period_end
 
     # Compute drift for this period

@@ -11,7 +11,7 @@ import pytest
 
 from core.compute.drift import DriftWatch, MissingInputReason
 from core.db.pit import drift_watch_as_of, drift_watchlist_as_of, DriftWatchlistEntry
-from core.db.models import Consolidation
+from core.db.models import Consolidation, FinancialFiling, XbrlIsinBasis, XbrlTaxonomy
 from core.timezones import IST
 from tests.factories import RELIANCE, make_fact
 
@@ -268,7 +268,32 @@ class TestDriftWatchlistWiring:
         as_of_time = datetime(2025, 1, 15, 12, 0, tzinfo=IST)
         period_end = date(2024, 12, 31)
 
-        # Add facts and a filing to enable drift computation
+        # Add a FinancialFiling record to enable drift computation
+        session.add(
+            FinancialFiling(
+                isin=RELIANCE,
+                isin_basis=XbrlIsinBasis.BHAVCOPY,
+                symbol="RELIANCE",
+                scrip_code=None,
+                consolidation=Consolidation.CONSOLIDATED,
+                taxonomy=XbrlTaxonomy.IND_AS,
+                reporting_quarter="Q4",
+                period_start=date(2024, 1, 1),
+                period_end=period_end,
+                board_meeting_date=as_of_time.date(),
+                facts_written=2,
+                facts_quarantined=0,
+                dimensional_facts_deferred=0,
+                rule_version="tests-1",
+                as_of=as_of_time,
+                content_hash="9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08",
+                source_url="https://example.test/filing.xml",
+                extracted_by="tests",
+                model_version=None,
+            )
+        )
+
+        # Add facts for drift computation
         session.add(
             make_fact(
                 isin=RELIANCE,
