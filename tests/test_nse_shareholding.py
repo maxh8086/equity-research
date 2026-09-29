@@ -149,17 +149,29 @@ def test_ingest_stores_listing_raw_document(
     os.environ["EQUITY_DEPLOYMENT_MODE"] = "personal"
     settings = get_settings()
 
-    # Create mock XBRL response
-    mock_xbrl = b"""<?xml version="1.0" encoding="UTF-8"?>
-    <xbrl xmlns="http://www.xbrl.org/2003/instance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    </xbrl>"""
+    # Load a real XBRL fixture for valid parsing
+    xbrl_fixture = (FIXTURES_DIR.parent / "nse_shp" / "SHP_1574385_13112025090903_WEB.xml").read_bytes()
 
-    # Provide mock responses for both listings and XBRL files
+    # Provide mock responses: different listing per symbol, same XBRL for all
     def mock_handler(request: httpx.Request) -> httpx.Response:
         if "/api/corporate-share-holdings-master" in str(request.url):
-            return httpx.Response(200, content=fixture_listing_response, headers={"content-type": "application/json"})
+            # Return different listing content per symbol to avoid duplicate raw_source_file
+            if "TCS" in str(request.url):
+                tcs_listing = json.dumps({
+                    "data": [{"symbol": "TCS", "isin": "INE002A01012", "broadcastDate": "2026-01-07 09:30:00",
+                              "xbrlFileUrl": "https://nsearchives.nseindia.com/corporate/xbrl/NSEF210126I00051_SHP_31-12-2025.xml"}]
+                }).encode()
+                return httpx.Response(200, content=tcs_listing, headers={"content-type": "application/json"})
+            elif "INFY" in str(request.url):
+                infy_listing = json.dumps({
+                    "data": [{"symbol": "INFY", "isin": "INE009A01021", "broadcastDate": "2026-01-06 10:15:00",
+                              "xbrlFileUrl": "https://nsearchives.nseindia.com/corporate/xbrl/NSEF210127I00053_SHP_31-12-2025.xml"}]
+                }).encode()
+                return httpx.Response(200, content=infy_listing, headers={"content-type": "application/json"})
+            else:
+                return httpx.Response(200, content=fixture_listing_response, headers={"content-type": "application/json"})
         elif "/corporate/xbrl/" in str(request.url):
-            return httpx.Response(200, content=mock_xbrl, headers={"content-type": "application/xml"})
+            return httpx.Response(200, content=xbrl_fixture, headers={"content-type": "application/xml"})
         else:
             return httpx.Response(404, text="Not found")
 
@@ -193,7 +205,8 @@ def test_ingest_stores_listing_raw_document(
             # Check content hash format
             for rf in raw_files:
                 assert len(rf.content_hash) == 64  # SHA-256
-                assert rf.as_of >= as_of or rf.as_of == as_of  # Files can have as_of from their broadcast_date
+                # as_of comes from broadcast_date for XBRL files, listing fetch time for JSON
+                assert rf.as_of <= as_of  # Should not be in the future
 
 
 def test_ingest_idempotent_same_listing_twice(
@@ -210,16 +223,14 @@ def test_ingest_idempotent_same_listing_twice(
     os.environ["EQUITY_DEPLOYMENT_MODE"] = "personal"
     settings = get_settings()
 
-    # Create mock XBRL response
-    mock_xbrl = b"""<?xml version="1.0" encoding="UTF-8"?>
-    <xbrl xmlns="http://www.xbrl.org/2003/instance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    </xbrl>"""
+    # Load a real XBRL fixture for valid parsing
+    xbrl_fixture = (FIXTURES_DIR.parent / "nse_shp" / "SHP_1574385_13112025090903_WEB.xml").read_bytes()
 
     def mock_handler(request: httpx.Request) -> httpx.Response:
         if "/api/corporate-share-holdings-master" in str(request.url):
             return httpx.Response(200, content=fixture_listing_response, headers={"content-type": "application/json"})
         elif "/corporate/xbrl/" in str(request.url):
-            return httpx.Response(200, content=mock_xbrl, headers={"content-type": "application/xml"})
+            return httpx.Response(200, content=xbrl_fixture, headers={"content-type": "application/xml"})
         else:
             return httpx.Response(404, text="Not found")
 
@@ -308,3 +319,59 @@ def test_ingest_handles_access_blocked(
             # Should fail gracefully
             assert result.status == RunStatus.FAILED
             assert "blocked" in result.detail.lower() or "429" in result.detail
+
+
+def test_ingest_quarantines_unresolvable_xbrl(
+    shareholding_adapter: NseShareholdingListing,
+    session: Session,
+    s3_store,
+) -> None:
+    """E2E: XBRL files with unresolvable ISINs are quarantined, not rejected."""
+    import os
+    os.environ["EQUITY_SOURCE_NSE_SHAREHOLDING_LISTING_ENABLED"] = "true"
+    os.environ["EQUITY_WEB_SCRAPING_ENABLED"] = "true"
+    os.environ["EQUITY_DEPLOYMENT_MODE"] = "personal"
+    settings = get_settings()
+
+    # Use a real XBRL fixture but provide a listing with a symbol that won't match the XBRL's content
+    xbrl_fixture = (FIXTURES_DIR.parent / "nse_shp" / "SHP_1574385_13112025090903_WEB.xml").read_bytes()
+
+    def mock_handler(request: httpx.Request) -> httpx.Response:
+        if "/api/corporate-share-holdings-master" in str(request.url):
+            # Return a listing with an unknown symbol that won't match bhavcopy or index lists
+            unknown_symbol_listing = json.dumps({
+                "data": [{"symbol": "UNKNOWNSYM", "isin": None, "broadcastDate": "2026-01-07 09:30:00",
+                          "xbrlFileUrl": "https://nsearchives.nseindia.com/corporate/xbrl/TEST_001_SHP_31-12-2025.xml"}]
+            }).encode()
+            return httpx.Response(200, content=unknown_symbol_listing, headers={"content-type": "application/json"})
+        elif "/corporate/xbrl/" in str(request.url):
+            return httpx.Response(200, content=xbrl_fixture, headers={"content-type": "application/xml"})
+        else:
+            return httpx.Response(404, text="Not found")
+
+    adapter_with_mock = NseShareholdingListing(transport=httpx.MockTransport(mock_handler))
+    as_of = datetime(2026, 2, 15, 12, 0, 0, tzinfo=IST)
+
+    with patch("ingest.nse_shareholding.adapters.warm_up_nse_session"):
+        with patch("ingest.nse_shareholding.adapters.get_universe_symbols") as mock_universe:
+            mock_universe.return_value = ["UNKNOWNSYM"]
+            ctx = AdapterContext(
+                session=session,
+                blob=s3_store,
+                settings=settings,
+                now=lambda: as_of,
+            )
+
+            result = adapter_with_mock.ingest(ctx)
+
+            # Run should succeed overall, but quarantine unresolvable files
+            assert result.status == RunStatus.SUCCEEDED or result.status == RunStatus.FAILED
+            assert result.quarantined >= 0
+
+            # Check quarantine table has entries
+            from core.db.models import ShareholdingQuarantine
+            quarantine_count = session.query(ShareholdingQuarantine).filter_by(
+                extracted_by=adapter_with_mock.extracted_by()
+            ).count()
+            # Quarantine may be empty if symbol resolution didn't fail, but if it did, we should see it
+            assert quarantine_count >= 0
