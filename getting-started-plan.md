@@ -101,7 +101,7 @@ Session 6 — validation
 ## Week 3 — First real signal
 
 Session 7c — corporate actions and ownership wiring (remainder)
-> The five ownership and catalyst tables, their adapters, the live NSE announcements adapter, the ownership rules, and the corporate_action lifecycle with dilution facts and the demerger chain are done (see `docs/finished.md`). What remains: use-of-proceeds extraction, written to `guidance_claim`; any ownership rule in CLAUDE.md not yet covered by `core/compute/ownership_rules.py`, and feeding it real holdings once they exist (the X and Y thresholds stay caller-supplied).
+> The five ownership and catalyst tables, their adapters, the live NSE announcements adapter, the ownership rules, and the corporate_action lifecycle with dilution facts and the demerger chain are done (see `docs/finished.md`). What remains: use-of-proceeds extraction, written to `guidance_claim`; and feeding the ownership rules (`ownership_rules.py`, `ownership_trends.py`) real holdings once a broker adapter exists (the X and Y thresholds stay caller-supplied). Still uncovered from CLAUDE.md: the minimum-public-shareholding sale filter and the monthly `mf_holding` early read, both blocked on data that is not stored yet.
 
 Session 7d — live shareholding listing ✅ recorded in [docs/finished.md](docs/finished.md)
 
