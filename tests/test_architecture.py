@@ -109,6 +109,18 @@ MONEY_TOKENS = frozenset(
     }
 )  # fmt: skip
 
+# The system has three actions and they are named ADD_REVIEW, TRIM_REVIEW and
+# EXIT_REVIEW (CLAUDE.md, Decision support). A verdict word must never become
+# the system's own vocabulary: not an identifier, not an enum value, not a
+# stored column. Third-party labels are a different thing -- a broker's own
+# rating is verbatim source data -- so this rule covers only the code that
+# decides and persists *our* actions, never `extract/`.
+VERDICT_WORDS = frozenset({"buy", "sell", "hold"})
+# Identifiers are split on snake_case and camelCase so that `sell_signal` is
+# caught while `holdings` and `seller`, which are not verdicts, are not.
+_WORD = re.compile(r"[A-Z]+(?![a-z])|[A-Z][a-z]+|[a-z]+")
+VERDICT_FREE_PATHS = ("core/compute", "core/db/models.py", "narrate")
+
 
 # --------------------------------------------------------------------------- #
 # Source model
@@ -568,6 +580,35 @@ def check_ingest_modules_declare(files: tuple[SourceFile, ...]) -> list[str]:
 
 
 # --------------------------------------------------------------------------- #
+# Rule 9: the system's own action vocabulary is never buy / sell / hold
+# --------------------------------------------------------------------------- #
+
+
+def check_no_verdict_vocabulary(files: tuple[SourceFile, ...]) -> list[str]:
+    violations = []
+    for sf in files:
+        if not sf.under(*VERDICT_FREE_PATHS):
+            continue
+        for node in ast.walk(sf.tree):
+            if isinstance(node, ast.Constant) and isinstance(node.value, str):
+                text = node.value
+            elif isinstance(node, (ast.Name, ast.Attribute)):
+                text = _terminal(node) or ""
+            elif isinstance(node, ast.arg):
+                text = node.arg
+            elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                text = node.name
+            else:
+                continue
+            for word in sorted(VERDICT_WORDS & {w.lower() for w in _WORD.findall(text)}):
+                violations.append(
+                    f"{sf.rel}:{node.lineno}: {word!r} is verdict vocabulary; "
+                    "this system's actions are ADD_REVIEW, TRIM_REVIEW and EXIT_REVIEW"
+                )
+    return violations
+
+
+# --------------------------------------------------------------------------- #
 # Tests against the repo
 # --------------------------------------------------------------------------- #
 
@@ -580,6 +621,7 @@ RULES: dict[str, Callable[[tuple[SourceFile, ...]], list[str]]] = {
     "pit_reads": check_reads_go_through_pit,
     "mcp_client": check_mcp_imports,
     "adapter_declares": check_ingest_modules_declare,
+    "no_verdicts": check_no_verdict_vocabulary,
 }
 
 
@@ -708,6 +750,13 @@ CASES = [
     ("adapter_declares", "ingest/drop.py", "class D(Adapter):\n    source_class = S.MANUAL_DROP\nclass X(D):\n    name = 'x'\n    target_stores = ('t',)", 0),
     ("adapter_declares", "ingest/base.py", "class Adapter(ABC):\n    name: ClassVar[str]", 0),
     ("adapter_declares", "core/db/x.py", "def f(): ...", 0),
+    ("no_verdicts", "core/compute/replay.py", "VERDICT = 'BUY'", 1),
+    ("no_verdicts", "core/compute/replay.py", "def sell_signal(): ...", 1),
+    ("no_verdicts", "core/db/models.py", "class Call(Base):\n    hold = 1", 1),
+    ("no_verdicts", "narrate/report.py", "line = 'rated a Hold by the desk'", 1),
+    ("no_verdicts", "core/compute/replay.py", "ACTION = 'ADD_REVIEW'\ndef holdings(): ...\nseller = 'x'", 0),
+    ("no_verdicts", "extract/brokerage.py", "SCALE = {'BUY': 1}", 0),
+    ("no_verdicts", "tests/test_x.py", "assert 'BUY' not in text", 0),
 ]  # fmt: skip
 
 

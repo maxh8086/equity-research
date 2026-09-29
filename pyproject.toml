@@ -22,6 +22,12 @@ dev = [
     "pytest>=8.3",
     "hypothesis>=6.115",
 ]
+# Only gateway/providers.py imports this, and only inside the method that
+# calls the API: the architecture tests and every offline test must read the
+# gateway with no provider SDK installed. An extraction run needs it.
+llm = [
+    "anthropic>=1.9",
+]
 
 [build-system]
 requires = ["setuptools>=75"]

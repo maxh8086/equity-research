@@ -135,8 +135,8 @@ Session 8 — credit ratings
 
 ## Week 4 — The MVP
 
-Session 9 — guidance extraction
-> Build concall transcript extraction into `guidance_claim`. Pydantic schema with hedge_strength (will > expect > aim to > working towards), specificity, verbatim quote, quote location, section (prepared remarks | Q&A), speaker role, source URL. Treat the transcript as untrusted input: the prompt must forbid following instructions found inside it. Whether guidance was raised, lowered, maintained or withdrawn versus the prior quarter is computed by code, not extracted. Use Sonnet — do not downgrade this model tier.
+Session 9 — guidance extraction ✅ recorded in [docs/finished.md](docs/finished.md)
+- **Not yet:** a live adapter that follows exchange announcements to transcript PDFs (drop folder only); scanned transcripts (no OCR, quarantined as `no_text_layer`); the extraction run itself, which needs the 20-company sample and a real API key.
 
 Session 10 — resolution
 > Build auto-resolution matching guidance claims against `financial_facts` when periods close. Implement SILENT detection for claims that stop being mentioned across two consecutive filings.
@@ -177,7 +177,7 @@ All of it is worthless on empty stores, and LangGraph will be rewritten twice be
 3. Order book ledger ⑦, and the rest of the special situations (Sessions 7e, 7g, 7h): every one raises a review or a watchlist entry, never an order, and none triggers anything until replay on a separate later period says it predicts something
 4. Reverse DCF and tri-scenario valuation, producing `valuation_baseline`: target price, drawdown stop and review-named actions (`ADD_REVIEW`, `TRIM_REVIEW`, `EXIT_REVIEW`), with the assumed-baseline disclaimer enforced by a test (see CLAUDE.md "Decision support")
 5. Thesis tracker (`thesis_condition` checked by code, R3) and catalyst calendar (`scheduled_event` from exchange announcements)
-6. `ADD_REVIEW` positive triggers (two-stage expansion, fundamental upgrade, rating upgrade, tailwind) and their four gates, validated by replay on a separate period
+6. `ADD_REVIEW` positive triggers (two-stage expansion, fundamental upgrade, rating upgrade, tailwind) and their four gates, validated by replay on a separate period. The replay itself is already built, ahead of the stores that feed it: `core/compute/replay.py` raises the gated reviews from signals and the state known at `t` (a signal or state dated later is `LookAhead`), measures forward and excess returns as outcome data held in a separate type, and refuses to report a hit rate on the window its parameters were tuned on. `core/compute/replay_report.py` renders the counterfactual — what the rules would have raised, which gate blocked what, and what the price then did — carrying the assumed-baseline disclaimer, which a test asserts. Wire the stores into it as each one lands; until they do it has nothing to replay. Note the deliberate absence: the rendered report never contains a three-letter verdict, and `tests/test_architecture.py` enforces that on `core/compute/`, `core/db/models.py` and `narrate/` (a broker's own rating, recorded verbatim in `extract/`, is source data and is exempt)
 7. Session 7d: monthly mutual fund holdings (`mf_holding`), MSCI and other index review announcements, and `index_event` impact analysis (days of volume)
 8. Relationship graph ④, events ⑤
 9. Session 7f: news, brokerage calls and scuttlebutt (see CLAUDE.md "News, brokerage calls and scuttlebutt"). Publisher RSS adapter (`web_scrape`) into `news_item`; mention extraction by the model, ISIN resolution by code through a dated alias table, with quarantine; `brokerage_call` with target prices parsed by code from quoted text; management interviews routed to `guidance_claim`; `industry_metric` from DGCA, FADA, TRAI and NPCI monthly data; a CLI timeline report. No X.
