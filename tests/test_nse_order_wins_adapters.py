@@ -92,7 +92,7 @@ def _ctx(session, s3_store, *, settings: Settings | None = None, now: datetime =
 
 def _store_listing(ctx: AdapterContext, rows: list[dict], *, as_of: datetime, tag: str = "") -> None:
     """What the 7c adapter leaves behind: the raw API response, recorded in raw_source_file."""
-    payload = json.dumps({"data": rows, "tag": tag}).encode()
+    payload = json.dumps({"data": rows, "pagination": {"tag": tag}}).encode()
     NseAnnouncements().store_raw(
         ctx, data=payload, source_url=LISTING_URL, as_of=as_of, media_type="application/json"
     )
@@ -243,7 +243,7 @@ def test_malformed_raw_file_fails_the_run_but_good_files_are_still_read(session,
 
 def test_only_reads_the_announcement_adapters_raw_files(session, s3_store):
     ctx = _ctx(session, s3_store)
-    payload = json.dumps({"data": [GOOD], "tag": "other-source"}).encode()
+    payload = json.dumps({"data": [GOOD], "pagination": {"tag": "other-source"}}).encode()
     NseOrderWins().store_raw(
         ctx, data=payload, source_url="other", as_of=datetime(2026, 5, 4, 16, 0, tzinfo=IST),
         media_type="application/json",
