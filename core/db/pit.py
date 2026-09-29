@@ -1,10 +1,11 @@
 """Point-in-time reads. Every read takes an explicit `as_of`; there is no default."""
 
 from collections.abc import Collection, Iterable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from enum import StrEnum
+from typing import Literal
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -36,6 +37,24 @@ from core.compute.guidance import (
     Unit,
     compare_claims,
     compare_hedges,
+)
+from core.compute.guidance_resolution import (
+    METRIC_RESOLVERS,
+    Basis,
+    ClaimOutcome,
+    DeliveryRate,
+    Fact,
+    PeriodKey,
+    Resolution,
+    Status,
+    TranscriptMentions,
+    UnresolvableReason,
+    claim_key,
+    delivery_rate,
+    detect_silent,
+    period_resolved,
+    resolve_claim,
+    select_claims,
 )
 from core.compute.price_crosscheck import Bar, Mismatch, crosscheck
 from core.db.models import (
@@ -1677,6 +1696,209 @@ def guidance_directions_as_of(
         out.append(GuidanceDirection(current=row, previous=previous, direction=direction, hedge_change=hedge_change))
         chains[key] = row
     return out
+
+
+# --------------------------------------------------------------------------- #
+# Guidance graded against what was reported, and what management stopped saying
+# --------------------------------------------------------------------------- #
+
+# Every line item any resolver reads: the only facts worth fetching.
+_RESOLVER_LINE_ITEMS = tuple(
+    sorted({need.line_item for resolver in METRIC_RESOLVERS.values() for need in resolver.needs})
+)
+
+
+def _resolver_facts(session: Session, *, isin: str, as_of: datetime) -> list[Fact]:
+    """The Ind AS line items the resolvers read, one current version per key, as known at `as_of`.
+
+    Both bases are returned, each fact tagged with its own; resolve_claim picks
+    one. Only facts from a filing whose taxonomy is in ratios.APPLICABLE_FAMILIES
+    are kept, exactly as ratios_as_of does: a bank or an insurer files other
+    line items, and a same-named element in another family must not be graded
+    against. A fact whose filing is not known at `as_of` is dropped with them.
+    """
+    rows = [
+        row
+        for consolidation in Consolidation
+        for row in facts_as_of(
+            session, isin=isin, consolidation=consolidation, as_of=as_of, line_items=_RESOLVER_LINE_ITEMS
+        )
+    ]
+    if not rows:
+        return []
+    f = FinancialFiling
+    families = {
+        digest: taxonomy
+        for digest, taxonomy in session.execute(
+            select(f.content_hash, f.taxonomy)
+            .where(f.isin == isin, f.content_hash.in_({row.content_hash for row in rows}), f.as_of <= as_of)
+            .distinct()
+        ).tuples()
+    }
+    return [
+        Fact(
+            line_item=row.line_item,
+            period_start=row.period_start,
+            period_end=row.period_end,
+            value=row.value,
+            basis=Basis(row.consolidation.value),
+        )
+        for row in rows
+        if families.get(row.content_hash) in ratios.APPLICABLE_FAMILIES
+    ]
+
+
+def _files_only_outside_ind_as(session: Session, *, isin: str, as_of: datetime) -> bool:
+    """Whether every filing of `isin` known at `as_of` is of a family the resolvers do not read."""
+    f = FinancialFiling
+    taxonomies = set(session.scalars(select(f.taxonomy).where(f.isin == isin, f.as_of <= as_of).distinct()))
+    return bool(taxonomies) and not taxonomies & ratios.APPLICABLE_FAMILIES
+
+
+@dataclass(frozen=True)
+class GuidanceResolution:
+    """One claim and how it stands against what was reported by the read `as_of`.
+
+    Not a stored column. Whether a claim is open, met or missed depends on
+    which facts were public when it is read, so a stored answer would freeze
+    one reading of history and quietly become look-ahead (R2).
+    """
+
+    claim: GuidanceClaim
+    resolution: Resolution
+
+
+def guidance_resolutions_as_of(
+    session: Session, *, isin: str, as_of: datetime, metric: str | None = None
+) -> list[GuidanceResolution]:
+    """Whether each claim `isin` had made by `as_of` was met, missed, still open, or cannot be graded.
+
+    Computed here by core/compute/guidance_resolution.py, never extracted and
+    never stored (R1, R2). The grade depends on which facts were public at
+    `as_of`: the same claim is OPEN before the results, MET or MISSED after
+    them, and a restatement filed later changes the grade of a read made
+    after it and of no read made before. Every read is filtered to rows with
+    as_of at or before the read; nothing newer is looked at.
+
+    Facts are the latest version per key at `as_of` (facts_as_of), Ind AS
+    filings only. For ALREADY_KNOWN_WHEN_MADE the facts are read a second time
+    as of the claim's own `as_of`, to see whether the answer already existed.
+    Claims are those of the extraction that stands for each transcript
+    (guidance_claims_as_of), so a re-extraction is not counted twice. Oldest
+    first, every claim: a reiteration is graded on its own, and which ones
+    feed a delivery rate is the choice of guidance_delivery_as_of.
+
+    Data gaps, none repaired (R3): balance-sheet and cash-flow facts may not
+    be stored for a quarter, so a claim on one stays OPEN. A company whose
+    filings known at `as_of` are all of another taxonomy family (a bank, an
+    NBFC, an insurer) has no Ind AS line items to grade against: an
+    otherwise-OPEN claim is then UNRESOLVABLE with METRIC_NOT_IN_XBRL, since
+    waiting will not help. Before it has filed anything, it is OPEN.
+    """
+    claims = guidance_claims_as_of(session, isin=isin, as_of=as_of, metric=metric)
+    if not claims:
+        return []
+    facts = _resolver_facts(session, isin=isin, as_of=as_of)
+    outside_ind_as = _files_only_outside_ind_as(session, isin=isin, as_of=as_of)
+    when_made: dict[datetime, list[Fact]] = {as_of: facts}
+    out: list[GuidanceResolution] = []
+    for row in claims:
+        if row.as_of not in when_made:
+            when_made[row.as_of] = _resolver_facts(session, isin=isin, as_of=row.as_of)
+        resolution = resolve_claim(_comparable(row), facts, facts_when_made=when_made[row.as_of])
+        if outside_ind_as and resolution.status is Status.OPEN:
+            resolution = replace(
+                resolution, status=Status.UNRESOLVABLE, reason=UnresolvableReason.METRIC_NOT_IN_XBRL
+            )
+        out.append(GuidanceResolution(row, resolution))
+    return out
+
+
+@dataclass(frozen=True)
+class GuidanceSilence:
+    """One claim, its resolution, and whether management has since dropped it.
+
+    Not a stored column, for the reason GuidanceResolution is not: silence is
+    a fact about the calls public at the read `as_of`.
+    """
+
+    claim: GuidanceClaim
+    resolution: Resolution
+    silent: bool
+
+
+def _with_silence(
+    session: Session, *, isin: str, as_of: datetime, resolved: Sequence[GuidanceResolution]
+) -> list[GuidanceSilence]:
+    transcripts = concall_transcripts_as_of(session, isin=isin, as_of=as_of)
+    current = _current_extractions(transcripts)
+    by_id = {row.id: row for row in transcripts}
+    said: dict[tuple[str, datetime], set[tuple[str, PeriodKey]]] = {key: set() for key in current}
+    for item in resolved:
+        claim = item.claim
+        said[(claim.content_hash, claim.as_of)].add(claim_key(claim.metric, claim.period_label))
+    calls = [
+        TranscriptMentions(
+            call_date=by_id[transcript_id].call_date,
+            mentions=frozenset(said[key]),
+            clean=by_id[transcript_id].claims_quarantined == 0,
+        )
+        for key, transcript_id in current.items()
+    ]
+    out = []
+    for item in resolved:
+        claim = item.claim
+        metric, key = claim_key(claim.metric, claim.period_label)
+        later = [call for call in calls if call.call_date > claim.call_date]
+        silent = detect_silent(metric, key, later, resolved=period_resolved(item.resolution))
+        out.append(GuidanceSilence(claim, item.resolution, silent))
+    return out
+
+
+def guidance_silence_as_of(session: Session, *, isin: str, as_of: datetime) -> list[GuidanceSilence]:
+    """Which claims management had dropped by `as_of`: unsettled, and absent from the calls since.
+
+    Computed here by core/compute/guidance_resolution.py, never extracted and
+    never stored (R1, R2). A claim is silent once its period is not settled
+    (see period_resolved) and each of the next rule.consecutive_calls later
+    calls, all public at `as_of`, is clean and does not mention its metric
+    and period. It is not silent before the last of those calls is published,
+    whatever its call date: a read at t may not use a call filed after t. A
+    call with quarantined claims cannot establish absence.
+
+    Later means a call date strictly after the claim's own call. Each call is
+    the extraction that stands for its transcript (see _current_extractions),
+    so a re-extraction is not counted twice and the earlier run's claims do
+    not count as mentions. Oldest claim first, as guidance_resolutions_as_of.
+    """
+    resolved = guidance_resolutions_as_of(session, isin=isin, as_of=as_of)
+    return _with_silence(session, isin=isin, as_of=as_of, resolved=resolved)
+
+
+def guidance_delivery_as_of(
+    session: Session, *, isin: str, as_of: datetime, basis: Literal["first", "last"] = "first"
+) -> DeliveryRate:
+    """How much of what `isin` guided, by `as_of`, it delivered: the hedge-weighted share of graded claims met.
+
+    Computed here by core/compute/guidance_resolution.py, never extracted and
+    never stored (R1, R2): both the grades and the silence behind it depend on
+    what was public at `as_of`, so a stored rate would be look-ahead by
+    construction.
+
+    One claim per (metric, period) feeds the rate: the first, the original
+    promise, by default, or the last with basis="last" (select_claims says why
+    the first is the default). Only MET and MISSED are in the rate. OPEN,
+    UNRESOLVABLE and SILENT are counted apart and are not misses; whether
+    silence should count against management is an open research question.
+    """
+    resolved = guidance_resolutions_as_of(session, isin=isin, as_of=as_of)
+    rows = _with_silence(session, isin=isin, as_of=as_of, resolved=resolved)
+    comparable = [_comparable(item.claim) for item in rows]
+    by_claim = {id(c): item for c, item in zip(comparable, rows, strict=True)}
+    chosen = select_claims(comparable, basis)
+    return delivery_rate(
+        ClaimOutcome(by_claim[id(c)].resolution.status, c.hedge, by_claim[id(c)].silent) for c in chosen
+    )
 
 
 def guidance_quarantine_as_of(session: Session, *, as_of: datetime) -> list[GuidanceQuarantine]:
