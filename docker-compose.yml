@@ -42,10 +42,21 @@ services:
       timeout: 5s
       retries: 20
 
-  # MinIO no longer publishes images to Docker Hub; quay.io still hosts them.
-  # Pinned by digest (RELEASE.2025-09-07T16-13-09Z).
+  # MinIO publishes its images nowhere we can read any more: it left Docker Hub
+  # in 2025, then quay.io withdrew anonymous pulls of minio/* on 2026-09-24
+  # (every tag, including latest, answers 401 -- the anonymous token is granted
+  # but carries no actions). Both images are therefore mirrored into our own
+  # Docker Hub namespace, which also keeps a third-party registry off the
+  # critical path of every CI run. docs/minio-image-mirror.md covers how the
+  # mirror was made and how to refresh it.
+  #
+  # Pinned by digest, because the write-once bucket design in core/blob.py
+  # depends on the image being immutable. These digests are NOT the quay ones:
+  # the mirror is a single linux/amd64 manifest, not quay's multi-arch index.
+  # Same release either way: RELEASE.2025-09-07T16-13-09Z.
+  # amd64 only -- an arm64 host needs the mirror re-pushed for its platform.
   blob:
-    image: quay.io/minio/minio@sha256:14cea493d9a34af32f524e538b8346cf79f3321eff8e708c1e2960462bd8936e
+    image: docker.io/maxh8086/minio@sha256:a1a8bd4ac40ad7881a245bab97323e18f971e4d4cba2c2007ec1bedd21cbaba2
     command: ["server", "/data"]
     environment:
       MINIO_ROOT_USER: equity
@@ -64,7 +75,7 @@ services:
   # default GOVERNANCE retention, so stored source bytes cannot be deleted.
   # Wiping local blobs means removing the blobdata volume.
   blob-init:
-    image: quay.io/minio/mc@sha256:a7fe349ef4bd8521fb8497f55c6042871b2ae640607cf99d9bede5e9bdf11727
+    image: docker.io/maxh8086/mc@sha256:eb4ea9884b77704230e2423e9004d2fa738dc272876b9cc41a297d29443b8780
     depends_on:
       blob:
         condition: service_healthy

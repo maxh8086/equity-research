@@ -547,3 +547,17 @@ If I ask for any of these, say no and explain:
 - Running any `web_scrape` adapter in `commercial` mode
 - Scraping X (Twitter) or automating a logged-in social-media session
 - Letting a model assign a company or ISIN to a news mention — violates R1
+
+## Ideas backlog: when to read `docs/revisit.md`
+
+`docs/revisit.md` holds ideas collected from other repositories. It is not part
+of the build and not a task list. Do not read it, plan from it, or pull items
+from it until every task in this file is finished: the four MVP steps under
+Current phase. Once they are done, the backlog gets one planning pass, with the
+user; nothing in it is planned before then.
+
+When a task finishes, clean up in the same change: remove it from
+`getting-started-plan.md` and any other task or plan file, and add it to
+[docs/finished.md](docs/finished.md) with its design notes. A decision that
+governs future work also goes into the doc that owns it (for example
+`docs/temporal-model.md`) or this file.
