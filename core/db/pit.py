@@ -58,6 +58,8 @@ from core.db.models import (
     IndexSnapshotQuarantine,
     NseBhavcopyQuarantine,
     NseBhavcopyRow,
+    RatingAction,
+    RatingAgency,
     RatioBasis,
     RawSourceFile,
     ScreenerExport,
@@ -1787,4 +1789,52 @@ def watchlist_entries_as_of(
             .where(we.isin == isin, we.as_of <= t)
             .order_by(we.opened_date, we.id)
         )
+    )
+
+
+# ---------------------------------------------------------------------------
+# Credit rating actions
+# ---------------------------------------------------------------------------
+
+
+def rating_actions_as_of(
+    session: Session,
+    *,
+    isin: str,
+    t: datetime,
+) -> list[RatingAction]:
+    """All rating actions for `isin` whose action_date is visible at `t`, oldest first.
+
+    `t` is an aware datetime; rows with `as_of <= t` are included (R2).
+    """
+    require_aware(t, "t")
+    ra = RatingAction
+    return list(
+        session.scalars(
+            select(ra)
+            .where(ra.isin == isin, ra.as_of <= t)
+            .order_by(ra.action_date, ra.id)
+        )
+    )
+
+
+def latest_rating_as_of(
+    session: Session,
+    *,
+    isin: str,
+    agency: RatingAgency,
+    t: datetime,
+) -> RatingAction | None:
+    """The most recent rating action for (isin, agency) visible at `t`, or None.
+
+    "Most recent" means the row with the latest `action_date`, with `id` as
+    the tiebreaker (insertion order within the same day).
+    """
+    require_aware(t, "t")
+    ra = RatingAction
+    return session.scalar(
+        select(ra)
+        .where(ra.isin == isin, ra.agency == agency, ra.as_of <= t)
+        .order_by(ra.action_date.desc(), ra.id.desc())
+        .limit(1)
     )

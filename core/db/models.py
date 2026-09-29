@@ -4,6 +4,7 @@ from enum import StrEnum
 
 from sqlalchemy import (
     BigInteger,
+    Boolean,
     CheckConstraint,
     Date,
     DateTime,
@@ -20,6 +21,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from core.compute.guidance import ClaimSection, HedgeStrength, Specificity, Unit
+from core.compute.ratings import CommonRatingScale, RatingAgency, RatingOutlook
 from core.db.base import Base, ProvenanceMixin
 from core.timezones import require_aware
 
@@ -1355,4 +1357,59 @@ class WatchlistEntry(ProvenanceMixin, Base):
         ),
         Index("ix_watchlist_entry_isin_status", "isin", "status"),
         Index("ix_watchlist_entry_status_date", "status", "status_date"),
+    )
+
+
+# --- Credit rating actions (session 8) ---
+
+
+class RatingAction(ProvenanceMixin, Base):
+    """Store ⑧: Credit rating actions (CRISIL/ICRA/CARE/India Ratings/Brickwork/Acuite).
+
+    `action_date` is the date the agency published the rating action.
+    `raw_rating` is the verbatim string from the agency; `common_scale` is the
+    normalised equivalent. `severity` and direction flags are computed by code,
+    never by a model (R1). `evidence_url` is required on every row (CLAUDE.md).
+    Append-only.
+    """
+
+    __tablename__ = "rating_action"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    agency: Mapped[RatingAgency] = mapped_column(
+        _pg_enum(RatingAgency, "rating_agency"), nullable=False
+    )
+    instrument_type: Mapped[str] = mapped_column(Text, nullable=False)
+    raw_rating: Mapped[str] = mapped_column(Text, nullable=False)
+    common_scale: Mapped[CommonRatingScale] = mapped_column(
+        _pg_enum(CommonRatingScale, "common_rating_scale"), nullable=False
+    )
+    outlook: Mapped[RatingOutlook | None] = mapped_column(
+        _pg_enum(RatingOutlook, "rating_outlook"), nullable=True
+    )
+    action_date: Mapped[date] = mapped_column(Date, nullable=False)
+    severity: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_upgrade: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    is_downgrade: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    is_withdrawn: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    evidence_url: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_rating_action_isin_format"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_rating_action_no_model"),
+        CheckConstraint(
+            "evidence_url IS NOT NULL AND evidence_url != ''",
+            name="ck_rating_action_evidence_url_required",
+        ),
+        CheckConstraint(
+            "severity BETWEEN 1 AND 5", name="ck_rating_action_severity_range"
+        ),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_rating_action_content_hash_sha256"
+        ),
+        Index("ix_rating_action_isin_date", "isin", "action_date"),
     )
