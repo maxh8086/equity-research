@@ -1,0 +1,43 @@
+{
+  "data": [
+    {
+      "subject": "Board Meeting to be held on 15-Feb-2026",
+      "description": "The Board of Directors will hold a meeting on 15-Feb-2026 to consider and approve the quarterly financial results for the quarter ended 31-Dec-2025",
+      "announced_on": "2026-01-10 10:15:00",
+      "isin": "INE002A01012",
+      "symbol": "TCS"
+    },
+    {
+      "subject": "Results for Quarter Ended 31-Dec-2025",
+      "description": "Results of the quarter ended 31-Dec-2025 approved by Board",
+      "announced_on": "2026-02-15 15:30:00",
+      "isin": "INE002A01012",
+      "symbol": "TCS"
+    },
+    {
+      "subject": "Annual General Meeting scheduled for 28-Mar-2026",
+      "description": "Annual General Meeting to be held on 28-Mar-2026",
+      "announced_on": "2026-02-20 14:00:00",
+      "isin": "INE002A01012",
+      "symbol": "TCS"
+    },
+    {
+      "subject": "Share buyback program approval",
+      "description": "Board approves buyback of equity shares",
+      "announced_on": "2026-03-01 11:45:00",
+      "isin": "INE002A01012",
+      "symbol": "TCS"
+    },
+    {
+      "subject": "Miscellaneous announcement",
+      "description": "No event date mentioned in this announcement",
+      "announced_on": "2026-02-15 16:00:00",
+      "isin": "INE002A01012",
+      "symbol": "TCS"
+    }
+  ],
+  "pagination": {
+    "totalPages": 1,
+    "totalRecords": 5
+  }
+}
