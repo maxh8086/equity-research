@@ -1257,3 +1257,102 @@ class GuidanceQuarantine(ProvenanceMixin, Base):
         ),
         Index("ix_guidance_quarantine_pit", "as_of"),
     )
+
+
+# --- S7b technical screens ---
+
+
+class TechnicalSignalType(StrEnum):
+    VOLUME_SPIKE_UP = "volume_spike_up"
+    VOLUME_SPIKE_DOWN = "volume_spike_down"
+    CONSOLIDATION_BREAKOUT = "consolidation_breakout"
+    CONSOLIDATION_BREAKDOWN = "consolidation_breakdown"
+    ATH_BREAKOUT = "ath_breakout"
+
+
+class TechnicalSignal(ProvenanceMixin, Base):
+    """Store ⑩: technical signals computed by code from adjusted daily closes.
+
+    All prices passed in must already be adjusted for corporate actions.
+    Severity and type are always computed by code (R1). Append-only,
+    enforced by a DB trigger. No model writes to this table.
+    `rule_version` tags every parameter set.
+    """
+
+    __tablename__ = "technical_signal"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    signal_type: Mapped[TechnicalSignalType] = mapped_column(
+        _pg_enum(TechnicalSignalType, "technical_signal_type"), nullable=False
+    )
+    signal_date: Mapped[date] = mapped_column(Date, nullable=False)
+    close_price: Mapped[Decimal] = mapped_column(Numeric(20, 4), nullable=False)
+    volume: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    volume_median_50d: Mapped[Decimal | None] = mapped_column(Numeric(20, 4), nullable=True)
+    price_return_1d: Mapped[Decimal | None] = mapped_column(Numeric(10, 6), nullable=True)
+    consolidation_start: Mapped[date | None] = mapped_column(Date, nullable=True)
+    consolidation_high: Mapped[Decimal | None] = mapped_column(Numeric(20, 4), nullable=True)
+    consolidation_low: Mapped[Decimal | None] = mapped_column(Numeric(20, 4), nullable=True)
+    ath_since: Mapped[date | None] = mapped_column(Date, nullable=True)
+    adjustment_factor: Mapped[Decimal] = mapped_column(Numeric(20, 10), nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_technical_signal_isin_format"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_technical_signal_no_model"),
+        CheckConstraint("close_price > 0", name="ck_technical_signal_close_price_positive"),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_technical_signal_content_hash_sha256"
+        ),
+        UniqueConstraint(
+            "isin", "signal_type", "signal_date", "rule_version",
+            name="uq_technical_signal_version",
+        ),
+        Index("ix_technical_signal_isin_date", "isin", "signal_date"),
+    )
+
+
+class WatchlistEntryStatus(StrEnum):
+    OPEN = "open"
+    PROMOTED = "promoted"
+    EXPIRED = "expired"
+    INVALIDATED = "invalidated"
+
+
+class WatchlistEntry(ProvenanceMixin, Base):
+    """Store ⑪: watchlist entries opened by technical signals.
+
+    A technical signal only opens an entry; promotion to ADD_REVIEW requires
+    the ADD_REVIEW gates (CLAUDE.md Decision support). No model writes to
+    this table. Append-only, enforced by a DB trigger.
+    """
+
+    __tablename__ = "watchlist_entry"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    status: Mapped[WatchlistEntryStatus] = mapped_column(
+        _pg_enum(WatchlistEntryStatus, "watchlist_entry_status"), nullable=False
+    )
+    opened_by_signal_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("technical_signal.id"), nullable=False
+    )
+    opened_date: Mapped[date] = mapped_column(Date, nullable=False)
+    status_date: Mapped[date] = mapped_column(Date, nullable=False)
+    invalidation_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_watchlist_entry_isin_format"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_watchlist_entry_no_model"),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_watchlist_entry_content_hash_sha256"
+        ),
+        Index("ix_watchlist_entry_isin_status", "isin", "status"),
+        Index("ix_watchlist_entry_status_date", "status", "status_date"),
+    )

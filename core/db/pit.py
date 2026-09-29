@@ -67,6 +67,8 @@ from core.db.models import (
     ShareholdingQuarantine,
     UpstoxCandle,
     UpstoxCandleQuarantine,
+    TechnicalSignal,
+    WatchlistEntry,
 )
 from core.timezones import IST, require_aware
 
@@ -1745,3 +1747,44 @@ def guidance_quarantine_review_as_of(
             )
         entries.append(GuidanceQuarantineEntry(row, resolved))
     return entries
+
+
+# --- S7b technical screens ---
+
+
+def technical_signals_as_of(
+    session: Session, *, isin: str, t: datetime
+) -> list[TechnicalSignal]:
+    """Technical signal rows for `isin` with as_of <= `t`, oldest first.
+
+    All rows for all signal types are returned (filter by signal_type in the
+    caller if needed). Uses only data visible at `t` (R2).
+    """
+    require_aware(t, "t")
+    ts = TechnicalSignal
+    return list(
+        session.scalars(
+            select(ts)
+            .where(ts.isin == isin, ts.as_of <= t)
+            .order_by(ts.signal_date, ts.id)
+        )
+    )
+
+
+def watchlist_entries_as_of(
+    session: Session, *, isin: str, t: datetime
+) -> list[WatchlistEntry]:
+    """Watchlist entries for `isin` with as_of <= `t`, oldest first.
+
+    All lifecycle statuses are returned (filter by status in the caller).
+    Uses only data visible at `t` (R2).
+    """
+    require_aware(t, "t")
+    we = WatchlistEntry
+    return list(
+        session.scalars(
+            select(we)
+            .where(we.isin == isin, we.as_of <= t)
+            .order_by(we.opened_date, we.id)
+        )
+    )
