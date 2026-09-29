@@ -67,7 +67,7 @@ def disc(kind, day=date(2026, 1, 10)):
 
 class TestContract:
     def test_rule_version_and_frozen_fact(self):
-        assert RULE_VERSION == "ownership_trends/1"
+        assert RULE_VERSION == "ownership_trends/2"
         f = OwnershipFact(
             isin=ISIN, fact_type="x", direction="inflow", severity="low", event_date=Q[0],
             value=None, detail="d", flags=(), evidence=("e",), rule_version=RULE_VERSION,
@@ -79,8 +79,8 @@ class TestContract:
         for fn, names in [
             (promoter_open_market_flow, {"window_days", "inflow_threshold_quantity"}),
             (fii_dii_trend, {"n_quarters"}),
-            (pledged_pct_change_facts, {"y_points"}),
-            (promoter_sale_pct_of_stake_facts, {"x_pct"}),
+            (pledged_pct_change_facts, {"y_points", "as_of_date", "management_updates"}),
+            (promoter_sale_pct_of_stake_facts, {"x_pct", "as_of_date", "window_days"}),
             (promoter_selling_before_results, {"window_days", "min_trades"}),
         ]:
             params = inspect.signature(fn).parameters
@@ -238,7 +238,9 @@ class TestPledgeEvents:
 
 class TestPledgedPctChange:
     def run(self, facts, y="5", holdings=HELD):
-        return pledged_pct_change_facts(facts, isin=ISIN, y_points=D(y), holdings=holdings)
+        return pledged_pct_change_facts(
+            facts, isin=ISIN, y_points=D(y), holdings=holdings, as_of_date=Q[4], management_updates=()
+        )
 
     def test_rise_above_y_for_a_holding_is_critical_with_exit_review(self):
         facts = promoter(Q[0], 1000, 100) + promoter(Q[1], 1000, 200)  # 10% -> 20%
@@ -281,7 +283,8 @@ class TestPledgedPctChange:
 class TestPromoterSalePctOfStake:
     def run(self, trades, facts, x="10", holdings=HELD):
         return promoter_sale_pct_of_stake_facts(
-            trades, facts, isin=ISIN, x_pct=D(x), holdings=holdings
+            trades, facts, isin=ISIN, x_pct=D(x), holdings=holdings,
+            as_of_date=date(2026, 3, 31), window_days=365,
         )  # fmt: skip
 
     stake = promoter(date(2025, 12, 31), 1000, 0)
@@ -290,7 +293,7 @@ class TestPromoterSalePctOfStake:
         out = self.run([trade(date(2026, 1, 20), "-150")], self.stake)
         assert len(out) == 1
         f = out[0]
-        assert f.fact_type == "promoter_sale_above_x" and f.value == D("15")
+        assert f.fact_type == "promoter_cumulative_sale_above_x" and f.value == D("15")
         assert f.severity == "critical" and f.flags == ("CRITICAL", "EXIT_REVIEW")
 
     def test_at_or_below_x_is_no_fact(self):
