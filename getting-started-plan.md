@@ -74,13 +74,13 @@ Session 4b — shareholding pattern
 Session 5 — ratios
 > Implement ratio computation in `core/compute/ratios.py`. Pure functions, Decimal throughout, property tests. ROCE, margins, debt ratios, incremental ROCE.
 
-- **5 — ratios** ✅ `core/compute/ratios.py` (rule `ratios/1`): operating, EBIT and net margins and interest cover for every reported period; gross and net debt to equity for every balance-sheet date; ROCE on average capital employed (opening and closing balance sheets) and incremental ROCE against the fiscal year three years earlier, for fiscal years only. Ratios are fractions; a zero or negative denominator is undefined (None), never zero or infinite. `core.db.pit.ratios_as_of` computes them at read time from the facts known at `t`, so nothing is stored and a restatement changes a ratio only from when it was known. Each value carries its input facts; a gap is `not_applicable`, `missing_input` (naming the absent facts), `undefined` or `invalid_input`. Only Ind AS non-financial filings are covered: for NBFCs, banks and insurers, finance costs are the cost of the product. Companies' own reported ratios are never used (TATASTEEL tags a debt-equity ratio of 0.01).
+- **5 — ratios** ✅ recorded in [docs/finished.md](docs/finished.md).
 - **Check in Session 6:** Screener counts lease liabilities as borrowings, which results XBRL does not tag separately; whether Screener uses average or closing capital employed; whether its equity and net profit include non-controlling interests. Changing any of these is a new rule version. **Not yet:** ratios for banks, NBFCs and insurers (ROE, NIM, cost to income).
 
 Session 6 — validation
 > Build a validation script comparing our computed ratios against Screener for the 20-company validation sample (10 Nifty 50 + 10 Next 50, fixed seed, required company types swapped in; see CLAUDE.md "Current phase"). Report divergences with the underlying line items.
 
-- **6a — Screener template** ✅ merged Screener Excel template generator (d095d6d).
+- 6a (Screener template) is recorded in [docs/finished.md](docs/finished.md).
 - **6 — validation tooling** ✅, **gate not yet run** (needs data):
   - **Sample:** `validate/samples.py` `validation-sample/1`, frozen by a test. Seeded SHA-256 draw (`core/compute/sample.py`) over the NSE archive lists published by 2026-09-19. One swap, KOTAKBANK → SBILIFE, with its reason: no insurer was drawn, and the universe has no general insurer. `python -m validate sample` redraws from the recorded lists in the database. It draws from one list, not from computed membership, which is uncertain after the last list.
   - **Screener adapter:** `screener_export_drop` (`manual_drop`) stores hand-exported Screener workbooks. `screener_export` / `screener_value` are append-only, in absolute rupees. The sidecar names the ISIN and consolidation. The ISIN is checked against the constituent lists at export time, and every period must end before the export.
