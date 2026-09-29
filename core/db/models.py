@@ -19,6 +19,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, validates
 
+from core.compute.guidance import ClaimSection, HedgeStrength, Specificity, Unit
 from core.db.base import Base, ProvenanceMixin
 from core.timezones import require_aware
 
@@ -934,4 +935,254 @@ class ShareholdingQuarantine(ProvenanceMixin, Base):
         CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_shareholding_quarantine_content_hash_sha256"),
         CheckConstraint("model_version IS NULL", name="ck_shareholding_quarantine_no_model"),
         Index("ix_shareholding_quarantine_pit", "as_of"),
+    )
+
+
+# --------------------------------------------------------------------------- #
+# Store 2: guidance claims from concall transcripts
+# --------------------------------------------------------------------------- #
+
+
+class GuidanceIssueReason(StrEnum):
+    """Why a transcript or a claim was held back. Every one is a check by code."""
+
+    # Whole document: nothing from it enters a store
+    SHAPE_CHANGED = "shape_changed"
+    SCHEMA_REJECTED = "schema_rejected"
+    ISIN_UNRESOLVED = "isin_unresolved"
+    ISIN_CONFLICT = "isin_conflict"
+    IMPLAUSIBLE_AS_OF = "implausible_as_of"
+    NO_TEXT_LAYER = "no_text_layer"
+    # One claim: the rest of the document is stored
+    QUOTE_NOT_IN_TRANSCRIPT = "quote_not_in_transcript"
+    QUOTE_AMBIGUOUS = "quote_ambiguous"
+    VALUE_NOT_IN_QUOTE = "value_not_in_quote"
+    HEDGE_NOT_IN_QUOTE = "hedge_not_in_quote"
+    UNMAPPED_HEDGE = "unmapped_hedge"
+    UNMAPPED_METRIC = "unmapped_metric"
+    VALUE_UNPARSED = "value_unparsed"
+    SECTION_MISMATCH = "section_mismatch"
+    NOT_FORWARD_LOOKING = "not_forward_looking"
+
+
+GUIDANCE_ISSUE_REASON = _pg_enum(GuidanceIssueReason, "guidance_issue_reason")
+HEDGE_STRENGTH = _pg_enum(HedgeStrength, "hedge_strength")
+CLAIM_SECTION = _pg_enum(ClaimSection, "claim_section")
+CLAIM_SPECIFICITY = _pg_enum(Specificity, "claim_specificity")
+CLAIM_UNIT = _pg_enum(Unit, "claim_unit")
+
+
+class ConcallDocument(ProvenanceMixin, Base):
+    """One transcript file, as text, before any model has read it.
+
+    The ingest half of store 2, and the reason the model half is cheap to
+    redo: this row says which company and which call a stored PDF belongs to,
+    decided by code from the drop file's name and the dated symbol -> ISIN
+    reads (R1). `concall_transcript` rows then point at the same
+    (content_hash, as_of) with a model attached.
+
+    `model_version` is NULL here: nothing on this row came from a model.
+    """
+
+    __tablename__ = "concall_document"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    isin_basis: Mapped[XbrlIsinBasis] = mapped_column(XBRL_ISIN_BASIS, nullable=False)
+    symbol: Mapped[str] = mapped_column(Text, nullable=False)
+    call_date: Mapped[date] = mapped_column(Date, nullable=False)
+    page_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    char_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_concall_document_isin_format"),
+        CheckConstraint(
+            "(timezone('Asia/Kolkata', as_of))::date >= call_date",
+            name="ck_concall_document_as_of_not_before_call",
+        ),
+        CheckConstraint(
+            "char_count > 0 AND page_count >= 0", name="ck_concall_document_counts_non_negative"
+        ),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_concall_document_content_hash_sha256"),
+        CheckConstraint("model_version IS NULL", name="ck_concall_document_no_model"),
+        UniqueConstraint("content_hash", "as_of", "rule_version", name="uq_concall_document_version"),
+        Index("ix_concall_document_isin_pit", "isin", "as_of"),
+    )
+
+
+class ConcallTranscript(ProvenanceMixin, Base):
+    """One transcript, as extracted under one model version and one rule version.
+
+    `call_date` is when the call happened; `as_of` is when the transcript was
+    published, which is a day or more later. Re-running extraction -- a new
+    model version, a corrected prompt, a grown hedge lexicon -- adds a row at
+    the document's original `as_of` rather than revising this one, so a replay
+    at time t sees whichever extraction was current then.
+
+    Unlike every other filing table here, `model_version` is NOT NULL: these
+    rows exist only because a model read the document, and a row that cannot
+    name the weights cannot be audited. It names the weights that answered,
+    which is not the string the tier was asked for: that is `model_requested`,
+    and it is what the loader compares before deciding whether this document
+    still has anything new to say.
+    """
+
+    __tablename__ = "concall_transcript"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    symbol: Mapped[str | None] = mapped_column(Text, nullable=True)
+    call_date: Mapped[date] = mapped_column(Date, nullable=False)
+    fiscal_period: Mapped[str | None] = mapped_column(Text, nullable=True)
+    char_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    claims_written: Mapped[int] = mapped_column(Integer, nullable=False)
+    claims_quarantined: Mapped[int] = mapped_column(Integer, nullable=False)
+    # The exact prompt that produced this extraction. A prompt edit changes the
+    # hash, so two runs that disagree can be told apart from two documents.
+    prompt_hash: Mapped[str] = mapped_column(CHAR(64), nullable=False)
+    extractor_version: Mapped[str] = mapped_column(Text, nullable=False)
+    # The tier as asked for ("claude-sonnet-5"), not the snapshot that answered.
+    model_requested: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_concall_transcript_isin_format"),
+        CheckConstraint(
+            "(timezone('Asia/Kolkata', as_of))::date >= call_date",
+            name="ck_concall_transcript_as_of_not_before_call",
+        ),
+        CheckConstraint(
+            "char_count > 0 AND claims_written >= 0 AND claims_quarantined >= 0",
+            name="ck_concall_transcript_counts_non_negative",
+        ),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_concall_transcript_content_hash_sha256"),
+        CheckConstraint("prompt_hash ~ '^[0-9a-f]{64}$'", name="ck_concall_transcript_prompt_hash_sha256"),
+        CheckConstraint("model_version IS NOT NULL", name="ck_concall_transcript_model_named"),
+        UniqueConstraint(
+            "content_hash", "as_of", "rule_version", "extractor_version", "model_requested",
+            "model_version", "prompt_hash",
+            name="uq_concall_transcript_version",
+        ),  # fmt: skip
+        Index("ix_concall_transcript_isin_pit", "isin", "as_of"),
+    )
+
+
+class GuidanceClaim(ProvenanceMixin, Base):
+    """Store 2: one forward-looking commitment, located in its source document.
+
+    The model supplied the verbatim columns (`quote`, `hedge_verbatim`,
+    `value_text`, `metric_verbatim`, `period_label`) and the two enumerated
+    labels it is allowed to assign (`metric`, `section`). Everything gradable
+    -- `hedge_strength`, `specificity`, `value_low`/`value_high`, `value_unit`
+    -- was computed from those strings by core/compute/guidance.py under
+    `rule_version` (R1).
+
+    `quote_start`/`quote_end` are character offsets into the stored document,
+    found by code; the quote is evidence only because it was located in the
+    bytes in blob storage.
+
+    Whether guidance was raised, lowered, maintained or withdrawn is NOT a
+    column. It is a comparison between two claims, and which two are
+    comparable depends on what was known at `t`; storing it would freeze one
+    answer and quietly become look-ahead. It is computed at read time
+    (core.db.pit.guidance_directions_as_of). Append-only.
+    """
+
+    __tablename__ = "guidance_claim"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    call_date: Mapped[date] = mapped_column(Date, nullable=False)
+    metric: Mapped[str] = mapped_column(Text, nullable=False)
+    metric_verbatim: Mapped[str] = mapped_column(Text, nullable=False)
+    period_label: Mapped[str] = mapped_column(Text, nullable=False)
+    quote: Mapped[str] = mapped_column(Text, nullable=False)
+    quote_start: Mapped[int] = mapped_column(Integer, nullable=False)
+    quote_end: Mapped[int] = mapped_column(Integer, nullable=False)
+    speaker_name: Mapped[str] = mapped_column(Text, nullable=False)
+    speaker_role: Mapped[str] = mapped_column(Text, nullable=False)
+    section: Mapped[ClaimSection] = mapped_column(CLAIM_SECTION, nullable=False)
+    hedge_verbatim: Mapped[str] = mapped_column(Text, nullable=False)
+    hedge_strength: Mapped[HedgeStrength] = mapped_column(HEDGE_STRENGTH, nullable=False)
+    specificity: Mapped[Specificity] = mapped_column(CLAIM_SPECIFICITY, nullable=False)
+    value_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    value_low: Mapped[Decimal | None] = mapped_column(Numeric(28, 6), nullable=True)
+    value_high: Mapped[Decimal | None] = mapped_column(Numeric(28, 6), nullable=True)
+    value_unit: Mapped[Unit] = mapped_column(CLAIM_UNIT, nullable=False)
+    prompt_hash: Mapped[str] = mapped_column(CHAR(64), nullable=False)
+    extractor_version: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_guidance_claim_isin_format"),
+        CheckConstraint("quote_start >= 0 AND quote_end > quote_start", name="ck_guidance_claim_quote_span"),
+        CheckConstraint(
+            "value_low IS NULL OR value_high IS NULL OR value_low <= value_high",
+            name="ck_guidance_claim_value_order",
+        ),
+        # A row that disagrees with its own specificity is a bug, not data: the
+        # parser decides both, so the database refuses the combinations it
+        # cannot have produced.
+        CheckConstraint(
+            "(specificity = 'directional') = (value_low IS NULL AND value_high IS NULL)",
+            name="ck_guidance_claim_specificity_matches_value",
+        ),
+        CheckConstraint(
+            "(specificity = 'directional') = (value_text IS NULL)",
+            name="ck_guidance_claim_specificity_matches_text",
+        ),
+        CheckConstraint(
+            "specificity <> 'point' OR value_low = value_high",
+            name="ck_guidance_claim_point_is_one_number",
+        ),
+        CheckConstraint(
+            "specificity <> 'bound' OR (value_low IS NULL) <> (value_high IS NULL)",
+            name="ck_guidance_claim_bound_is_one_sided",
+        ),
+        CheckConstraint(
+            "(timezone('Asia/Kolkata', as_of))::date >= call_date",
+            name="ck_guidance_claim_as_of_not_before_call",
+        ),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_guidance_claim_content_hash_sha256"),
+        CheckConstraint("prompt_hash ~ '^[0-9a-f]{64}$'", name="ck_guidance_claim_prompt_hash_sha256"),
+        CheckConstraint("model_version IS NOT NULL", name="ck_guidance_claim_model_named"),
+        UniqueConstraint(
+            "content_hash", "as_of", "rule_version", "extractor_version", "model_version", "prompt_hash",
+            "quote_start", "metric", "period_label",
+            name="uq_guidance_claim_version",
+        ),  # fmt: skip
+        Index("ix_guidance_claim_isin_pit", "isin", "metric", "as_of"),
+    )
+
+
+class GuidanceQuarantine(ProvenanceMixin, Base):
+    """A transcript or a claim held back for review. Never repaired.
+
+    A whole-document entry has `quote` NULL. Reviewing these is how the hedge
+    lexicon and the metric list grow: a claim the model found but code could
+    not verify is a finding about the prompt, the document or the lexicon, and
+    it is deliberately cheaper to look at than to guess at. Append-only.
+    """
+
+    __tablename__ = "guidance_quarantine"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str | None] = mapped_column(CHAR(12), nullable=True)
+    quote: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reason: Mapped[GuidanceIssueReason] = mapped_column(GUIDANCE_ISSUE_REASON, nullable=False)
+    detail: Mapped[str] = mapped_column(Text, nullable=False)
+    prompt_hash: Mapped[str | None] = mapped_column(CHAR(64), nullable=True)
+    # NULL when the document was rejected before any model ran: a file with no
+    # text layer, or a symbol that resolves to no ISIN.
+    extractor_version: Mapped[str | None] = mapped_column(Text, nullable=True)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_guidance_quarantine_content_hash_sha256"),
+        CheckConstraint(
+            "prompt_hash IS NULL OR prompt_hash ~ '^[0-9a-f]{64}$'",
+            name="ck_guidance_quarantine_prompt_hash_sha256",
+        ),
+        Index("ix_guidance_quarantine_pit", "as_of"),
     )

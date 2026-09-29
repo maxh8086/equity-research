@@ -23,8 +23,22 @@ from core.compute.membership import (
     membership_on,
     observed_intervals,
 )
+from core.compute.guidance import (
+    ClaimSection,
+    ComparableClaim,
+    Direction,
+    HedgeChange,
+    HedgeStrength,
+    ParsedValue,
+    Specificity,
+    Unit,
+    compare_claims,
+    compare_hedges,
+)
 from core.compute.price_crosscheck import Bar, Mismatch, crosscheck
 from core.db.models import (
+    ConcallDocument,
+    ConcallTranscript,
     Consolidation,
     CorporateAction,
     CorporateActionQuarantine,
@@ -34,6 +48,8 @@ from core.db.models import (
     FinancialFact,
     FinancialFactsQuarantine,
     FinancialFiling,
+    GuidanceClaim,
+    GuidanceQuarantine,
     IndexCode,
     IndexSnapshot,
     IndexSnapshotConstituent,
@@ -75,6 +91,20 @@ def facts_as_of(
     if line_items is not None:
         stmt = stmt.where(f.line_item.in_(line_items))
     return list(session.scalars(stmt))
+
+
+def raw_source_file_as_of(
+    session: Session, *, content_hash: str, file_as_of: datetime, as_of: datetime
+) -> RawSourceFile | None:
+    """One stored file's record, for the media type and URL a later step needs to re-read it."""
+    require_aware(as_of, "as_of")
+    r = RawSourceFile
+    return session.scalars(
+        select(r)
+        .where(r.content_hash == content_hash, r.as_of == file_as_of, r.as_of <= as_of)
+        .order_by(r.id)
+        .limit(1)
+    ).first()
 
 
 def raw_source_files_as_of(
@@ -1170,4 +1200,276 @@ def shareholding_quarantine_review_as_of(
                 and (*file, row.xbrl_element, row.context_ref) not in requarantined
             )
         entries.append(ShareholdingQuarantineEntry(row, resolved))
+    return entries
+
+
+# --------------------------------------------------------------------------- #
+# Guidance claims from concall transcripts (guidance_claim)
+# --------------------------------------------------------------------------- #
+
+
+def concall_documents_as_of(
+    session: Session, *, isin: str | None = None, as_of: datetime
+) -> list[ConcallDocument]:
+    """Transcript files turned into text by `as_of`, oldest first; every rule_version's row."""
+    require_aware(as_of, "as_of")
+    d = ConcallDocument
+    stmt = select(d).where(d.as_of <= as_of).order_by(d.as_of, d.id)
+    if isin is not None:
+        stmt = stmt.where(d.isin == isin)
+    return list(session.scalars(stmt))
+
+
+def concall_document_loaded_as_of(
+    session: Session, *, content_hash: str, file_as_of: datetime, rule_version: str, as_of: datetime
+) -> tuple[bool, set[tuple[str, str]]]:
+    """Whether one transcript file was turned into text under `rule_version`, and why it was held back.
+
+    The loader's backstop, as for shareholding_filing_loaded_as_of.
+    """
+    require_aware(as_of, "as_of")
+    d, q = ConcallDocument, GuidanceQuarantine
+    parsed = session.scalar(
+        select(d.id).where(
+            d.content_hash == content_hash, d.as_of == file_as_of, d.rule_version == rule_version,
+            d.as_of <= as_of,
+        ).limit(1)  # fmt: skip
+    )
+    rejected = session.execute(
+        select(q.reason, q.detail).where(
+            q.content_hash == content_hash, q.as_of == file_as_of, q.rule_version == rule_version,
+            q.quote.is_(None), q.extractor_version.is_(None), q.as_of <= as_of,
+        )  # fmt: skip
+    ).tuples()
+    return parsed is not None, {(str(reason), detail) for reason, detail in rejected}
+
+
+def concall_transcripts_as_of(
+    session: Session, *, isin: str | None = None, as_of: datetime
+) -> list[ConcallTranscript]:
+    """Extracted transcripts known by `as_of`, oldest first; every extraction's row.
+
+    A document re-extracted under a newer model or a grown hedge lexicon has
+    several rows at the same `as_of`. They are all returned: which one a caller
+    wants is its own decision, and `guidance_claims_as_of` states the one this
+    module makes.
+    """
+    require_aware(as_of, "as_of")
+    t = ConcallTranscript
+    stmt = select(t).where(t.as_of <= as_of).order_by(t.as_of, t.id)
+    if isin is not None:
+        stmt = stmt.where(t.isin == isin)
+    return list(session.scalars(stmt))
+
+
+def concall_transcript_loaded_as_of(
+    session: Session,
+    *,
+    content_hash: str,
+    file_as_of: datetime,
+    extractor_version: str,
+    model_requested: str | None = None,
+    prompt_hash: str | None = None,
+    as_of: datetime,
+) -> tuple[bool, set[tuple[str, str]]]:
+    """Whether one transcript was already extracted under this setup, and why it was held back.
+
+    The extractor's backstop, as for shareholding_filing_loaded_as_of, and the
+    reason a re-run costs nothing: an unchanged document, model, prompt and
+    extractor has nothing new to say, so it is not sent again. `model_version`
+    `model_requested` is the tier as asked for, not the weights that answered:
+    it is the only one of the two the caller knows before the call. It and
+    `prompt_hash` left out mean "under any".
+    """
+    require_aware(as_of, "as_of")
+    t, q = ConcallTranscript, GuidanceQuarantine
+    stmt = select(t.id).where(
+        t.content_hash == content_hash, t.as_of == file_as_of, t.as_of <= as_of,
+        t.extractor_version == extractor_version,
+    )  # fmt: skip
+    if model_requested is not None:
+        stmt = stmt.where(t.model_requested == model_requested)
+    if prompt_hash is not None:
+        stmt = stmt.where(t.prompt_hash == prompt_hash)
+    extracted = session.scalar(stmt.limit(1))
+    rejected = session.execute(
+        select(q.reason, q.detail).where(
+            q.content_hash == content_hash, q.as_of == file_as_of, q.as_of <= as_of,
+            q.extractor_version == extractor_version, q.quote.is_(None),
+        )  # fmt: skip
+    ).tuples()
+    return extracted is not None, {(str(reason), detail) for reason, detail in rejected}
+
+
+def _current_extractions(rows: Iterable[ConcallTranscript]) -> dict[tuple[str, datetime], int]:
+    """The extraction that stands for each document: the last one loaded.
+
+    Rows arrive oldest first, so the last one wins -- the same rule
+    shareholding_pattern_as_of uses for a revised filing. A re-extraction is
+    stored at the document's original `as_of` (R2), so `as_of` cannot separate
+    two runs over the same bytes; load order can.
+    """
+    current: dict[tuple[str, datetime], int] = {}
+    for row in rows:
+        current[(row.content_hash, row.as_of)] = row.id
+    return current
+
+
+def guidance_claims_as_of(
+    session: Session,
+    *,
+    isin: str,
+    as_of: datetime,
+    metric: str | None = None,
+    sections: Collection[ClaimSection] | None = None,
+) -> list[GuidanceClaim]:
+    """Guidance `isin` had given by `as_of`, oldest first.
+
+    Only claims from the extraction that stands for each document (see
+    `_current_extractions`); an earlier run's claims over the same bytes stay
+    in the store but are not read as current.
+    """
+    require_aware(as_of, "as_of")
+    transcripts = concall_transcripts_as_of(session, isin=isin, as_of=as_of)
+    current = _current_extractions(transcripts)
+    if not current:
+        return []
+    by_id = {row.id: row for row in transcripts}
+    keys = {
+        (row.content_hash, row.as_of, row.extractor_version, row.model_version, row.prompt_hash)
+        for row in (by_id[i] for i in current.values())
+    }
+    c = GuidanceClaim
+    stmt = select(c).where(c.isin == isin, c.as_of <= as_of).order_by(c.as_of, c.call_date, c.quote_start, c.id)
+    if metric is not None:
+        stmt = stmt.where(c.metric == metric)
+    if sections is not None:
+        stmt = stmt.where(c.section.in_(list(sections)))
+    return [
+        row
+        for row in session.scalars(stmt)
+        if (row.content_hash, row.as_of, row.extractor_version, row.model_version, row.prompt_hash) in keys
+    ]
+
+
+@dataclass(frozen=True)
+class GuidanceDirection:
+    """One claim read against the last comparable one before it.
+
+    Not a stored column. Which earlier claim is comparable depends on what was
+    known at `as_of`, so a stored answer would freeze one reading of history
+    and quietly become look-ahead (R2). `previous` is None for the first claim
+    on a metric and period, where `direction` is NEW.
+    """
+
+    current: GuidanceClaim
+    previous: GuidanceClaim | None
+    direction: Direction
+    hedge_change: HedgeChange | None
+
+
+def _comparable(row: GuidanceClaim) -> ComparableClaim:
+    return ComparableClaim(
+        metric=row.metric,
+        period_label=row.period_label,
+        value=ParsedValue(
+            low=row.value_low, high=row.value_high, unit=Unit(row.value_unit), specificity=Specificity(row.specificity)
+        ),
+        hedge=HedgeStrength(row.hedge_strength),
+    )
+
+
+def guidance_directions_as_of(
+    session: Session, *, isin: str, as_of: datetime, metric: str | None = None
+) -> list[GuidanceDirection]:
+    """Whether each claim raised, lowered, maintained or reshaped the one before it.
+
+    Computed here by core/compute/guidance.py, never extracted and never stored
+    (R1). Claims are chained within a (metric, period_label): the previous
+    claim is the newest one on the same metric and period known before this
+    one. WITHDRAWN is not produced here -- a promise that stops being made is
+    silence, and silence is detected by looking at the calls that followed, not
+    at one claim.
+    """
+    chains: dict[tuple[str, str], GuidanceClaim] = {}
+    out: list[GuidanceDirection] = []
+    for row in guidance_claims_as_of(session, isin=isin, as_of=as_of, metric=metric):
+        key = (row.metric, row.period_label)
+        previous = chains.get(key)
+        direction = compare_claims(None if previous is None else _comparable(previous), _comparable(row))
+        hedge_change = (
+            None
+            if previous is None
+            else compare_hedges(HedgeStrength(previous.hedge_strength), HedgeStrength(row.hedge_strength))
+        )
+        out.append(GuidanceDirection(current=row, previous=previous, direction=direction, hedge_change=hedge_change))
+        chains[key] = row
+    return out
+
+
+def guidance_quarantine_as_of(session: Session, *, as_of: datetime) -> list[GuidanceQuarantine]:
+    """Transcripts and claims held back for review, known by `as_of`, oldest first."""
+    require_aware(as_of, "as_of")
+    q = GuidanceQuarantine
+    return list(session.scalars(select(q).where(q.as_of <= as_of).order_by(q.as_of, q.id)))
+
+
+@dataclass(frozen=True)
+class GuidanceQuarantineEntry:
+    row: GuidanceQuarantine
+    resolved: bool
+
+    @property
+    def needs_review(self) -> bool:
+        return not self.resolved
+
+
+def guidance_quarantine_review_as_of(
+    session: Session, *, current_extractor_version: str, current_rule_version: str, as_of: datetime
+) -> list[GuidanceQuarantineEntry]:
+    """Every guidance quarantine row known by `as_of`, marked once it has been dealt with.
+
+    A whole-document entry (`quote` NULL) is resolved once that document has
+    produced a transcript row. A claim entry is resolved once the document was
+    re-extracted under both current versions without holding the same quote
+    back again -- so a hedge phrase added to the lexicon clears its backlog,
+    and one that is still unmapped stays on the list.
+    """
+    rows = guidance_quarantine_as_of(session, as_of=as_of)
+    if not rows:
+        return []
+    t = ConcallTranscript
+    hashes = {row.content_hash for row in rows}
+    extractions = set(
+        session.execute(
+            select(t.content_hash, t.as_of, t.extractor_version, t.rule_version)
+            .where(t.content_hash.in_(hashes), t.as_of <= as_of)
+            .distinct()
+        ).tuples()
+    )
+    documents = {(h, t_) for h, t_, _, _ in extractions}
+    extracted_now = {
+        (h, t_)
+        for h, t_, ev, rv in extractions
+        if ev == current_extractor_version and rv == current_rule_version
+    }
+    requarantined = {
+        (row.content_hash, row.as_of, row.quote)
+        for row in rows
+        if row.quote is not None
+        and row.extractor_version == current_extractor_version
+        and row.rule_version == current_rule_version
+    }
+    entries = []
+    for row in rows:
+        document = (row.content_hash, row.as_of)
+        if row.quote is None:
+            resolved = document in documents
+        else:
+            resolved = (
+                (row.extractor_version, row.rule_version) != (current_extractor_version, current_rule_version)
+                and document in extracted_now
+                and (*document, row.quote) not in requarantined
+            )
+        entries.append(GuidanceQuarantineEntry(row, resolved))
     return entries
