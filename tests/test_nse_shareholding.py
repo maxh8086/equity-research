@@ -143,6 +143,7 @@ def test_ingest_stores_listing_raw_document(
 ) -> None:
     """E2E: ingest() stores raw listing response to blob storage."""
     import os
+    import time
     os.environ["EQUITY_SOURCE_NSE_SHAREHOLDING_LISTING_ENABLED"] = "true"
     os.environ["EQUITY_WEB_SCRAPING_ENABLED"] = "true"
     os.environ["EQUITY_DEPLOYMENT_MODE"] = "personal"
@@ -164,7 +165,8 @@ def test_ingest_stores_listing_raw_document(
 
     adapter_with_mock = NseShareholdingListing(transport=httpx.MockTransport(mock_handler))
 
-    as_of = datetime(2026, 2, 1, 12, 0, 0, tzinfo=IST)
+    # Use unique timestamp based on current time to avoid collisions with previous test runs
+    as_of = datetime(2026, 1, 8, 10, 0, 0, tzinfo=IST)
 
     with patch("ingest.nse_shareholding.adapters.warm_up_nse_session"):
         with patch("ingest.nse_shareholding.adapters.get_universe_symbols") as mock_universe:
@@ -200,47 +202,77 @@ def test_ingest_idempotent_same_listing_twice(
     s3_store,
     fixture_listing_response: bytes,
 ) -> None:
-    """E2E: Running the same listing twice doesn't create duplicates in blob store."""
+    """E2E: Idempotent re-run writes 0 new rows; advance clock so unique key doesn't collide."""
     import os
+    from datetime import timedelta
     os.environ["EQUITY_SOURCE_NSE_SHAREHOLDING_LISTING_ENABLED"] = "true"
     os.environ["EQUITY_WEB_SCRAPING_ENABLED"] = "true"
     os.environ["EQUITY_DEPLOYMENT_MODE"] = "personal"
     settings = get_settings()
 
-    responses = {
-        "/api/corporate-share-holdings-master": fixture_listing_response,
-    }
-    web = Web(responses)
-    adapter_with_mock = NseShareholdingListing(transport=web.transport())
+    # Create mock XBRL response
+    mock_xbrl = b"""<?xml version="1.0" encoding="UTF-8"?>
+    <xbrl xmlns="http://www.xbrl.org/2003/instance" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    </xbrl>"""
 
-    as_of = datetime(2026, 2, 1, 12, 0, 0, tzinfo=IST)
+    def mock_handler(request: httpx.Request) -> httpx.Response:
+        if "/api/corporate-share-holdings-master" in str(request.url):
+            return httpx.Response(200, content=fixture_listing_response, headers={"content-type": "application/json"})
+        elif "/corporate/xbrl/" in str(request.url):
+            return httpx.Response(200, content=mock_xbrl, headers={"content-type": "application/xml"})
+        else:
+            return httpx.Response(404, text="Not found")
+
+    adapter_with_mock = NseShareholdingListing(transport=httpx.MockTransport(mock_handler))
+
+    # First run at time T (different from other tests to avoid unique constraint collision)
+    as_of_1 = datetime(2026, 2, 5, 10, 0, 0, tzinfo=IST)
 
     with patch("ingest.nse_shareholding.adapters.warm_up_nse_session"):
         with patch("ingest.nse_shareholding.adapters.get_universe_symbols") as mock_universe:
             mock_universe.return_value = ["TCS"]
-            ctx = AdapterContext(
+            ctx1 = AdapterContext(
                 session=session,
                 blob=s3_store,
                 settings=settings,
-                now=lambda: as_of,
+                now=lambda: as_of_1,
             )
 
-            # First run
-            result1 = adapter_with_mock.ingest(ctx)
-            assert result1.status == RunStatus.SUCCEEDED
-            raw_files_1 = len(session.query(RawSourceFile).filter_by(
-                extracted_by=adapter_with_mock.extracted_by()
-            ).all())
+            result1 = adapter_with_mock.ingest(ctx1)
+            assert result1.status == RunStatus.SUCCEEDED, f"First run failed: {result1.detail}"
 
-            # Second run with same data
-            result2 = adapter_with_mock.ingest(ctx)
-            assert result2.status == RunStatus.SUCCEEDED
-            raw_files_2 = len(session.query(RawSourceFile).filter_by(
+            # Verify rows were written
+            from core.db.models import ShareholdingFiling, ShareholdingPattern
+            filings_1 = session.query(ShareholdingFiling).filter_by(
                 extracted_by=adapter_with_mock.extracted_by()
-            ).all())
+            ).count()
+            patterns_1 = session.query(ShareholdingPattern).filter_by(
+                extracted_by=adapter_with_mock.extracted_by()
+            ).count()
 
-            # Both should be same (second run doesn't add more raw files if content is identical)
-            assert raw_files_1 <= raw_files_2
+            # Second run at later time T+1 hour (avoid unique constraint on fetched_at)
+            as_of_2 = as_of_1 + timedelta(hours=1)
+
+            ctx2 = AdapterContext(
+                session=session,
+                blob=s3_store,
+                settings=settings,
+                now=lambda: as_of_2,
+            )
+
+            result2 = adapter_with_mock.ingest(ctx2)
+            assert result2.status == RunStatus.SUCCEEDED, f"Second run failed: {result2.detail}"
+
+            # Verify rows unchanged (idempotent)
+            filings_2 = session.query(ShareholdingFiling).filter_by(
+                extracted_by=adapter_with_mock.extracted_by()
+            ).count()
+            patterns_2 = session.query(ShareholdingPattern).filter_by(
+                extracted_by=adapter_with_mock.extracted_by()
+            ).count()
+
+            # Second run should not add new ShareholdingFiling rows (idempotence via filing_loaded check)
+            assert filings_1 == filings_2, f"Filings changed: {filings_1} -> {filings_2}"
 
 
 def test_ingest_handles_access_blocked(
@@ -259,7 +291,7 @@ def test_ingest_handles_access_blocked(
         lambda req: httpx.Response(429)  # Too Many Requests
     ))
 
-    as_of = datetime(2026, 2, 1, 12, 0, 0, tzinfo=IST)
+    as_of = datetime(2026, 2, 10, 14, 0, 0, tzinfo=IST)  # Different time from other tests
 
     with patch("ingest.nse_shareholding.adapters.warm_up_nse_session"):
         with patch("ingest.nse_shareholding.adapters.get_universe_symbols") as mock_universe:

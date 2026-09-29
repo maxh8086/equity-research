@@ -55,11 +55,11 @@ def get_universe_symbols() -> list[str]:
 
 @dataclass
 class Tally:
-    """Statistics from a run."""
+    """Statistics from a run. Compatible with nse_shp.adapters.load_filing()."""
 
     symbols_processed: int = 0
     listings_fetched: int = 0
-    xbrl_files_downloaded: int = 0
+    raw_files: int = 0  # Number of raw XBRL files downloaded (required by load_filing)
     filings: int = 0  # Number of filings successfully parsed
     rows_written: int = 0  # Total number of shareholding pattern rows written
     quarantined: int = 0  # Number of quarantine entries
@@ -74,8 +74,8 @@ class Tally:
             detail_parts.append(f"{self.symbols_processed} symbols processed")
         if self.listings_fetched:
             detail_parts.append(f"{self.listings_fetched} listings fetched")
-        if self.xbrl_files_downloaded:
-            detail_parts.append(f"{self.xbrl_files_downloaded} XBRL files downloaded")
+        if self.raw_files:
+            detail_parts.append(f"{self.raw_files} XBRL files downloaded")
         if self.filings:
             detail_parts.append(f"{self.filings} filings parsed")
         if self.rows_written:
@@ -96,7 +96,7 @@ class Tally:
             adapter_name,
             RunStatus.FAILED if failed else RunStatus.SUCCEEDED,
             detail,
-            raw_files=self.xbrl_files_downloaded,
+            raw_files=self.raw_files,
             rows_written=self.rows_written,
             quarantined=self.quarantined,
         )
@@ -221,7 +221,7 @@ class NseShareholdingListing(Adapter):
                                 as_of=row_data.broadcast_date,
                                 media_type=xbrl_response.headers.get("content-type", "application/xml"),
                             )
-                            tally.xbrl_files_downloaded += 1
+                            tally.raw_files += 1
                         except (IOError, OSError) as exc:
                             tally.problems.append(f"blob store error for {symbol} XBRL: {type(exc).__name__}: {exc}")
                             continue
@@ -229,10 +229,14 @@ class NseShareholdingListing(Adapter):
                         # Parse XBRL file and write rows using the existing drop-folder adapter's parser
                         # (Reuse the same load_filing logic to ensure consistency)
                         try:
-                            # load_filing modifies tally in place
+                            # load_filing modifies tally in place; it raises FileRejected for parse errors
                             load_filing(self, ctx, xbrl_doc, tally)
-                        except Exception as exc:
-                            tally.problems.append(f"XBRL load_filing error for {symbol}: {type(exc).__name__}: {exc}")
+                        except SQLAlchemyError as exc:
+                            tally.problems.append(f"database error for {symbol} XBRL: {type(exc).__name__}: {exc}")
+                            raise  # Let DB errors propagate; adapter failed
+                        except ValueError as exc:
+                            # From parse_filing if XBRL is malformed
+                            tally.problems.append(f"XBRL validation error for {symbol}: {exc}")
                             continue
 
         except (AccessBlocked, httpx.HTTPError, ValueError):
