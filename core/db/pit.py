@@ -2582,3 +2582,32 @@ def trailing_revenue_as_of(
         if r.period_start is not None
     ]
     return trailing_revenue(quarters, as_of)
+
+def screener_schedules_series_as_of(
+    session: Session,
+    *,
+    isin: str,
+    line_item: str,
+    as_of: datetime,
+) -> list[FinancialFact]:
+    """Every period of a Screener schedules line item known at `as_of`, oldest first.
+
+    One row per period_end: the latest version (by as_of, then id) whose as_of
+    is at or before the given time, so a value first known later, or a
+    restatement made later, is never visible. Only rows written by the
+    Screener schedules adapter are read.
+    """
+    require_aware(as_of, "as_of")
+    m = FinancialFact
+    stmt = (
+        select(m)
+        .where(
+            m.isin == isin,
+            m.line_item == line_item,
+            m.extracted_by == "ingest.screener_schedules.adapters.ScreenerSchedules",
+            m.as_of <= as_of,
+        )
+        .distinct(m.period_end)
+        .order_by(m.period_end, m.as_of.desc(), m.id.desc())
+    )
+    return list(session.scalars(stmt))
