@@ -2373,6 +2373,53 @@ def corporate_action_versions_as_of(
 # --- Drift: post-earnings drift watchlist ---
 
 
+@dataclass(frozen=True)
+class DriftWatchlistEntry:
+    """A drift-based watchlist entry, read-only source (never stored in watchlist_entry)."""
+
+    drift: DriftWatch
+    source: str = "drift/1"
+
+
+def drift_watchlist_as_of(
+    session: Session,
+    *,
+    isin: str,
+    as_of: datetime,
+) -> list[DriftWatchlistEntry]:
+    """Drift-based watchlist candidates for `isin` visible at `as_of`, oldest first.
+
+    Read-only source: returns computed DriftWatch results alongside other watchlist
+    entry sources (technical signals, etc.). Never stored; computed at read time.
+    Returns empty list if period_end cannot be determined from latest facts.
+    """
+    require_aware(as_of, "as_of")
+
+    # Get all financial filings for this ISIN to find latest period_end
+    filings = financial_filings_as_of(session, isin=isin, consolidation=Consolidation.CONSOLIDATED, as_of=as_of)
+    if not filings:
+        return []
+
+    # Group by period_end and take the latest (most recent quarter)
+    latest_filing = filings[-1]  # Newest first by default ordering
+    period_end = latest_filing.period_end
+
+    # Compute drift for this period
+    # Use the filing's as_of as evidence_url placeholder
+    try:
+        watch = drift_watch_as_of(
+            session,
+            isin=isin,
+            period_end=period_end,
+            as_of=as_of,
+            evidence_url=latest_filing.source_url or "unknown",
+        )
+        return [DriftWatchlistEntry(drift=watch)]
+    except Exception:
+        # If computation fails (missing data, etc.), return empty list
+        return []
+
+
 def drift_watch_as_of(
     session: Session,
     *,
