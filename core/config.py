@@ -80,6 +80,10 @@ class Settings(BaseSettings):
     nse_announcements_api_url: str = "https://www.nseindia.com/api/corporate-announcements?index=equities"
     nse_min_interval_seconds: float = 2.0  # Shared throttle for all NSE API calls
 
+    # NSE shareholding listing API (ingest/nse_shareholding): web_scrape adapter.
+    # Shares session handling (ingest/nse_session) with other NSE adapters.
+    nse_shareholding_listing_api_url: str = "https://www.nseindia.com/api/corporate-share-holdings-master"
+
     # Upstox API v3 historical candles (ingest/upstox): official_api, keyed by ISIN.
     # The access token expires daily and a human logs in to get it (CLAUDE.md
     # "Integrations"); it is never stored anywhere but this env var.

@@ -1,0 +1,20 @@
+{
+  "data": [
+    {
+      "symbol": "TCS",
+      "isin": "INE002A01012",
+      "broadcastDate": "2026-01-30 09:30:00",
+      "xbrlFileUrl": "https://nsearchives.nseindia.com/corporate/xbrl/NSEF210126I00051_SHP_31-12-2025.xml",
+      "revisionDate": null,
+      "revisionRemark": null
+    },
+    {
+      "symbol": "INFY",
+      "isin": "INE009A01021",
+      "broadcastDate": "2026-01-29 10:15:00",
+      "xbrlFileUrl": "https://nsearchives.nseindia.com/corporate/xbrl/NSEF210127I00053_SHP_31-12-2025.xml",
+      "revisionDate": null,
+      "revisionRemark": null
+    }
+  ]
+}
