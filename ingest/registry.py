@@ -12,7 +12,7 @@ from ingest.base import NAME_RE, Adapter
 
 # Shared machinery, not sources. tests/test_architecture.py mirrors this list.
 INFRA_MODULES = frozenset(
-    {"ingest.__main__", "ingest.base", "ingest.http", "ingest.registry", "ingest.schema"}
+    {"ingest.__main__", "ingest.base", "ingest.http", "ingest.nse_session", "ingest.registry", "ingest.schema"}
 )
 
 

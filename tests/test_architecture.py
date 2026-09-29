@@ -51,7 +51,7 @@ MCP_CALLERS = ("ingest", GATEWAY_PATH)
 # Mirrors ingest.registry.INFRA_MODULES (checked below).
 INGEST_INFRA = frozenset(
     {"ingest/__init__.py", "ingest/__main__.py", "ingest/base.py", "ingest/http.py",
-     "ingest/registry.py", "ingest/schema.py"}
+     "ingest/nse_session.py", "ingest/registry.py", "ingest/schema.py"}
 )  # fmt: skip
 ADAPTER_DECLARATIONS = frozenset({"name", "source_class", "target_stores"})
 
