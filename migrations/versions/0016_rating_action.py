@@ -1,7 +1,7 @@
 """rating_action table and supporting enums
 
 Revision ID: 0016
-Revises: 0011
+Revises: 0015
 Create Date: 2026-09-29
 """
 
