@@ -19,6 +19,7 @@ from core.compute.adjustment import (
     rights_factor,
     split_factor,
 )
+from core.compute.drift import DriftWatch, MissingInputReason, drift_watch
 from core.compute.membership import (
     Membership,
     ObservedInterval,
@@ -2367,3 +2368,78 @@ def corporate_action_versions_as_of(
     if action_types is not None:
         stmt = stmt.where(ca.action_type.in_(list(action_types)))
     return list(session.scalars(stmt))
+
+
+# --- Drift: post-earnings drift watchlist ---
+
+
+def drift_watch_as_of(
+    session: Session,
+    *,
+    isin: str,
+    period_end: date,
+    as_of: datetime,
+    evidence_url: str,
+) -> DriftWatch:
+    """Post-earnings drift watchlist candidate for `isin` at observation time `as_of`.
+
+    Reads financial facts and guidance resolutions at `as_of`,
+    computes YoY growth and guidance surprise, then scores the
+    candidate using the drift/1 formula. Missing inputs yield
+    MissingInputReason entries (R3).
+
+    Keyword-only arguments; mirrors guidance_report_as_of style.
+    """
+    require_aware(as_of, "as_of")
+
+    # Compute prior-year period end (one fiscal year earlier)
+    prior_period_end = date(period_end.year - 1, period_end.month, period_end.day)
+
+    # Read financial facts at as_of
+    facts = facts_as_of(session, isin=isin, consolidation=Consolidation.CONSOLIDATED, as_of=as_of)
+    facts_by_line_and_period = {(f.line_item, f.period_end): f for f in facts}
+
+    # Compute YoY sales growth
+    yoy_sales_growth_pct: tuple[Decimal, date] | None = None
+    revenue_current = facts_by_line_and_period.get(("total_revenue", period_end))
+    revenue_prior = facts_by_line_and_period.get(("total_revenue", prior_period_end))
+    if revenue_current and revenue_prior and revenue_prior.value and revenue_prior.value > 0:
+        growth = ((revenue_current.value - revenue_prior.value) / revenue_prior.value) * Decimal("100")
+        yoy_sales_growth_pct = (growth, revenue_current.as_of.date())
+
+    # Compute YoY PAT growth
+    yoy_pat_growth_pct: tuple[Decimal, date] | None = None
+    pat_current = facts_by_line_and_period.get(("profit_after_tax", period_end))
+    pat_prior = facts_by_line_and_period.get(("profit_after_tax", prior_period_end))
+    if pat_current and pat_prior:
+        if pat_prior.value and pat_prior.value > 0:
+            # Prior year was profitable: compute YoY growth
+            growth = ((pat_current.value - pat_prior.value) / pat_prior.value) * Decimal("100")
+            yoy_pat_growth_pct = (growth, pat_current.as_of.date())
+        elif pat_prior.value is not None and pat_prior.value < 0:
+            # Prior year was a loss: growth calculation meaningless, signal via negative value
+            yoy_pat_growth_pct = (Decimal("-1"), pat_current.as_of.date())
+
+    # Compute guidance surprise from guidance resolutions
+    guidance_surprise_pct: tuple[Decimal, date] | None = None
+    # TODO: Implement guidance surprise from guidance_resolutions_as_of
+    # For now, pass None to signal missing data with explicit MissingInputReason
+    trailing_trend_surprise_pct: tuple[Decimal, date] | None = None
+    # TODO: Implement trailing trend from quarterly history
+    forward_pe: tuple[Decimal, date] | None = None
+    diluted_share_count: tuple[Decimal, date] | None = None
+    # TODO: Implement forward PE from shareholding_pattern
+
+    # Call the pure drift_watch function
+    return drift_watch(
+        isin=isin,
+        period_end=period_end,
+        t=as_of.date(),
+        yoy_sales_growth_pct=yoy_sales_growth_pct,
+        yoy_pat_growth_pct=yoy_pat_growth_pct,
+        trailing_trend_surprise_pct=trailing_trend_surprise_pct,
+        guidance_surprise_pct=guidance_surprise_pct,
+        forward_pe=forward_pe,
+        diluted_share_count=diluted_share_count,
+        evidence_url=evidence_url,
+    )
