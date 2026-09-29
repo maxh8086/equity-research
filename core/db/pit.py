@@ -2293,6 +2293,34 @@ def scheduled_events_as_of(
     return list(session.scalars(stmt))
 
 
+def scheduled_event_exists_as_of(
+    session: Session,
+    *,
+    isin: str,
+    event_type,
+    event_date: date,
+    as_of: datetime,
+) -> bool:
+    """Check if a ScheduledEvent with matching (isin, event_type, event_date) exists at `as_of`.
+
+    Returns True if at least one row exists with the given triple, False otherwise.
+    Used for idempotence checks to prevent duplicate writes on rerun.
+    """
+    require_aware(as_of, "as_of")
+    from core.db.models import ScheduledEventType
+    m = ScheduledEvent
+    stmt = (
+        select(m)
+        .where(
+            m.isin == isin,
+            m.event_type == event_type,
+            m.event_date == event_date,
+            m.as_of <= as_of,
+        )
+    )
+    return session.scalars(stmt).first() is not None
+
+
 def index_events_as_of(
     session: Session,
     *,
