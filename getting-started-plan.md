@@ -64,7 +64,8 @@ Session 4 — XBRL parser
 > Build the BSE/NSE XBRL parser for `financial_facts`. Deterministic element mapping, no LLM. Unmapped elements go to a quarantine table for manual review, never guessed.
 
 Session 4 is built in slices:
-- **Not yet:** a live NSE results-listing adapter (drop folder only for now); pre-2020 taxonomies (quarantined as `unsupported_taxonomy`); segment facts. Results XBRL has no gross block, only net PPE and CWIP; the gross-block source is built (Screener schedules adapter, see `docs/finished.md`).
+- **Live results-listing adapter** ✅ built, not yet run live (see `docs/finished.md`).
+- **Not yet:** pre-2020 taxonomies (quarantined as `unsupported_taxonomy`); segment facts. Results XBRL has no gross block, only net PPE and CWIP; the gross-block source is built (Screener schedules adapter, see `docs/finished.md`).
 
 Session 4b — shareholding pattern
 > Parse quarterly shareholding-pattern XBRL into `shareholding_pattern`: share counts (not just percentages) for promoter, FII/FPI, DII by type and public, plus pledged shares. `as_of` must be after quarter end. Same deterministic mapping and quarantine as Session 4.

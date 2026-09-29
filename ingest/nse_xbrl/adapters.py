@@ -17,7 +17,8 @@ never the download time (R2).
   row per mapped fact, dated at the file's `as_of`; single-fact problems go
   to `financial_facts_quarantine` with the rest of the file kept.
 
-A live NSE listing adapter is not built yet: until then there is no scraping here.
+There is no scraping here: the live listing adapter is `ingest/nse_results_listing`,
+which reuses `load_filing` below.
 """
 
 from __future__ import annotations
