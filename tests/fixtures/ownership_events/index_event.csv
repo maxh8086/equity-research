@@ -1,0 +1,4 @@
+isin,index_code,event_type,status,announced_date,effective_date,old_weight,new_weight
+INE848E01016,nifty_50,weight_change,effective,2024-03-01,2024-03-28,1.25,1.45
+INE040A01034,msci_india,inclusion,announced,2024-05-10,2024-05-31,,0.35
+INE040A01034,nifty_next_50,exclusion,cancelled,2024-06-15,,,

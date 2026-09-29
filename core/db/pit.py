@@ -39,6 +39,12 @@ from core.compute.guidance import (
 )
 from core.compute.price_crosscheck import Bar, Mismatch, crosscheck
 from core.db.models import (
+    BulkBlockDeal,
+    IndexEvent,
+    IndexEventStatus,
+    InsiderTrade,
+    ScheduledEvent,
+    StakeDisclosure,
     ConcallDocument,
     ConcallTranscript,
     CompanyEvent,
@@ -1873,4 +1879,123 @@ def company_events_by_type_as_of(
         .where(e.isin == isin, e.event_type == event_type, e.as_of <= t)
         .order_by(e.event_date.desc(), e.id.desc())
     )
+    return list(session.scalars(stmt))
+
+
+# ---------------------------------------------------------------------------
+# Session 7c: ownership events and catalyst calendar
+# ---------------------------------------------------------------------------
+
+
+def insider_trades_as_of(
+    session: Session,
+    *,
+    isin: str,
+    as_of: datetime,
+) -> list[InsiderTrade]:
+    """All insider trade rows for `isin` visible at `as_of`.
+
+    Returns every row with ``as_of <= as_of``, ordered by trade_date
+    descending.  The caller is responsible for deduplication when the same
+    physical trade was filed more than once (different `content_hash`).
+    """
+    require_aware(as_of, "as_of")
+    m = InsiderTrade
+    stmt = (
+        select(m)
+        .where(m.isin == isin, m.as_of <= as_of)
+        .order_by(m.trade_date.desc(), m.id.desc())
+    )
+    return list(session.scalars(stmt))
+
+
+def stake_disclosures_as_of(
+    session: Session,
+    *,
+    isin: str,
+    as_of: datetime,
+) -> list[StakeDisclosure]:
+    """All stake-disclosure rows for `isin` visible at `as_of`.
+
+    Returns every row with ``as_of <= as_of``, ordered by disclosure_date
+    descending.
+    """
+    require_aware(as_of, "as_of")
+    m = StakeDisclosure
+    stmt = (
+        select(m)
+        .where(m.isin == isin, m.as_of <= as_of)
+        .order_by(m.disclosure_date.desc(), m.id.desc())
+    )
+    return list(session.scalars(stmt))
+
+
+def bulk_block_deals_as_of(
+    session: Session,
+    *,
+    isin: str,
+    as_of: datetime,
+) -> list[BulkBlockDeal]:
+    """All bulk/block deal rows for `isin` visible at `as_of`.
+
+    Returns every row with ``as_of <= as_of``, ordered by deal_date
+    descending.
+    """
+    require_aware(as_of, "as_of")
+    m = BulkBlockDeal
+    stmt = (
+        select(m)
+        .where(m.isin == isin, m.as_of <= as_of)
+        .order_by(m.deal_date.desc(), m.id.desc())
+    )
+    return list(session.scalars(stmt))
+
+
+def scheduled_events_as_of(
+    session: Session,
+    *,
+    isin: str,
+    as_of: datetime,
+) -> list[ScheduledEvent]:
+    """All scheduled-event rows for `isin` visible at `as_of`.
+
+    Returns rows with ``as_of <= as_of``, ordered by event_date descending.
+    Both upcoming and past events are returned; the caller filters by
+    ``event_date`` if only future events are needed.
+    """
+    require_aware(as_of, "as_of")
+    m = ScheduledEvent
+    stmt = (
+        select(m)
+        .where(m.isin == isin, m.as_of <= as_of)
+        .order_by(m.event_date.desc(), m.id.desc())
+    )
+    return list(session.scalars(stmt))
+
+
+def index_events_as_of(
+    session: Session,
+    *,
+    isin: str,
+    as_of: datetime,
+    index_code: IndexCode | None = None,
+    status: IndexEventStatus | None = None,
+) -> list[IndexEvent]:
+    """All index-event rows for `isin` visible at `as_of`.
+
+    Optionally filters by ``index_code`` and/or ``status``.  Returns rows
+    ordered by announced_date descending so the most-recent announcement
+    appears first.
+    """
+    require_aware(as_of, "as_of")
+    m = IndexEvent
+    stmt = (
+        select(m)
+        .where(m.isin == isin, m.as_of <= as_of)
+        .order_by(m.announced_date.desc(), m.id.desc())
+    )
+    if index_code is not None:
+        stmt = stmt.where(m.index_code == index_code)
+    if status is not None:
+        stmt = stmt.where(m.status == status)
     return list(session.scalars(stmt))

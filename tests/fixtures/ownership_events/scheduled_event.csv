@@ -1,0 +1,4 @@
+isin,event_type,severity,event_date,description,outcome
+INE848E01016,results,critical,2024-07-25,Q1 FY25 earnings announcement,
+INE848E01016,agm,high,2024-08-30,Annual general meeting FY24,Meeting held; all resolutions passed
+INE848E01016,record_date,medium,2024-10-15,,
