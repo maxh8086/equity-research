@@ -66,6 +66,8 @@ from core.compute.guidance_resolution import (
 )
 from core.compute.price_crosscheck import Bar, Mismatch, crosscheck
 from core.db.models import (
+    BrokerHoldingQuarantine,
+    BrokerHoldingSnapshot,
     BulkBlockDeal,
     IndexEvent,
     IndexEventStatus,
@@ -2654,3 +2656,38 @@ def order_wins_as_of(session: Session, *, isin: str, as_of: datetime) -> list[Or
     for row in rows:
         latest.setdefault(row.announcement_key, row)
     return sorted(latest.values(), key=lambda r: (r.announced_on, r.id), reverse=True)
+
+
+def holdings_as_of(session: Session, *, account_label: str, as_of: datetime) -> list[BrokerHoldingSnapshot]:
+    """Positions of one account known at `as_of`: the latest snapshot per ISIN, ordered by ISIN.
+
+    Only rows whose `as_of` (when the drop was known) is at or before the
+    given time are visible. Each ISIN takes the rows of its own newest
+    `snapshot_at`; when the same snapshot was dropped again, the newest drop
+    known at `as_of` replaces the earlier one. An ISIN can carry an NSE row and
+    a BSE row of the same snapshot; both are returned. A position missing from
+    a later snapshot is not inferred to have been closed: its last known row
+    stays, with its `snapshot_at` for the caller to judge.
+    """
+    require_aware(as_of, "as_of")
+    m = BrokerHoldingSnapshot
+    rows = session.scalars(
+        select(m)
+        .where(m.account_label == account_label, m.as_of <= as_of)
+        .order_by(m.isin, m.snapshot_at.desc(), m.as_of.desc(), m.exchange, m.id)
+    )
+    winning: dict[str, tuple[datetime, datetime]] = {}
+    latest: list[BrokerHoldingSnapshot] = []
+    for row in rows:
+        key = winning.setdefault(row.isin, (row.snapshot_at, row.as_of))
+        if key == (row.snapshot_at, row.as_of):
+            latest.append(row)
+    return latest
+
+
+def broker_holdings_file_loaded(session: Session, *, content_hash: str) -> bool:
+    """Whether a dropped holdings file was already loaded, into either store (reruns write nothing)."""
+    for m in (BrokerHoldingSnapshot, BrokerHoldingQuarantine):
+        if session.scalar(select(m.id).where(m.content_hash == content_hash).limit(1)) is not None:
+            return True
+    return False
