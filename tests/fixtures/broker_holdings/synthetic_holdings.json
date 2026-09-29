@@ -1,0 +1,53 @@
+[
+  {
+    "tradingsymbol": "ALPHAIND",
+    "exchange": "NSE",
+    "isin": "INE000A01004",
+    "quantity": 100,
+    "t1_quantity": 0,
+    "average_price": 250.5,
+    "last_price": 300.25,
+    "close_price": 299.0,
+    "pnl": 4975.0,
+    "day_change": 1.25,
+    "product": "CNC",
+    "authorised_quantity": 0,
+    "collateral_quantity": 0,
+    "discrepancy": false,
+    "mtf": {"quantity": 0, "average_price": 0}
+  },
+  {
+    "tradingsymbol": "BETAWORKS-BE",
+    "exchange": "NSE",
+    "isin": "INE000B01002",
+    "quantity": 50,
+    "t1_quantity": 0,
+    "average_price": 1234.55,
+    "last_price": 1300.1,
+    "close_price": 1290.0,
+    "pnl": 3277.5,
+    "day_change": 10.1,
+    "product": "CNC",
+    "authorised_quantity": 0,
+    "collateral_quantity": 0,
+    "discrepancy": false,
+    "mtf": {"quantity": 0, "average_price": 0}
+  },
+  {
+    "tradingsymbol": "GAMMATECH",
+    "exchange": "BSE",
+    "isin": "INE000C01000",
+    "quantity": 10,
+    "t1_quantity": 5,
+    "average_price": 80,
+    "last_price": 75.75,
+    "close_price": 76.0,
+    "pnl": -42.5,
+    "day_change": -0.25,
+    "product": "CNC",
+    "authorised_quantity": 0,
+    "collateral_quantity": 0,
+    "discrepancy": false,
+    "mtf": {"quantity": 0, "average_price": 0}
+  }
+]

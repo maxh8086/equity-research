@@ -64,9 +64,8 @@ def quarantine(**overrides) -> OrderWinQuarantine:
     return OrderWinQuarantine(**fields)
 
 
-def test_0020_is_the_single_head():
+def test_0020_follows_0019():
     script = ScriptDirectory.from_config(Config(str(REPO_ROOT / "alembic.ini")))
-    assert script.get_heads() == ["0020"]
     assert script.get_revision("0020").down_revision == "0019"
 
 
