@@ -10,7 +10,7 @@ from decimal import Decimal
 import pytest
 
 from core.compute.drift import DriftWatch, MissingInputReason
-from core.db.pit import drift_watch_as_of
+from core.db.pit import drift_watch_as_of, drift_watchlist_as_of, DriftWatchlistEntry
 from core.db.models import Consolidation
 from core.timezones import IST
 from tests.factories import RELIANCE, make_fact
@@ -250,3 +250,53 @@ class TestDriftWatchEdgeCases:
         assert MissingInputReason.NO_GUIDANCE_CLAIMS in watch.missing_reasons
         # Trailing trend is optional, so not in missing_reasons if not computed
         # Forward PE missing reasons handled via UNKNOWN_SHARE_COUNT when data gaps exist
+
+
+class TestDriftWatchlistWiring:
+    """Test watchlist wiring: drift as a read-only source."""
+
+    def test_drift_watchlist_returns_empty_without_filings(self, session):
+        """Without financial filings, drift_watchlist returns empty list."""
+        t = datetime(2025, 1, 15, 12, 0, tzinfo=IST)
+
+        entries = drift_watchlist_as_of(session, isin=RELIANCE, as_of=t)
+
+        assert entries == []
+
+    def test_drift_watchlist_entry_wraps_drift_watch(self, session):
+        """drift_watchlist_as_of returns DriftWatchlistEntry(drift=DriftWatch)."""
+        as_of_time = datetime(2025, 1, 15, 12, 0, tzinfo=IST)
+        period_end = date(2024, 12, 31)
+
+        # Add facts and a filing to enable drift computation
+        session.add(
+            make_fact(
+                isin=RELIANCE,
+                period_start=date(2024, 1, 1),
+                period_end=period_end,
+                line_item="total_revenue",
+                value=Decimal("120000"),
+                as_of=as_of_time,
+                consolidation=Consolidation.CONSOLIDATED,
+            )
+        )
+        session.add(
+            make_fact(
+                isin=RELIANCE,
+                period_start=date(2024, 1, 1),
+                period_end=period_end,
+                line_item="profit_after_tax",
+                value=Decimal("12000"),
+                as_of=as_of_time,
+                consolidation=Consolidation.CONSOLIDATED,
+            )
+        )
+        session.flush()
+
+        entries = drift_watchlist_as_of(session, isin=RELIANCE, as_of=as_of_time)
+
+        # Should return a list with one DriftWatchlistEntry
+        assert len(entries) == 1
+        assert isinstance(entries[0], DriftWatchlistEntry)
+        assert isinstance(entries[0].drift, DriftWatch)
+        assert entries[0].source == "drift/1"
