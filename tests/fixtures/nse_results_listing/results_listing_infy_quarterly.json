@@ -1,0 +1,41 @@
+[
+  {
+    "symbol": "INFY",
+    "companyName": "Infosys Limited",
+    "isin": "INE009A01021",
+    "period": "Quarterly",
+    "toDate": "30-Sep-2024",
+    "audited": "Un-Audited",
+    "cumulative": "-",
+    "consolidated": "Standalone",
+    "xbrl": "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_112850_1276017_17102024074402.xml",
+    "format": "New",
+    "exchdisstime": "17-Oct-2024 19:44:31"
+  },
+  {
+    "symbol": "INFY",
+    "companyName": "Infosys Limited",
+    "isin": "INE009A01021",
+    "period": "Quarterly",
+    "toDate": "31-Mar-2024",
+    "audited": "Audited",
+    "cumulative": "-",
+    "consolidated": "Consolidated",
+    "xbrl": "https://nsearchives.nseindia.com/corporate/xbrl/INDAS_104589_1099938_19042024112830.xml",
+    "format": "New",
+    "exchdisstime": "19-Apr-2024 11:32:06"
+  },
+  {
+    "symbol": "INFY",
+    "companyName": "Infosys Limited",
+    "isin": "INE009A01021",
+    "period": "Quarterly",
+    "toDate": "30-Jun-2017",
+    "audited": "Un-Audited",
+    "cumulative": "-",
+    "consolidated": "Consolidated",
+    "xbrl": "-",
+    "format": "Old",
+    "exchdisstime": "14-Jul-2017 17:05:00"
+  }
+]
