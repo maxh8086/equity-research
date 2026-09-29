@@ -64,12 +64,12 @@ Session 4 — XBRL parser
 > Build the BSE/NSE XBRL parser for `financial_facts`. Deterministic element mapping, no LLM. Unmapped elements go to a quarantine table for manual review, never guessed.
 
 Session 4 is built in slices:
-- **Not yet:** a live NSE results-listing adapter (drop folder only for now); pre-2020 taxonomies (quarantined as `unsupported_taxonomy`); segment facts. Results XBRL has no gross block, only net PPE and CWIP in half-yearly and yearly balance sheets, so Session 7 needs another source for gross block (annual report notes or a later taxonomy).
+- **Not yet:** a live NSE results-listing adapter (drop folder only for now); pre-2020 taxonomies (quarantined as `unsupported_taxonomy`); segment facts. Results XBRL has no gross block, only net PPE and CWIP; the gross-block source is built (Screener schedules adapter, see `docs/finished.md`).
 
 Session 4b — shareholding pattern
 > Parse quarterly shareholding-pattern XBRL into `shareholding_pattern`: share counts (not just percentages) for promoter, FII/FPI, DII by type and public, plus pledged shares. `as_of` must be after quarter end. Same deterministic mapping and quarantine as Session 4.
 
-- **Not yet:** a live NSE shareholding listing adapter (drop folder only; planned as Session 7d); named-holder facts (typed dimensions: each promoter and each holder above 1%) are counted and deferred.
+- **Not yet:** the live NSE shareholding listing adapter is built (7d, see `docs/finished.md`); named-holder facts (typed dimensions: each promoter and each holder above 1%) are counted and deferred.
 
 Session 5 — ratios
 > Implement ratio computation in `core/compute/ratios.py`. Pure functions, Decimal throughout, property tests. ROCE, margins, debt ratios, incremental ROCE.
@@ -101,15 +101,9 @@ Session 6 — validation
 ## Week 3 — First real signal
 
 Session 7c — corporate actions and ownership wiring (remainder)
-> The five ownership and catalyst tables, their drop-folder adapters, the live NSE announcements adapter and the ownership rules (false-signal filters, net aggregation, critical alerts) are done (see `docs/finished.md`). What remains: the full `corporate_action` lifecycle including fund-raising and dilution; the dilution and corporate-action rules from CLAUDE.md (pro-forma EPS, use-of-proceeds claims written to `guidance_claim`); the demerger milestone chain (scheme of arrangement, board, shareholder and creditor approval, NCLT order, record date, listing) as `scheduled_event` rows, where the entitlement ratio from the scheme document adjusts no price until a human verifies it; any ownership rule in CLAUDE.md not yet covered by `core/compute/ownership_rules.py`, and feeding it real holdings once they exist (the X and Y thresholds stay caller-supplied).
+> The five ownership and catalyst tables, their adapters, the live NSE announcements adapter, the ownership rules, and the corporate_action lifecycle with dilution facts and the demerger chain are done (see `docs/finished.md`). What remains: use-of-proceeds extraction, written to `guidance_claim`; any ownership rule in CLAUDE.md not yet covered by `core/compute/ownership_rules.py`, and feeding it real holdings once they exist (the X and Y thresholds stay caller-supplied).
 
-Session 7d — live shareholding listing
-> Build `nse_shareholding_listing`, a `web_scrape` adapter (switch `EQUITY_SOURCE_NSE_SHAREHOLDING_LISTING_ENABLED`, off in `commercial` mode) that feeds the Session 4c parser and stores, with no drop folder in between. It reads NSE's shareholding-pattern listing (`/api/corporate-share-holdings-master?index=equities&symbol=<SYMBOL>`, the data behind the "Shareholding Patterns" page) for the 100-company universe, throttled and with the client identified, sharing the NSE session handling built in 7c. It then downloads each new XBRL file from `nsearchives.nseindia.com/corporate/xbrl/`, which is `official_archive`.
-> - Every listing response goes to blob storage before parsing, and is kept. The listing overwrites itself: a revised filing replaces the original's row and link (HDFCLIFE, March 2026), so only stored snapshots preserve the original.
-> - `published_at` is the row's `broadcastDate` (IST). The file-name timestamp check stays: NSE has replaced a file weeks after its listed broadcast without a revision flag (HDFCBANK, September 2025), and that file is quarantined as `implausible_as_of`.
-> - The listing's `isin` field is never used: it holds old or non-equity ISINs for several companies (INFY, HDFCBANK, VEDL, INDUSINDBK). The ISIN comes from the file, bhavcopy and index lists, as in 4c.
-> - Revised rows (`revisionDate`, `revisionRemark`) load as another filing with a later `as_of`; the remark is stored as text, and nothing is read from it.
-> - Strict Pydantic model for the listing rows, contract tests on recorded responses, and a daily canary. If NSE blocks the client, never escalate: fall back to the drop folder, where a hand-downloaded listing CSV (the page's "Download (.csv)") can supply `published_at` for the files beside it.
+Session 7d — live shareholding listing ✅ recorded in [docs/finished.md](docs/finished.md)
 
 Session 7e — order wins
 > Build the order-win detector on the Session 7c announcement feed: hardcoded include and exclude keyword tables under a `rule_version`, matched by code against the announcement subject and description. Value, customer and execution period come from the PDF as a model-returned verbatim quote with the number parsed and checked by code (R1); anything else is quarantined. Write `order_win`, with `order_status` resolved later against subsequent filings. The metric is order value over trailing twelve-month revenue, annualised across the stated execution period. Suppress the signal when the stock has already run before the broadcast time, and report the gate that blocked it. Screener full-text search is not the source: robots.txt disallows `/*?q=`.
