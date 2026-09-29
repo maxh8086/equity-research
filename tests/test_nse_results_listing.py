@@ -295,7 +295,7 @@ def test_reparse_rereads_stored_bytes_without_the_network(session, universe):
 
 
 def test_block_on_the_listing_stops_the_whole_run(session, universe):
-    _index_list(session, "TCS", "INE467B01029", datetime(2024, 4, 15, 9, 0, tzinfo=IST))
+    _index_list(session, "TCS", "INE467B01029", datetime(2024, 4, 16, 9, 0, tzinfo=IST))
     nse = Nse(block="/api/corporates-financial-results")
     result = nse.adapter().run(_ctx(session))
     assert result.status is RunStatus.FAILED and "blocked" in result.detail.lower()
@@ -304,7 +304,7 @@ def test_block_on_the_listing_stops_the_whole_run(session, universe):
 
 
 def test_block_on_the_homepage_stops_before_any_api_call(session, universe):
-    nse = Nse(block="https://www.nseindia.com/")
+    nse = Nse(block="https://www.nseindia.com")
     result = nse.adapter().run(_ctx(session))
     assert result.status is RunStatus.FAILED and "blocked" in result.detail.lower()
     assert len(nse.requests) == 1

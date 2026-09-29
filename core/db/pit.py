@@ -151,6 +151,29 @@ def raw_source_file_as_of(
     ).first()
 
 
+def raw_source_file_by_url_as_of(
+    session: Session, *, source_url: str, file_as_of: datetime, extracted_by: str, as_of: datetime
+) -> RawSourceFile | None:
+    """The record of a file one adapter already stored from `source_url`, published at `file_as_of`.
+
+    A live adapter asks this before downloading, so a rerun re-reads the stored
+    bytes instead of fetching (and recording) the same file again.
+    """
+    require_aware(as_of, "as_of")
+    r = RawSourceFile
+    return session.scalars(
+        select(r)
+        .where(
+            r.source_url == source_url,
+            r.as_of == file_as_of,
+            r.extracted_by == extracted_by,
+            r.as_of <= as_of,
+        )
+        .order_by(r.id)
+        .limit(1)
+    ).first()
+
+
 def raw_source_files_as_of(
     session: Session, *, extracted_by: str, as_of: datetime
 ) -> list[RawSourceFile]:

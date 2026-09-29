@@ -84,6 +84,12 @@ class Settings(BaseSettings):
     # Shares session handling (ingest/nse_session) with other NSE adapters.
     nse_shareholding_listing_api_url: str = "https://www.nseindia.com/api/corporate-share-holdings-master"
 
+    # NSE financial-results listing API (ingest/nse_results_listing): web_scrape adapter.
+    # Shares session handling and throttle (ingest/nse_session, nse_min_interval_seconds).
+    nse_results_listing_api_url: str = "https://www.nseindia.com/api/corporates-financial-results"
+    # The listing's `period` values to request for each symbol.
+    nse_results_listing_periods: list[str] = Field(default_factory=lambda: ["Quarterly"])
+
     # Upstox API v3 historical candles (ingest/upstox): official_api, keyed by ISIN.
     # The access token expires daily and a human logs in to get it (CLAUDE.md
     # "Integrations"); it is never stored anywhere but this env var.
