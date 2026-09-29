@@ -529,6 +529,13 @@ compliance, and multi-user support. This is a note, not legal advice.
 - Money as `Decimal`, never float
 - All timestamps timezone-aware, IST for market data
 - Migrations via Alembic; every schema change is a migration
+- New migrations take revision id `NNNN_short_slug` (next number after the
+  highest on origin/main after `git fetch`, plus a slug from the table or
+  feature, e.g. `0019_credit_watch`) in a file named `<revision>.py`, so two
+  sessions claiming the same number still get different ids and
+  `tests/test_migrations.py` fails on a diverged head. Before merging, fetch
+  origin/main and rebase your `down_revision` onto its head. Existing ids
+  are unchanged, so a deployed database needs no stamp.
 - Every venv has a pinned `requirements.txt` next to it so it can be
   rebuilt from scratch. Regenerate it in the same change as any dependency
   add/remove/upgrade: `pip freeze --exclude-editable` (drop pip/setuptools).
