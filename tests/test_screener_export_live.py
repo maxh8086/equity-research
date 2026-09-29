@@ -407,7 +407,9 @@ def test_persistent_overload_is_a_problem_not_a_block(session, clock, listed):
     assert result.status is RunStatus.FAILED and "IOC" in result.detail
     assert server.paths().count("GET /company/IOC/consolidated/") == 2  # one retry, no more
     assert any("GAIL" in p for p in server.paths())  # the run went on
-    assert _count(session, ScreenerExport) == 2
+    # The fake serves one workbook for every company, so GAIL's copy counts as already loaded (same bytes).
+    assert "POST " + live.EXPORT_PATH.format(company_id="1003") in server.paths()
+    assert _count(session, ScreenerExport) == 1
 
 
 def test_non_workbook_answer_is_not_stored(session, clock, listed):

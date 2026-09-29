@@ -4,7 +4,7 @@ from collections.abc import Mapping
 from pathlib import Path
 
 from dotenv import dotenv_values
-from pydantic import Field, SecretStr, TypeAdapter
+from pydantic import AliasChoices, Field, SecretStr, TypeAdapter
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from core.sources import DeploymentMode
@@ -15,7 +15,9 @@ _BOOL = TypeAdapter(bool)
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="EQUITY_", env_file=ENV_FILE, extra="ignore")
+    model_config = SettingsConfigDict(
+        env_prefix="EQUITY_", env_file=ENV_FILE, extra="ignore", populate_by_name=True
+    )
 
     database_url: str = "postgresql+psycopg://equity:equity_local_dev@127.0.0.1:5433/equity"
     test_database_url: str = (
@@ -101,6 +103,20 @@ class Settings(BaseSettings):
     # Screener company schedules API (ingest/screener_schedules): web_scrape adapter.
     screener_schedules_base_url: str = "https://www.screener.in"
     screener_schedules_min_interval_seconds: float = 3.0
+
+    # Screener logged-in workbook export (ingest/screener_export_live): web_scrape adapter.
+    # The login is read from SCREENER_USERNAME / SCREENER_PASSWORD (the names the user's other
+    # Screener project uses); EQUITY_SCREENER_* also work. Never logged, stored or echoed.
+    screener_username: SecretStr | None = Field(
+        default=None, validation_alias=AliasChoices("SCREENER_USERNAME", "EQUITY_SCREENER_USERNAME")
+    )
+    screener_password: SecretStr | None = Field(
+        default=None, validation_alias=AliasChoices("SCREENER_PASSWORD", "EQUITY_SCREENER_PASSWORD")
+    )
+    screener_export_live_base_url: str = "https://www.screener.in"
+    screener_export_live_min_interval_seconds: float = 3.0
+    screener_export_live_backoff_seconds: float = 60.0
+    screener_export_live_consolidated: bool = True
 
 
 def parse_source_switches(environ: Mapping[str, str]) -> dict[str, bool]:

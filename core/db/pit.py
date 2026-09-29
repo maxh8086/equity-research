@@ -2691,3 +2691,26 @@ def broker_holdings_file_loaded(session: Session, *, content_hash: str) -> bool:
         if session.scalar(select(m.id).where(m.content_hash == content_hash).limit(1)) is not None:
             return True
     return False
+
+
+def raw_source_file_by_hash_url_as_of(
+    session: Session, *, content_hash: str, source_url: str, extracted_by: str, as_of: datetime
+) -> RawSourceFile | None:
+    """The record of a file one adapter already stored from `source_url` with these exact bytes.
+
+    A live export adapter asks this after a download, so a rerun that gets the
+    same workbook again re-uses the stored record instead of adding another.
+    """
+    require_aware(as_of, "as_of")
+    r = RawSourceFile
+    return session.scalars(
+        select(r)
+        .where(
+            r.content_hash == content_hash,
+            r.source_url == source_url,
+            r.extracted_by == extracted_by,
+            r.as_of <= as_of,
+        )
+        .order_by(r.id)
+        .limit(1)
+    ).first()
