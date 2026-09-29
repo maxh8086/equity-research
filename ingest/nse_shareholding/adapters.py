@@ -28,7 +28,7 @@ from ingest.base import Adapter, AdapterContext, RawDocument, RunResult, RunStat
 from ingest.http import AccessBlocked, PoliteClient
 from ingest.nse_session import create_nse_client, warm_up_nse_session
 from ingest.nse_shareholding.schema import ShareholdingListingResponse
-from ingest.nse_shp.parser import parse_filing
+from ingest.nse_shp.adapters import load_filing
 
 TARGET_STORES = ("shareholding_pattern", "shareholding_filing", "shareholding_quarantine")
 RULE_VERSION = "shareholding_listing_v1"
@@ -60,9 +60,11 @@ class Tally:
     symbols_processed: int = 0
     listings_fetched: int = 0
     xbrl_files_downloaded: int = 0
-    raw_files_stored: int = 0
-    rows_written: int = 0
-    rows_already_loaded: int = 0
+    filings: int = 0  # Number of filings successfully parsed
+    rows_written: int = 0  # Total number of shareholding pattern rows written
+    quarantined: int = 0  # Number of quarantine entries
+    rejected_files: int = 0  # Number of files rejected
+    already_loaded: int = 0  # Number of files already parsed
     problems: list[str] = field(default_factory=list)
 
     def result(self, adapter_name: str) -> RunResult:
@@ -74,24 +76,29 @@ class Tally:
             detail_parts.append(f"{self.listings_fetched} listings fetched")
         if self.xbrl_files_downloaded:
             detail_parts.append(f"{self.xbrl_files_downloaded} XBRL files downloaded")
-        if self.raw_files_stored:
-            detail_parts.append(f"{self.raw_files_stored} raw files stored")
+        if self.filings:
+            detail_parts.append(f"{self.filings} filings parsed")
         if self.rows_written:
             detail_parts.append(f"{self.rows_written} rows written")
-        if self.rows_already_loaded:
-            detail_parts.append(f"{self.rows_already_loaded} files already loaded")
+        if self.quarantined:
+            detail_parts.append(f"{self.quarantined} quarantined")
+        if self.rejected_files:
+            detail_parts.append(f"{self.rejected_files} files rejected")
+        if self.already_loaded:
+            detail_parts.append(f"{self.already_loaded} already loaded")
         if self.problems:
             detail_parts.append("; ".join(self.problems))
 
         detail = ", ".join(detail_parts) if detail_parts else "no listings"
-        failed = bool(self.problems)
+        failed = bool(self.rejected_files or self.problems)
 
         return RunResult(
             adapter_name,
             RunStatus.FAILED if failed else RunStatus.SUCCEEDED,
             detail,
-            raw_files=self.raw_files_stored,
+            raw_files=self.xbrl_files_downloaded,
             rows_written=self.rows_written,
+            quarantined=self.quarantined,
         )
 
 
@@ -180,7 +187,6 @@ class NseShareholdingListing(Adapter):
                             media_type=response.headers.get("content-type", "application/json"),
                         )
                         tally.listings_fetched += 1
-                        tally.raw_files_stored += 1
                     except (IOError, OSError) as exc:
                         tally.problems.append(f"blob store error for {symbol} listing: {type(exc).__name__}: {exc}")
                         continue
@@ -216,33 +222,18 @@ class NseShareholdingListing(Adapter):
                                 media_type=xbrl_response.headers.get("content-type", "application/xml"),
                             )
                             tally.xbrl_files_downloaded += 1
-                            tally.raw_files_stored += 1
                         except (IOError, OSError) as exc:
                             tally.problems.append(f"blob store error for {symbol} XBRL: {type(exc).__name__}: {exc}")
                             continue
 
-                        # Check idempotence: has this file already been parsed?
-                        is_loaded, quarantines = shareholding_filing_loaded_as_of(
-                            ctx.session,
-                            content_hash=xbrl_doc.content_hash,
-                            file_as_of=xbrl_doc.as_of,
-                            rule_version=RULE_VERSION,
-                            as_of=as_of,
-                        )
-
-                        if is_loaded:
-                            tally.rows_already_loaded += 1
-                            continue
-
-                        # Parse XBRL file (reuse existing parser)
+                        # Parse XBRL file and write rows using the existing drop-folder adapter's parser
+                        # (Reuse the same load_filing logic to ensure consistency)
                         try:
-                            parsed = parse_filing(xbrl_response.content.decode("utf-8"))
+                            # load_filing modifies tally in place
+                            load_filing(self, ctx, xbrl_doc, tally)
                         except Exception as exc:
-                            tally.problems.append(f"XBRL parse error for {symbol}: {type(exc).__name__}: {exc}")
+                            tally.problems.append(f"XBRL load_filing error for {symbol}: {type(exc).__name__}: {exc}")
                             continue
-
-                        # TODO: Write parsed rows to database using existing shareholding pattern writer
-                        # This will be done in a follow-up pit.py reader and commit per the CLAUDE.md pattern
 
         except (AccessBlocked, httpx.HTTPError, ValueError):
             # Explicitly handled errors already; re-raise unexpected errors
