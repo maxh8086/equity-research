@@ -130,11 +130,6 @@ Session 9 — guidance extraction ✅ recorded in [docs/finished.md](docs/finish
 Session 10 — resolution ✅ recorded in [docs/finished.md](docs/finished.md)
 - **Not yet:** the 5% point tolerance and the two-call SILENT window are unvalidated placeholders (choose on one period, measure on a later one); quarterly balance-sheet and cash-flow facts may not be stored, so claims on them stay OPEN; metrics with no XBRL source (gross margin, order book, volumes, store counts and the rest) stay unresolvable until a source exists; arithmetic is checked against hand-computed examples, not yet against Screener or real filings; bank, NBFC and insurer filers are marked unresolvable rather than graded on their own line items; whether SILENT should count against management in the delivery rate is undecided.
 
-Session 11 — output
-> Build a CLI report: per company, what management promised, what landed, what went silent, and the delivery rate weighted by hedge strength. Model the layout on an earnings note: headline, what's new this quarter, a table of actual versus guidance versus prior period, guidance that went silent, and a sources list with a dated link for every figure. No comparison with consensus estimates (there's no free Indian consensus feed), and the schema rejects unsourced figures.
-
-**MVP exit criteria:** run it on your five largest holdings, four quarters back. If the delivery rates don't surprise you, stop building and reconsider. If they do, you have something no Indian vendor sells.
-
 ---
 
 ## Working rhythm
