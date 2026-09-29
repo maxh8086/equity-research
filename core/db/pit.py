@@ -93,6 +93,7 @@ from core.db.models import (
     IndexSnapshotQuarantine,
     NseBhavcopyQuarantine,
     NseBhavcopyRow,
+    OrderWinFact,
     RatingAction,
     RatingAgency,
     RatioBasis,
@@ -2611,3 +2612,22 @@ def screener_schedules_series_as_of(
         .order_by(m.period_end, m.as_of.desc(), m.id.desc())
     )
     return list(session.scalars(stmt))
+
+
+def order_wins_as_of(session: Session, *, isin: str, as_of: datetime) -> list[OrderWinFact]:
+    """Order wins for `isin` known at `as_of`, newest announcement first (Session 7e).
+
+    One row per announcement: the latest version (by as_of, then id) whose
+    as_of is at or before the given time, so an announcement made later, or a
+    re-extraction under a newer rule made later, is never visible. Order
+    intensity is the caller's arithmetic, with `trailing_revenue_as_of`.
+    """
+    require_aware(as_of, "as_of")
+    m = OrderWinFact
+    rows = session.scalars(
+        select(m).where(m.isin == isin, m.as_of <= as_of).order_by(m.as_of.desc(), m.id.desc())
+    )
+    latest: dict[str, OrderWinFact] = {}
+    for row in rows:
+        latest.setdefault(row.announcement_key, row)
+    return sorted(latest.values(), key=lambda r: (r.announced_on, r.id), reverse=True)
