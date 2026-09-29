@@ -160,8 +160,8 @@ target_stores  = ("screener_page_snapshot",)
   makes the export loop painless, this adapter earns its keep only as a
   cross-check. You asked for it after I flagged that, so it is specified here —
   but build it *after* the export round-trip is green, not before.
-- Migration **`0011`**, created on the `next-session-9036bc` branch
-  (`next-session-938ec0` is already at `0010_screener_export`).
+- Migration **`0012`** (`0010_guidance_claim` and `0011_screener_export`
+  are taken).
 
 ---
 

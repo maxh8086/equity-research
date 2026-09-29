@@ -16,8 +16,13 @@ which is what the loader compares before spending another call. And there is
 no `direction` column: whether guidance was raised or lowered is a comparison
 between two claims, computed at read time from what was known at `t`.
 
-Revision ID: 0011
-Revises: 0010
+NOTE ON THE REVISION NUMBER: branch claude/next-session-9036bc carries its own
+`0010_screener_export`. Whichever lands second is renumbered to 0011 and has
+its `down_revision` pointed at the first; two heads at 0010 will not merge on
+their own.
+
+Revision ID: 0010
+Revises: 0009
 Create Date: 2026-09-29
 """
 
@@ -27,8 +32,8 @@ import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.dialects import postgresql
 
-revision: str = "0011"
-down_revision: str | None = "0010"
+revision: str = "0010"
+down_revision: str | None = "0009"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
