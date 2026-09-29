@@ -541,6 +541,13 @@ class CorporateActionType(StrEnum):
     DIVIDEND = "dividend"
     DEMERGER = "demerger"
     ISIN_CHANGE = "isin_change"
+    # Fund-raising: `shares_new` is the shares issued, or issuable on conversion
+    # (warrants, ESOPs, FCCBs), so dilution counts them before they convert.
+    QIP = "qip"
+    PREFERENTIAL_ALLOTMENT = "preferential_allotment"
+    WARRANTS = "warrants"
+    ESOP = "esop"
+    FCCB = "fccb"
 
 
 class CorporateActionStatus(StrEnum):
@@ -615,6 +622,8 @@ class CorporateAction(ProvenanceMixin, Base):
     ratio_basis: Mapped[RatioBasis] = mapped_column(RATIO_BASIS, nullable=False)
     verified_by: Mapped[str | None] = mapped_column(Text, nullable=True)
     purpose: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Fund-raising only: NULL when the source does not say who is allotted.
+    allottee_is_promoter: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     source_row: Mapped[int] = mapped_column(Integer, nullable=False)  # 1-based data row in the file
     rule_version: Mapped[str] = mapped_column(Text, nullable=False)
 
@@ -642,6 +651,11 @@ class CorporateAction(ProvenanceMixin, Base):
             " WHEN 'dividend' THEN dividend_per_share >= 0"
             " WHEN 'demerger' THEN retained_fraction > 0 AND retained_fraction < 1"
             " WHEN 'isin_change' THEN new_isin IS NOT NULL"
+            " WHEN 'qip' THEN COALESCE(shares_new > 0 AND issue_price > 0, false)"
+            " WHEN 'preferential_allotment' THEN COALESCE(shares_new > 0 AND issue_price > 0, false)"
+            " WHEN 'warrants' THEN COALESCE(shares_new > 0 AND issue_price > 0, false)"
+            " WHEN 'esop' THEN COALESCE(shares_new > 0, false)"
+            " WHEN 'fccb' THEN COALESCE(shares_new > 0, false)"
             " END",
             name="ck_corporate_action_terms",
         ),
@@ -1628,6 +1642,13 @@ class ScheduledEventType(StrEnum):
     BUYBACK_CLOSE = "buyback_close"
     OFS_OPEN = "ofs_open"
     OFS_CLOSE = "ofs_close"
+    # Demerger milestone chain (a record date reuses RECORD_DATE)
+    DEMERGER_SCHEME = "demerger_scheme"
+    DEMERGER_BOARD = "demerger_board"
+    DEMERGER_SHAREHOLDER = "demerger_shareholder"
+    DEMERGER_CREDITOR = "demerger_creditor"
+    DEMERGER_NCLT_ORDER = "demerger_nclt_order"
+    DEMERGER_LISTING = "demerger_listing"
 
 
 SCHEDULED_EVENT_TYPE = _pg_enum(ScheduledEventType, "scheduled_event_type")

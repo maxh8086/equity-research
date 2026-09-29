@@ -123,6 +123,6 @@ def test_announced_fundraising_may_lack_terms(session: Session):
 
 @pytest.mark.db
 def test_existing_terms_still_enforced(session: Session):
-    session.add(_row(action_type=CorporateActionType.BONUS, shares_new=None, issue_price=None))
+    session.add(_row(action_type=CorporateActionType.BONUS, shares_new=0, shares_held=1, issue_price=None))
     with pytest.raises(IntegrityError, match="ck_corporate_action_terms"):
         session.flush()
