@@ -4,6 +4,7 @@ from enum import StrEnum
 
 from sqlalchemy import (
     BigInteger,
+    Boolean,
     CheckConstraint,
     Date,
     DateTime,
@@ -20,6 +21,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from core.compute.guidance import ClaimSection, HedgeStrength, Specificity, Unit
+from core.compute.ratings import CommonRatingScale, RatingAgency, RatingOutlook
 from core.db.base import Base, ProvenanceMixin
 from core.timezones import require_aware
 
@@ -151,6 +153,10 @@ class RawSourceFile(ProvenanceMixin, Base):
 class IndexCode(StrEnum):
     NIFTY_50 = "nifty_50"
     NIFTY_NEXT_50 = "nifty_next_50"
+    MSCI_EM = "msci_em"
+    MSCI_INDIA = "msci_india"
+    FTSE_ALL_WORLD = "ftse_all_world"
+    BSE_SENSEX = "bse_sensex"
 
 
 class EntityLinkBasis(StrEnum):
@@ -1256,4 +1262,465 @@ class GuidanceQuarantine(ProvenanceMixin, Base):
             name="ck_guidance_quarantine_prompt_hash_sha256",
         ),
         Index("ix_guidance_quarantine_pit", "as_of"),
+    )
+
+
+# --- S7b technical screens ---
+
+
+class TechnicalSignalType(StrEnum):
+    VOLUME_SPIKE_UP = "volume_spike_up"
+    VOLUME_SPIKE_DOWN = "volume_spike_down"
+    CONSOLIDATION_BREAKOUT = "consolidation_breakout"
+    CONSOLIDATION_BREAKDOWN = "consolidation_breakdown"
+    ATH_BREAKOUT = "ath_breakout"
+
+
+class TechnicalSignal(ProvenanceMixin, Base):
+    """Store ⑩: technical signals computed by code from adjusted daily closes.
+
+    All prices passed in must already be adjusted for corporate actions.
+    Severity and type are always computed by code (R1). Append-only,
+    enforced by a DB trigger. No model writes to this table.
+    `rule_version` tags every parameter set.
+    """
+
+    __tablename__ = "technical_signal"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    signal_type: Mapped[TechnicalSignalType] = mapped_column(
+        _pg_enum(TechnicalSignalType, "technical_signal_type"), nullable=False
+    )
+    signal_date: Mapped[date] = mapped_column(Date, nullable=False)
+    close_price: Mapped[Decimal] = mapped_column(Numeric(20, 4), nullable=False)
+    volume: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    volume_median_50d: Mapped[Decimal | None] = mapped_column(Numeric(20, 4), nullable=True)
+    price_return_1d: Mapped[Decimal | None] = mapped_column(Numeric(10, 6), nullable=True)
+    consolidation_start: Mapped[date | None] = mapped_column(Date, nullable=True)
+    consolidation_high: Mapped[Decimal | None] = mapped_column(Numeric(20, 4), nullable=True)
+    consolidation_low: Mapped[Decimal | None] = mapped_column(Numeric(20, 4), nullable=True)
+    ath_since: Mapped[date | None] = mapped_column(Date, nullable=True)
+    adjustment_factor: Mapped[Decimal] = mapped_column(Numeric(20, 10), nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_technical_signal_isin_format"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_technical_signal_no_model"),
+        CheckConstraint("close_price > 0", name="ck_technical_signal_close_price_positive"),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_technical_signal_content_hash_sha256"
+        ),
+        UniqueConstraint(
+            "isin", "signal_type", "signal_date", "rule_version",
+            name="uq_technical_signal_version",
+        ),
+        Index("ix_technical_signal_isin_date", "isin", "signal_date"),
+    )
+
+
+class WatchlistEntryStatus(StrEnum):
+    OPEN = "open"
+    PROMOTED = "promoted"
+    EXPIRED = "expired"
+    INVALIDATED = "invalidated"
+
+
+class WatchlistEntry(ProvenanceMixin, Base):
+    """Store ⑪: watchlist entries opened by technical signals.
+
+    A technical signal only opens an entry; promotion to ADD_REVIEW requires
+    the ADD_REVIEW gates (CLAUDE.md Decision support). No model writes to
+    this table. Append-only, enforced by a DB trigger.
+    """
+
+    __tablename__ = "watchlist_entry"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    status: Mapped[WatchlistEntryStatus] = mapped_column(
+        _pg_enum(WatchlistEntryStatus, "watchlist_entry_status"), nullable=False
+    )
+    opened_by_signal_id: Mapped[int] = mapped_column(
+        BigInteger, ForeignKey("technical_signal.id"), nullable=False
+    )
+    opened_date: Mapped[date] = mapped_column(Date, nullable=False)
+    status_date: Mapped[date] = mapped_column(Date, nullable=False)
+    invalidation_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_watchlist_entry_isin_format"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_watchlist_entry_no_model"),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_watchlist_entry_content_hash_sha256"
+        ),
+        Index("ix_watchlist_entry_isin_status", "isin", "status"),
+        Index("ix_watchlist_entry_status_date", "status", "status_date"),
+    )
+
+
+# --- Credit rating actions (session 8) ---
+
+
+class RatingAction(ProvenanceMixin, Base):
+    """Store ⑧: Credit rating actions (CRISIL/ICRA/CARE/India Ratings/Brickwork/Acuite).
+
+    `action_date` is the date the agency published the rating action.
+    `raw_rating` is the verbatim string from the agency; `common_scale` is the
+    normalised equivalent. `severity` and direction flags are computed by code,
+    never by a model (R1). `evidence_url` is required on every row (CLAUDE.md).
+    Append-only.
+    """
+
+    __tablename__ = "rating_action"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    agency: Mapped[RatingAgency] = mapped_column(
+        _pg_enum(RatingAgency, "rating_agency"), nullable=False
+    )
+    instrument_type: Mapped[str] = mapped_column(Text, nullable=False)
+    raw_rating: Mapped[str] = mapped_column(Text, nullable=False)
+    common_scale: Mapped[CommonRatingScale] = mapped_column(
+        _pg_enum(CommonRatingScale, "common_rating_scale"), nullable=False
+    )
+    outlook: Mapped[RatingOutlook | None] = mapped_column(
+        _pg_enum(RatingOutlook, "rating_outlook"), nullable=True
+    )
+    action_date: Mapped[date] = mapped_column(Date, nullable=False)
+    severity: Mapped[int] = mapped_column(Integer, nullable=False)
+    is_upgrade: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    is_downgrade: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    is_withdrawn: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    evidence_url: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_rating_action_isin_format"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_rating_action_no_model"),
+        CheckConstraint(
+            "evidence_url IS NOT NULL AND evidence_url != ''",
+            name="ck_rating_action_evidence_url_required",
+        ),
+        CheckConstraint(
+            "severity BETWEEN 1 AND 5", name="ck_rating_action_severity_range"
+        ),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_rating_action_content_hash_sha256"
+        ),
+        Index("ix_rating_action_isin_date", "isin", "action_date"),
+    )
+
+
+# --- S7 company_event ---
+
+
+class CompanyEventSeverity(StrEnum):
+    CRITICAL = "critical"
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+
+class CompanyEventType(StrEnum):
+    CWIP_TO_GROSS_BLOCK = "cwip_to_gross_block"
+    REVENUE_STEP_UP = "revenue_step_up"
+    MARGIN_COMPRESSION = "margin_compression"
+    DEBT_SPIKE = "debt_spike"
+    PROMOTER_PLEDGE = "promoter_pledge"
+    PROMOTER_PLEDGE_INVOKED = "promoter_pledge_invoked"
+    RATING_DOWNGRADE = "rating_downgrade"
+    RATING_WITHDRAWAL = "rating_withdrawal"
+    RAID_REGULATORY = "raid_regulatory"
+
+
+class CompanyEvent(ProvenanceMixin, Base):
+    """Store : Red flags and commissioning signals, computed by code.
+
+    Severity is always computed by code, never asserted by a model (R1).
+    Every row requires an evidence_url (CLAUDE.md). Append-only.
+    """
+
+    __tablename__ = "company_event"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    event_type: Mapped[CompanyEventType] = mapped_column(
+        _pg_enum(CompanyEventType, "company_event_type"), nullable=False
+    )
+    severity: Mapped[CompanyEventSeverity] = mapped_column(
+        _pg_enum(CompanyEventSeverity, "company_event_severity"), nullable=False
+    )
+    event_date: Mapped[date] = mapped_column(Date, nullable=False)
+    metric: Mapped[str | None] = mapped_column(Text, nullable=True)
+    value: Mapped[Decimal | None] = mapped_column(Numeric(28, 6), nullable=True)
+    threshold: Mapped[Decimal | None] = mapped_column(Numeric(28, 6), nullable=True)
+    evidence_url: Mapped[str] = mapped_column(Text, nullable=False)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+    detail: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    __table_args__ = (
+        CheckConstraint(
+            "isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_company_event_isin_format"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_company_event_no_model"),
+        CheckConstraint(
+            "evidence_url IS NOT NULL AND evidence_url != ''",
+            name="ck_company_event_evidence_url_required",
+        ),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_company_event_content_hash_sha256"
+        ),
+        Index("ix_company_event_isin_date", "isin", "event_date"),
+        Index("ix_company_event_type_date", "event_type", "event_date"),
+    )
+
+
+# --- Ownership events and catalysts (session 7c) ---
+
+
+class AcquisitionMode(StrEnum):
+    OPEN_MARKET = "open_market"
+    PREFERENTIAL_ALLOTMENT = "preferential_allotment"
+    ESOS_ESOP = "esos_esop"
+    OFF_MARKET = "off_market"
+    GIFT = "gift"
+    INHERITANCE = "inheritance"
+    PLEDGE_INVOCATION = "pledge_invocation"
+    OTHER = "other"
+
+
+ACQUISITION_MODE = _pg_enum(AcquisitionMode, "acquisition_mode")
+
+
+class InsiderTrade(ProvenanceMixin, Base):
+    """Promoter / insider trade disclosure as filed with NSE/BSE.
+
+    Each row is one trade event. Append-only; a correction is a new row
+    with a later `as_of`.
+    """
+
+    __tablename__ = "insider_trade"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    person_name: Mapped[str] = mapped_column(Text, nullable=False)
+    person_category: Mapped[str] = mapped_column(Text, nullable=False)
+    acquisition_mode: Mapped[AcquisitionMode] = mapped_column(ACQUISITION_MODE, nullable=False)
+    trade_date: Mapped[date] = mapped_column(Date, nullable=False)
+    quantity: Mapped[Decimal] = mapped_column(Numeric(28, 0), nullable=False)
+    price_per_share: Mapped[Decimal] = mapped_column(Numeric(28, 6), nullable=False)
+    post_trade_holding_pct: Mapped[Decimal | None] = mapped_column(Numeric(10, 6), nullable=True)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_insider_trade_isin_format"),
+        CheckConstraint("model_version IS NULL", name="ck_insider_trade_no_model"),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_insider_trade_content_hash_sha256"
+        ),
+        Index("ix_insider_trade_isin_date", "isin", "trade_date"),
+    )
+
+
+class DisclosureType(StrEnum):
+    SAST_5PCT = "sast_5pct"
+    SAST_10PCT = "sast_10pct"
+    SAST_25PCT = "sast_25pct"
+    SAST_CREEPING = "sast_creeping"
+    PLEDGE_CREATED = "pledge_created"
+    PLEDGE_RELEASED = "pledge_released"
+    PLEDGE_INVOKED = "pledge_invoked"
+    RECLASSIFICATION = "reclassification"
+
+
+DISCLOSURE_TYPE = _pg_enum(DisclosureType, "disclosure_type")
+
+
+class StakeDisclosure(ProvenanceMixin, Base):
+    """Large-stake crossing or pledge event disclosure (SAST / pledge regulations).
+
+    Append-only; each regulatory trigger is a separate row.
+    """
+
+    __tablename__ = "stake_disclosure"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    acquirer_name: Mapped[str] = mapped_column(Text, nullable=False)
+    disclosure_type: Mapped[DisclosureType] = mapped_column(DISCLOSURE_TYPE, nullable=False)
+    disclosure_date: Mapped[date] = mapped_column(Date, nullable=False)
+    shares_acquired: Mapped[Decimal | None] = mapped_column(Numeric(28, 0), nullable=True)
+    post_acquisition_pct: Mapped[Decimal | None] = mapped_column(Numeric(10, 6), nullable=True)
+
+    __table_args__ = (
+        CheckConstraint(
+            "isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_stake_disclosure_isin_format"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_stake_disclosure_no_model"),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_stake_disclosure_content_hash_sha256"
+        ),
+        Index("ix_stake_disclosure_isin_date", "isin", "disclosure_date"),
+    )
+
+
+class DealType(StrEnum):
+    BULK = "bulk"
+    BLOCK = "block"
+
+
+DEAL_TYPE = _pg_enum(DealType, "deal_type")
+
+
+class DealSide(StrEnum):
+    INFLOW = "inflow"  # Cash inflow: client acquiring shares
+    OUTFLOW = "outflow"  # Cash outflow: client selling shares
+
+
+DEAL_SIDE = _pg_enum(DealSide, "deal_side")
+
+
+class BulkBlockDeal(ProvenanceMixin, Base):
+    """Bulk or block deal record as published by NSE/BSE.
+
+    Append-only; each deal is a separate row.
+    """
+
+    __tablename__ = "bulk_block_deal"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    deal_type: Mapped[DealType] = mapped_column(DEAL_TYPE, nullable=False)
+    deal_date: Mapped[date] = mapped_column(Date, nullable=False)
+    client_name: Mapped[str] = mapped_column(Text, nullable=False)
+    quantity: Mapped[Decimal] = mapped_column(Numeric(28, 0), nullable=False)
+    price_per_share: Mapped[Decimal] = mapped_column(Numeric(28, 6), nullable=False)
+    deal_side: Mapped[DealSide] = mapped_column(DEAL_SIDE, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_bulk_block_deal_isin_format"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_bulk_block_deal_no_model"),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_bulk_block_deal_content_hash_sha256"
+        ),
+        Index("ix_bulk_block_deal_isin_date", "isin", "deal_date"),
+    )
+
+
+class ScheduledEventType(StrEnum):
+    BOARD_MEETING = "board_meeting"
+    RESULTS = "results"
+    AGM = "agm"
+    EGM = "egm"
+    RECORD_DATE = "record_date"
+    EX_DIVIDEND = "ex_dividend"
+    RIGHTS_RECORD = "rights_record"
+    BUYBACK_OPEN = "buyback_open"
+    BUYBACK_CLOSE = "buyback_close"
+    OFS_OPEN = "ofs_open"
+    OFS_CLOSE = "ofs_close"
+
+
+SCHEDULED_EVENT_TYPE = _pg_enum(ScheduledEventType, "scheduled_event_type")
+
+
+class ScheduledEventSeverity(StrEnum):
+    CRITICAL = "critical"
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+
+SCHEDULED_EVENT_SEVERITY = _pg_enum(ScheduledEventSeverity, "scheduled_event_severity")
+
+
+class ScheduledEvent(ProvenanceMixin, Base):
+    """Catalyst calendar entry from exchange announcements.
+
+    Severity is computed by code (R1). Append-only; an outcome is a new row
+    with the same isin+event_type+event_date and a later `as_of`.
+    """
+
+    __tablename__ = "scheduled_event"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    event_type: Mapped[ScheduledEventType] = mapped_column(SCHEDULED_EVENT_TYPE, nullable=False)
+    severity: Mapped[ScheduledEventSeverity] = mapped_column(
+        SCHEDULED_EVENT_SEVERITY, nullable=False
+    )
+    event_date: Mapped[date] = mapped_column(Date, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    outcome: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    __table_args__ = (
+        CheckConstraint(
+            "isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_scheduled_event_isin_format"
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_scheduled_event_no_model"),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_scheduled_event_content_hash_sha256"
+        ),
+        Index("ix_scheduled_event_isin_date", "isin", "event_date"),
+        Index("ix_scheduled_event_type_date", "event_type", "event_date"),
+    )
+
+
+class IndexEventType(StrEnum):
+    INCLUSION = "inclusion"
+    EXCLUSION = "exclusion"
+    WEIGHT_CHANGE = "weight_change"
+    FO_INCLUSION = "fo_inclusion"
+    FO_EXCLUSION = "fo_exclusion"
+
+
+INDEX_EVENT_TYPE = _pg_enum(IndexEventType, "index_event_type")
+
+
+class IndexEventStatus(StrEnum):
+    ANNOUNCED = "announced"
+    EFFECTIVE = "effective"
+    REVISED = "revised"
+    CANCELLED = "cancelled"
+
+
+INDEX_EVENT_STATUS = _pg_enum(IndexEventStatus, "index_event_status")
+
+
+class IndexEvent(ProvenanceMixin, Base):
+    """Index review event (inclusion / exclusion / weight change / F&O eligibility).
+
+    Lifecycle: ANNOUNCED -> EFFECTIVE | REVISED | CANCELLED. Each state
+    transition is a new row with a later `as_of`. Append-only.
+    """
+
+    __tablename__ = "index_event"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    index_code: Mapped[IndexCode] = mapped_column(INDEX_CODE, nullable=False)
+    event_type: Mapped[IndexEventType] = mapped_column(INDEX_EVENT_TYPE, nullable=False)
+    status: Mapped[IndexEventStatus] = mapped_column(INDEX_EVENT_STATUS, nullable=False)
+    announced_date: Mapped[date] = mapped_column(Date, nullable=False)
+    effective_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    old_weight: Mapped[Decimal | None] = mapped_column(Numeric(10, 6), nullable=True)
+    new_weight: Mapped[Decimal | None] = mapped_column(Numeric(10, 6), nullable=True)
+
+    __table_args__ = (
+        CheckConstraint("isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_index_event_isin_format"),
+        CheckConstraint("model_version IS NULL", name="ck_index_event_no_model"),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_index_event_content_hash_sha256"
+        ),
+        Index("ix_index_event_isin", "isin"),
+        Index("ix_index_event_code_status", "index_code", "status"),
     )

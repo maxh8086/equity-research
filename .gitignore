@@ -8,8 +8,6 @@ __pycache__/
 build/
 dist/
 drop/
-# Obsidian
-.obsidian/
 # Local tooling state
 .claude/worktrees/
 .codebase-memory/
