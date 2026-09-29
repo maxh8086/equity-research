@@ -132,7 +132,7 @@ def test_same_value_written_twice_is_one_value():
 
 def test_tax_order_is_quarantined_as_excluded():
     q = extract_order_win(
-        ann("Order", "Received assessment order from Income Tax department Rs 100 crore."), T
+        ann("Tax notice", "Received assessment order from Income Tax department Rs 100 crore."), T
     )
     assert isinstance(q, Quarantined)
     assert q.reason is QuarantineReason.EXCLUDED
@@ -282,3 +282,13 @@ def test_no_verdict_or_action_fields():
     for cls in (OrderWin, OrderIntensity, Quarantined):
         names = {f.name.lower() for f in fields(cls)}
         assert not names & {"action", "verdict", "signal", "recommendation", "score"}
+
+
+@pytest.mark.parametrize(
+    "phrase,end",
+    [("by December 2027", date(2027, 12, 31)), ("by February 2028", date(2028, 2, 29))],
+)
+def test_month_year_end_is_the_last_day_of_that_month(phrase, end):
+    text = f"Received an order from NTPC worth Rs 10 crore, to be done {phrase}."
+    w = extract_order_win(ann("Order", text), T)
+    assert w.execution_end == end

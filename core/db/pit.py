@@ -2548,3 +2548,37 @@ def index_universe_symbols_as_of(session: Session, *, as_of: datetime) -> list[s
         select(c.symbol).join(s, s.id == c.snapshot_id).where(s.as_of <= as_of, c.as_of <= as_of).distinct()
     )
     return sorted(set(rows))
+
+def trailing_revenue_as_of(
+    session: Session,
+    *,
+    isin: str,
+    consolidation: Consolidation,
+    as_of: datetime,
+):
+    """Trailing twelve-month revenue from the four latest quarters public at `as_of`.
+
+    Returns a ``core.compute.order_wins.TrailingRevenue``, or None when fewer
+    than four contiguous quarterly revenue facts were known (Session 7e).
+    """
+    from core.compute.order_wins import RevenueQuarter, trailing_revenue
+
+    require_aware(as_of, "as_of")
+    rows = facts_as_of(
+        session,
+        isin=isin,
+        consolidation=consolidation,
+        as_of=as_of,
+        line_items=[ratios.REVENUE],
+    )
+    quarters = [
+        RevenueQuarter(
+            period_start=r.period_start,
+            period_end=r.period_end,
+            revenue_inr=r.value,
+            as_of=r.as_of,
+        )
+        for r in rows
+        if r.period_start is not None
+    ]
+    return trailing_revenue(quarters, as_of)
