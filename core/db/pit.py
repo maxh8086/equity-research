@@ -2347,3 +2347,23 @@ def index_events_as_of(
     if status is not None:
         stmt = stmt.where(m.status == status)
     return list(session.scalars(stmt))
+
+
+def corporate_action_versions_as_of(
+    session: Session,
+    *,
+    isins: Collection[str],
+    as_of: datetime,
+    action_types: Collection[CorporateActionType] | None = None,
+) -> list[CorporateAction]:
+    """Every version, known by `as_of`, of every action on any of `isins`, oldest first.
+
+    Unlike `corporate_actions_as_of` this keeps superseded versions, so the
+    status history can be checked. Ordered by `as_of`, then id.
+    """
+    require_aware(as_of, "as_of")
+    ca = CorporateAction
+    stmt = select(ca).where(ca.isin.in_(list(isins)), ca.as_of <= as_of).order_by(ca.as_of, ca.id)
+    if action_types is not None:
+        stmt = stmt.where(ca.action_type.in_(list(action_types)))
+    return list(session.scalars(stmt))
