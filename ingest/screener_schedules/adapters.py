@@ -106,7 +106,9 @@ class ScreenerSchedules(Adapter):
 
         The ISIN comes from the dated bhavcopy map; an unresolved symbol is
         quarantined, never guessed. A fact already stored with the same value
-        is not written again, so a rerun writes nothing.
+        is not written again, so a rerun writes nothing. Every Gross Block period
+        is its own dated fact; a restated value for a stored period is appended
+        as a new version (later as_of), never an overwrite.
         """
         tally = Tally()
         now = ctx.now()

@@ -1,6 +1,6 @@
 """Parser for Screener company schedules (fixed assets schedule).
 
-Extracts gross property, plant & equipment from the API response.
+Extracts gross property, plant & equipment for every period column of the API response.
 Values are strings with thousands commas, in rupees crore (multiply by 10^7 for rupees).
 """
 
@@ -112,25 +112,21 @@ def parse_schedules(
     if not isinstance(gross_block, dict) or not gross_block:
         return []
 
-    # Find the latest period with a valid numeric value
-    latest_fact: ParsedFact | None = None
-
+    # One fact per valid period column, oldest first.
+    facts: list[ParsedFact] = []
     for period_label, value_str in gross_block.items():
         period_end = _parse_period_end(period_label)
         if not period_end:
             continue
-
         rupees = _parse_crore_string(value_str)
         if rupees is None:
             continue
-
-        # Keep the latest period by date
-        if latest_fact is None or period_end > latest_fact.period_end:
-            latest_fact = ParsedFact(
+        facts.append(
+            ParsedFact(
                 line_item="property_plant_and_equipment_gross",
                 period_end=period_end,
                 value=rupees,
                 unit="INR",
             )
-
-    return [latest_fact] if latest_fact else []
+        )
+    return sorted(facts, key=lambda f: f.period_end)
