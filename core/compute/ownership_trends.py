@@ -7,7 +7,7 @@ pledge-invoked alert). This module adds the rules that need a window, a quarterl
 - FII plus DII share count rising or falling for N consecutive quarters, with rises in a quarter
   of an effective index inclusion tagged as passive, not conviction
 - pledge created and pledge released; pledged percentage rising, critical for a holding above Y points
-- promoter open-market sale above X percent of the stake, critical for a holding
+- cumulative promoter open-market sale above X percent of the stake over a window, critical for a holding
 - promoter selling clustered shortly before results
 
 Pure functions over plain frozen inputs; no I/O. Every threshold (X, Y, N, window, cluster size) is a
@@ -31,7 +31,15 @@ from core.compute.ownership_rules import (
     filter_false_signals_insider_trades,
 )
 
-RULE_VERSION = "ownership_trends/1"
+RULE_VERSION = "ownership_trends/2"
+
+# "Any rise" in the pledged percentage of the promoter stake is a red flag. The threshold parameter
+# stays required; callers wanting that policy pass this smallest quantum (percentage points).
+PLEDGE_ANY_RISE_PP = Decimal("0.01")
+
+NO_EXPLANATION_FOUND = "NO_EXPLANATION_FOUND"
+EXPLAINED_BY_MANAGEMENT_UPDATE = "EXPLAINED_BY_MANAGEMENT_UPDATE"
+MANAGEMENT_UPDATE_KINDS = ("CONCALL", "AGM", "SGM", "ANNUAL_REPORT", "ANNUAL_REVIEW")
 
 CRITICAL_FLAGS = ("CRITICAL", "EXIT_REVIEW")
 PROMOTER_CATEGORY = "Promoter"
@@ -72,6 +80,21 @@ class IndexEventInput:
 
 
 @dataclass(frozen=True)
+class ManagementUpdateInput:
+    """A dated management communication. `mentions_pledge` is decided by the caller, never here.
+
+    `provenance` says where the caller got `as_of` (for example the filing or transcript date).
+    """
+
+    isin: str
+    source_kind: str  # one of MANAGEMENT_UPDATE_KINDS
+    as_of: date
+    mentions_pledge: bool
+    url: str
+    provenance: str
+
+
+@dataclass(frozen=True)
 class OwnershipFact:
     """A computed ownership fact. Direction and severity only; never a verdict."""
 
@@ -85,6 +108,8 @@ class OwnershipFact:
     flags: tuple[str, ...]
     evidence: tuple[str, ...]
     rule_version: str = RULE_VERSION
+    # Set on pledged_pct_rising only: NO_EXPLANATION_FOUND or EXPLAINED_BY_MANAGEMENT_UPDATE.
+    explanation_status: str | None = None
 
 
 Result = OwnershipFact | NotEvaluableResult
@@ -298,25 +323,42 @@ def pledge_event_facts(disclosures: Sequence[StakeDisclosureInput], *, isin: str
     return out
 
 
+def _update_evidence(u: ManagementUpdateInput) -> str:
+    return f"management_update:{u.isin}:{u.source_kind}:{u.as_of.isoformat()}:{u.url}"
+
+
 def pledged_pct_change_facts(
     facts: Sequence[PatternFactInput],
     *,
     isin: str,
     y_points: Decimal,
     holdings: Sequence[HoldingInput],
+    as_of_date: date,
+    management_updates: Sequence[ManagementUpdateInput],
 ) -> list[Result]:
-    """Pledged share of the promoter stake, quarter on quarter.
+    """Pledged share of the promoter stake, quarter on quarter, as known on `as_of_date`.
 
-    Any rise is a negative fact. A rise of more than `y_points` percentage points on a holding is
+    Any rise is a negative fact, and the policy is that any rise is a red flag: pass
+    PLEDGE_ANY_RISE_PP as `y_points`. A rise of more than `y_points` percentage points on a holding is
     critical with CRITICAL and EXIT_REVIEW flags; on a non-holding it is high, unflagged.
+
+    Each rise carries `explanation_status`. EXPLAINED_BY_MANAGEMENT_UPDATE means the caller supplied
+    an update of this ISIN, dated on or after the rise's period end and not after `as_of_date`, with
+    `mentions_pledge` True. It only labels the fact: severity and flags are never cleared or
+    downgraded, and this module never reads update text. Otherwise NO_EXPLANATION_FOUND. Pattern
+    facts dated after `as_of_date` are ignored (point in time).
     """
     _non_negative("y_points", y_points)
-    total = _by_date(facts, PROMOTER_PATTERN_CATEGORY, SHARES_MEASURE)
-    pledged = _by_date(facts, PROMOTER_PATTERN_CATEGORY, PLEDGED_MEASURE)
+    for u in management_updates:
+        if u.source_kind not in MANAGEMENT_UPDATE_KINDS:
+            raise ValueError(f"source_kind must be one of {MANAGEMENT_UPDATE_KINDS}, got {u.source_kind!r}")
+    known_facts = [f for f in facts if f.as_on_date <= as_of_date]
+    total = _by_date(known_facts, PROMOTER_PATTERN_CATEGORY, SHARES_MEASURE)
+    pledged = _by_date(known_facts, PROMOTER_PATTERN_CATEGORY, PLEDGED_MEASURE)
     pct = {d: pledged[d] * 100 / total[d] for d in sorted(total.keys() & pledged.keys()) if total[d] > 0}
     dates = list(pct)
     if len(dates) < 2:
-        anchor = max((f.as_on_date for f in facts), default=date.min)
+        anchor = max((f.as_on_date for f in known_facts), default=date.min)
         return [
             _not_evaluable(
                 isin, "pledged_pct_change",
@@ -333,6 +375,10 @@ def pledged_pct_change_facts(
         if rise <= 0:
             continue
         critical = rise > y_points and held
+        explaining = [
+            u for u in management_updates
+            if u.isin == isin and u.mentions_pledge and b <= u.as_of <= as_of_date
+        ]  # fmt: skip
         out.append(
             OwnershipFact(
                 isin=isin, fact_type="pledged_pct_rising", direction="outflow",
@@ -340,7 +386,9 @@ def pledged_pct_change_facts(
                 event_date=b, value=rise,
                 detail=f"pledged share of promoter stake up {rise} points ({pct[a]} to {pct[b]}), Y={y_points}",
                 flags=CRITICAL_FLAGS if critical else (),
-                evidence=tuple(f"shareholding_pattern:{isin}:{d.isoformat()}:pledged_pct={pct[d]}" for d in (a, b)),
+                evidence=tuple(f"shareholding_pattern:{isin}:{d.isoformat()}:pledged_pct={pct[d]}" for d in (a, b))
+                + tuple(_update_evidence(u) for u in explaining),
+                explanation_status=EXPLAINED_BY_MANAGEMENT_UPDATE if explaining else NO_EXPLANATION_FOUND,
             )  # fmt: skip
         )
     return out
@@ -358,17 +406,28 @@ def promoter_sale_pct_of_stake_facts(
     isin: str,
     x_pct: Decimal,
     holdings: Sequence[HoldingInput],
+    as_of_date: date,
+    window_days: int,
 ) -> list[Result]:
-    """Each promoter open-market sale as a percent of the promoter stake at the latest quarter-end
-    on or before the trade. Above `x_pct` on a holding: critical with CRITICAL and EXIT_REVIEW flags;
-    on a non-holding: high, unflagged. No stake on file is not-evaluable.
+    """Cumulative promoter open-market sales over the `window_days` ending `as_of_date`, as a percent
+    of the promoter stake (each sale over the stake at the latest quarter-end on or before it, summed).
+
+    Strictly above `x_pct` is one fact dated `as_of_date`: critical with CRITICAL and EXIT_REVIEW flags
+    for a holding, high and unflagged for a non-holding. Only shares actually sold count, so a fall in
+    the promoter percentage from equity dilution (allotments, ESOPs, QIP, preferential issue) is never
+    a sale. A sale with no stake on file is a not-evaluable result and is left out of the sum.
     """
-    _non_negative("x_pct", x_pct)
+    _positive_int("window_days", window_days)
+    if x_pct <= 0:
+        raise ValueError(f"x_pct must be positive, got {x_pct}")
     stakes = _by_date(facts, PROMOTER_PATTERN_CATEGORY, SHARES_MEASURE)
     held = _held(isin, holdings)
+    start = as_of_date - timedelta(days=window_days)
     out: list[Result] = []
+    total_pct = Decimal("0")
+    evidence: list[str] = []
     for t in _promoter_open_market(trades, isin):
-        if t.quantity >= 0:
+        if t.quantity >= 0 or not start < t.trade_date <= as_of_date:
             continue
         known = [d for d in stakes if d <= t.trade_date and stakes[d] > 0]
         if not known:
@@ -377,16 +436,15 @@ def promoter_sale_pct_of_stake_facts(
             )
             continue
         stake_date = max(known)
-        pct = -t.quantity * 100 / stakes[stake_date]
-        if pct <= x_pct:
-            continue
+        total_pct += -t.quantity * 100 / stakes[stake_date]
+        evidence += [_trade_evidence(t), f"shareholding_pattern:{isin}:{stake_date.isoformat()}:promoter={stakes[stake_date]}"]
+    if total_pct > x_pct:
         out.append(
             OwnershipFact(
-                isin=isin, fact_type="promoter_sale_above_x", direction="outflow",
-                severity="critical" if held else "high", event_date=t.trade_date, value=pct,
-                detail=f"promoter sold {pct}% of stake of {stakes[stake_date]} as on {stake_date.isoformat()}, X={x_pct}",
-                flags=CRITICAL_FLAGS if held else (),
-                evidence=(_trade_evidence(t), f"shareholding_pattern:{isin}:{stake_date.isoformat()}:promoter={stakes[stake_date]}"),
+                isin=isin, fact_type="promoter_cumulative_sale_above_x", direction="outflow",
+                severity="critical" if held else "high", event_date=as_of_date, value=total_pct,
+                detail=f"promoter sold {total_pct}% of stake cumulatively over {window_days} days, X={x_pct}",
+                flags=CRITICAL_FLAGS if held else (), evidence=tuple(evidence),
             )  # fmt: skip
         )
     return out
