@@ -154,7 +154,7 @@ All of it is worthless on empty stores, and LangGraph will be rewritten twice be
 7. Session 7d: monthly mutual fund holdings (`mf_holding`), MSCI and other index review announcements, and `index_event` impact analysis (days of volume)
 8. Relationship graph ④, events ⑤
 9. Session 7f: news, brokerage calls and scuttlebutt (see CLAUDE.md "News, brokerage calls and scuttlebutt"). Publisher RSS adapter (`web_scrape`) into `news_item`; mention extraction by the model, ISIN resolution by code through a dated alias table, with quarantine; `brokerage_call` with target prices parsed by code from quoted text; management interviews routed to `guidance_claim`; `industry_metric` from DGCA, FADA, TRAI and NPCI monthly data; a CLI timeline report. No X.
-10. Read-only MCP server over the point-in-time functions; broker holdings adapter (read-only) for `portfolio_risk_snapshot`, which switches on critical ownership alerts and action-required corporate-action alerts for holdings
+10. Read-only MCP server over the point-in-time functions; `portfolio_risk_snapshot`, which switches on critical ownership alerts and action-required corporate-action alerts for holdings. The read-only broker holdings drop (`manual_drop`, a saved Kite `get_holdings` JSON, `holdings_as_of`, `holding_weight_facts`) is built, see `docs/finished.md`; a live broker pull by adapter code and `portfolio_risk_snapshot` are not
 11. Then, and only then, the swarm. No agent gets an order-capable tool.
 
 ---
