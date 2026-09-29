@@ -77,7 +77,7 @@ class TestContract:
 
     def test_thresholds_are_required_never_defaulted(self):
         for fn, names in [
-            (promoter_open_market_flow, {"window_days", "buy_threshold_quantity"}),
+            (promoter_open_market_flow, {"window_days", "inflow_threshold_quantity"}),
             (fii_dii_trend, {"n_quarters"}),
             (pledged_pct_change_facts, {"y_points"}),
             (promoter_sale_pct_of_stake_facts, {"x_pct"}),
@@ -92,7 +92,7 @@ class TestContract:
             fii_dii_trend([], isin=ISIN, n_quarters=0, passive_periods=frozenset())
         with pytest.raises(ValueError):
             promoter_open_market_flow(
-                [], isin=ISIN, as_of_date=Q[0], window_days=0, buy_threshold_quantity=D("1")
+                [], isin=ISIN, as_of_date=Q[0], window_days=0, inflow_threshold_quantity=D("1")
             )
 
 
@@ -100,7 +100,7 @@ class TestPromoterOpenMarketFlow:
     def run(self, trades, thr="100", window=30):
         return promoter_open_market_flow(
             trades, isin=ISIN, as_of_date=date(2026, 2, 1), window_days=window,
-            buy_threshold_quantity=D(thr),
+            inflow_threshold_quantity=D(thr),
         )  # fmt: skip
 
     def test_net_buying_above_threshold_is_positive_inflow(self):
