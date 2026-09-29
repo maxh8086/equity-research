@@ -105,8 +105,8 @@ Session 7c — corporate actions and ownership wiring (remainder)
 
 Session 7d — live shareholding listing ✅ recorded in [docs/finished.md](docs/finished.md)
 
-Session 7e — order wins
-> Build the order-win detector on the Session 7c announcement feed: hardcoded include and exclude keyword tables under a `rule_version`, matched by code against the announcement subject and description. Value, customer and execution period come from the PDF as a model-returned verbatim quote with the number parsed and checked by code (R1); anything else is quarantined. Write `order_win`, with `order_status` resolved later against subsequent filings. The metric is order value over trailing twelve-month revenue, annualised across the stated execution period. Suppress the signal when the stock has already run before the broadcast time, and report the gate that blocked it. Screener full-text search is not the source: robots.txt disallows `/*?q=`.
+Session 7e — order wins (extractor, tables, adapter and reader built; see [docs/finished.md](docs/finished.md))
+> **Not yet:** the PDF quote path (value, customer and period from the PDF as a model-returned verbatim quote checked by code; today only the announcement text is read); the suppress-if-already-ran gate (needs caller-supplied price thresholds; it must report the gate that blocked); `order_status` resolution against later filings; narrow counterparty and period patterns. Screener full-text search is not the source: robots.txt disallows `/*?q=`.
 
 ---
 
