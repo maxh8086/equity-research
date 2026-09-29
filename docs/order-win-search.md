@@ -46,31 +46,75 @@ volume worry that would motivate it is already handled by the query stage.
 | Source | Class | Standing |
 |---|---|---|
 | NSE / BSE announcements | `web_scrape` | The evidence. CLAUDE.md already classes announcements this way. Not yet built. |
-| Screener full-text search | `web_scrape` | **Discovery only, and unconfirmed.** See below. |
+| Screener full-text search | `web_scrape` | **Ruled out**, on two independent grounds. See below. |
 | Drop folder | `manual_drop` | The fallback the Breakage rules require, and the way to start without any scraping at all. |
 
 A reported order win is a lead, counted only once confirmed against an
 exchange filing (CLAUDE.md, News). So Screener can suggest candidates; it can
 never be the evidence a row is stored against.
 
-### Screener: unresolved
+### Screener: ruled out (checked 2026-09-29)
 
-`docs/mcp-repo-review.md` records that Screener's robots.txt disallows
-`/api/company/search/`, `/screen/raw/` and `/api/company/{id}/chart/`. Whether
-it also disallows **`/full-text-search/`** has not been checked — the session
-that wrote this could not reach the host.
+The open question was whether `/full-text-search/` is allowed. It was checked
+against the live host, and the route is unusable for us on two independent
+grounds. Either one alone would end it.
 
-**Before any adapter is built against it, confirm:**
+**1. It is behind an account wall.**
 
-1. `/full-text-search/` is allowed in `https://www.screener.in/robots.txt`.
-2. The boolean syntax. The query builder emits the common
-   `-"term" ("phrase" or "phrase")` form; engines differ on precedence and on
-   whether `or` must be uppercase. Paste one query by hand and check the
-   result count against a term you know the answer for.
+```
+GET https://www.screener.in/full-text-search/
+-> 302 Found
+   Location: /register/?next=/full-text-search/
+```
 
-If robots.txt disallows it, that is the end of it: fall back to NSE/BSE
-announcements, or to the drop folder. No impersonation, no headless browser —
-CLAUDE.md, Breakage.
+Unauthenticated requests never reach the search at all. Using it would mean
+automating a logged-in session, which CLAUDE.md rules out in the same terms it
+rules out X: an escalation past an access control, not a format change to
+rewrap.
+
+**2. Its query URLs are disallowed by robots.txt.** The live file is:
+
+```
+User-agent: *
+
+Disallow: /user/*
+Disallow: /*?q=
+Disallow: /*?sort=
+Disallow: /*?limit=
+Disallow: /*?page=
+Disallow: /company/source/quarter/*
+```
+
+Screener disallows by **query-string pattern**, not by path. `/full-text-search/`
+is not named — and it did not need to be, because a full-text search without a
+query is not a search, and the query rides in `?q=`, which `Disallow: /*?q=`
+covers. The same rule is what actually disallows the three endpoints
+`docs/mcp-repo-review.md` lists; that document is precise about it, citing them
+as `/api/company/search/?q=`, `/screen/raw/?sort=&page=` and
+`/api/company/{id}/chart/?q=`. An earlier summary here dropped the query
+strings and so made the rule look path-based, which would have left
+`/full-text-search/` looking clear. It is not.
+
+The second point was not confirmed by issuing a disallowed request — that would
+have been the violation itself. The login wall is what was observed directly;
+the `?q=` reading follows from the robots file and the nature of the route.
+
+**Consequence.** No Screener adapter for order-win discovery, and the boolean
+syntax of `search_query()` is now unverifiable against this engine. Candidates
+come from NSE/BSE announcements, or from the drop folder, which is where this
+can start with no scraping at all.
+
+`search_query()` itself stays. It is source-agnostic, it is the same phrase
+lists the classifier uses, and whatever full-text engine is eventually pointed
+at the announcement corpus will need a query. Its docstring already says to
+confirm precedence and `or` casing against the target engine before relying on
+it, and that caveat is now the live one: the syntax is **unconfirmed against
+any engine**, not merely unconfirmed against Screener.
+
+Nothing above depends on `/company/<SYMBOL>/consolidated/`, the robots-allowed
+unauthenticated page `docs/mcp-repo-review.md` recommends for a different job.
+That route is unaffected; it simply cannot do discovery, only lookup by a
+symbol already known.
 
 ## Known false positives
 
