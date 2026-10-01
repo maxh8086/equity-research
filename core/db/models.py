@@ -1454,6 +1454,7 @@ class CompanyEventType(StrEnum):
     RATING_DOWNGRADE = "rating_downgrade"
     RATING_WITHDRAWAL = "rating_withdrawal"
     RAID_REGULATORY = "raid_regulatory"
+    ORDER_FLOW_CYCLE = "order_flow_cycle"
 
 
 class CompanyEvent(ProvenanceMixin, Base):
@@ -1960,4 +1961,68 @@ class BrokerHoldingQuarantine(ProvenanceMixin, Base):
         CheckConstraint("model_version IS NULL", name="ck_broker_holding_quarantine_no_model"),
         UniqueConstraint("content_hash", "row_number", name="uq_broker_holding_quarantine_row"),
         Index("ix_broker_holding_quarantine_pit", "as_of"),
+    )
+
+
+# --- Circular order-flow detection ---
+
+
+class OrderFlowCycle(StrEnum):
+    """Cycle status in the inter-company order graph (R1: code-determined)."""
+
+    NO_CYCLE = "no_cycle"
+    CYCLE_2_NODE = "cycle_2_node"
+    CYCLE_3_NODE = "cycle_3_node"
+    CYCLE_3_PLUS = "cycle_3_plus"
+
+
+ORDER_FLOW_CYCLE = _pg_enum(OrderFlowCycle, "order_flow_cycle")
+
+
+class OrderFlowEdge(ProvenanceMixin, Base):
+    """A directed edge in the inter-company order graph: source company orders from target.
+
+    Tracks relationships from one company (source_isin) to its counterparties
+    (typically suppliers or related parties). The cycle_status, cycle_length,
+    and cycle_path indicate whether this edge participates in a circular flow.
+
+    Used to detect suspicious patterns like circular billing (A orders from B,
+    B orders from C, C orders from A). Append-only; read through
+    core.db.pit.order_flow_edges_as_of.
+    """
+
+    __tablename__ = "order_flow_edge"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    source_isin: Mapped[str] = mapped_column(CHAR(12), nullable=False)
+    target_counterparty: Mapped[str] = mapped_column(Text, nullable=False)
+    target_isin: Mapped[str | None] = mapped_column(CHAR(12), nullable=True)
+    order_win_id: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    announced_on: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    cycle_status: Mapped[OrderFlowCycle] = mapped_column(ORDER_FLOW_CYCLE, nullable=False)
+    cycle_length: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    cycle_path: Mapped[list[str] | None] = mapped_column(ARRAY(Text), nullable=True)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "source_isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_order_flow_edge_source_isin_format"
+        ),
+        CheckConstraint(
+            "target_isin IS NULL OR target_isin ~ '^IN[A-Z0-9]{9}[0-9]$'",
+            name="ck_order_flow_edge_target_isin_format",
+        ),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_order_flow_edge_content_hash_sha256"),
+        CheckConstraint("model_version IS NULL", name="ck_order_flow_edge_no_model"),
+        CheckConstraint(
+            "(cycle_length IS NULL) = (cycle_path IS NULL)",
+            name="ck_order_flow_edge_cycle_len_with_path",
+        ),
+        CheckConstraint(
+            "(cycle_status = 'no_cycle') = (cycle_length IS NULL)",
+            name="ck_order_flow_edge_no_cycle_no_len",
+        ),
+        UniqueConstraint("order_win_id", "rule_version", name="uq_order_flow_edge_win_rule"),
+        Index("ix_order_flow_edge_pit", "source_isin", "as_of"),
+        Index("ix_order_flow_edge_cycle", "source_isin", "cycle_status"),
     )

@@ -95,6 +95,7 @@ from core.db.models import (
     IndexSnapshotQuarantine,
     NseBhavcopyQuarantine,
     NseBhavcopyRow,
+    OrderFlowEdge,
     OrderWinFact,
     RatingAction,
     RatingAgency,
@@ -2656,6 +2657,26 @@ def order_wins_as_of(session: Session, *, isin: str, as_of: datetime) -> list[Or
     for row in rows:
         latest.setdefault(row.announcement_key, row)
     return sorted(latest.values(), key=lambda r: (r.announced_on, r.id), reverse=True)
+
+
+def order_flow_edges_as_of(
+    session: Session, *, source_isin: str, as_of: datetime
+) -> list[OrderFlowEdge]:
+    """Order flow edges from `source_isin` known at `as_of`, newest first per key.
+
+    For each (source_isin, order_win_id, rule_version) tuple, returns the latest
+    version with `as_of <= as_of`, so later re-computations or rule changes
+    are invisible to earlier reads.
+    """
+    require_aware(as_of, "as_of")
+    e = OrderFlowEdge
+    stmt = (
+        select(e)
+        .where(e.source_isin == source_isin, e.as_of <= as_of)
+        .distinct(e.order_win_id, e.rule_version)
+        .order_by(e.order_win_id, e.rule_version, e.as_of.desc(), e.id.desc())
+    )
+    return list(session.scalars(stmt))
 
 
 def holdings_as_of(session: Session, *, account_label: str, as_of: datetime) -> list[BrokerHoldingSnapshot]:
