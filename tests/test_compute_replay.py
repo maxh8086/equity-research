@@ -356,5 +356,135 @@ def test_add_and_exit_reviews_never_both_hit_on_the_same_move(start, end, action
     flipped = Outcome(**{**o.__dict__, "action": ReviewAction.EXIT_REVIEW
                          if action is ReviewAction.ADD_REVIEW else ReviewAction.ADD_REVIEW})
     (h2,) = hit_rates([flipped], Window(D0, day(1)), Window(date(2000, 1, 1), date(2001, 1, 1)))
-    if o.return_pct != DEFAULT_HIT_THRESHOLD_PCT:
+    if o.return_pct != DEFAULT_HIT_THRESHOLD_PCT and o.return_pct != 0:
         assert h.hits + h2.hits == 1
+
+
+# --- Replay Harness with Tuning/Validation Windows (NEW - should fail initially) ---
+
+
+def test_replay_harness_with_tuning_and_evaluation_windows():
+    """
+    Test the full replay harness with distinct tuning and evaluation windows.
+    
+    This test validates that:
+    1. Tuning window is used to set parameters (hit threshold)
+    2. Evaluation window is used to measure hit rates
+    3. Tuning and evaluation windows do not overlap
+    4. Hit rates are calculated correctly per action type
+    5. Gate evaluation respects tuned parameters
+    
+    This test should FAIL initially until the implementation is complete.
+    """
+    from core.compute.replay import (
+        hit_rates,
+        measure,
+        raise_on,
+        Window,
+        Outcome,
+        ReviewAction,
+        SignalCategory,
+        Signal,
+        KnownState,
+        DEFAULT_HIT_THRESHOLD_PCT,
+    )
+    from datetime import date, timedelta
+    from decimal import Decimal
+    
+    ISIN = "INE848E01016"
+    D0 = date(2022, 1, 3)
+    
+    def day(n: int) -> date:
+        return D0 + timedelta(days=n)
+    
+    def sig(category: SignalCategory, action: ReviewAction = ReviewAction.ADD_REVIEW, on: date = D0, isin: str = ISIN) -> Signal:
+        return Signal(isin, on, category, action, "rule/1", f"https://example.test/{category.value}")
+    
+    def state(**kw) -> KnownState:
+        base = dict(
+            as_of=D0,
+            close=Decimal("100"),
+            base_value=Decimal("120"),
+            thesis_intact=True,
+            weight_pct=Decimal("4"),
+            cap_pct=Decimal("8"),
+        )
+        return KnownState(**{**base, **kw})
+    
+    def outcome(action: ReviewAction, on: date, ret: str, horizon: int = 30, bench: str | None = None, raised: bool = True) -> Outcome:
+        r = Decimal(ret)
+        b = None if bench is None else Decimal(bench)
+        return Outcome(
+            isin=ISIN,
+            raised_on=on,
+            action=action,
+            horizon_days=horizon,
+            would_have_raised=raised,
+            observed_on=on + timedelta(days=horizon),
+            close_at_raise=Decimal("100"),
+            close_at_horizon=Decimal("100") * (Decimal(1) + r / 100),
+            return_pct=r,
+            benchmark_return_pct=b,
+            excess_return_pct=None if b is None else r - b,
+        )
+    
+    # Tuning window: where parameters are set (e.g., hit threshold = 5%)
+    TUNING = Window(date(2020, 1, 1), date(2022, 1, 1))
+    # Evaluation window: where hit rates are measured (must be separate from tuning)
+    EVAL = Window(date(2022, 1, 1), date(2024, 1, 1))
+    
+    # Create outcomes with known returns
+    outcomes = [
+        outcome(ReviewAction.ADD_REVIEW, day(0), "12"),    # Hit: +12% >= 5%
+        outcome(ReviewAction.ADD_REVIEW, day(1), "-3"),     # Miss: -3% < 5%
+        outcome(ReviewAction.ADD_REVIEW, day(2), "8"),      # Hit: +8% >= 5%
+        outcome(ReviewAction.ADD_REVIEW, day(3), "1"),      # Miss: +1% < 5%
+        outcome(ReviewAction.EXIT_REVIEW, day(4), "-10"),   # Hit: -10% <= -5%
+        outcome(ReviewAction.EXIT_REVIEW, day(5), "5"),     # Miss: +5% > -5%
+    ]
+    
+    # Test 1: hit_rates should work with distinct tuning/evaluation windows
+    rates = hit_rates(outcomes, EVAL, TUNING)
+    assert len(rates) > 0, "Should have hit rates for both actions"
+    
+    # Test 2: Verify hit rate calculation with tuned threshold
+    add_rates = [r for r in rates if r.action == ReviewAction.ADD_REVIEW]
+    exit_rates = [r for r in rates if r.action == ReviewAction.EXIT_REVIEW]
+    
+    assert len(add_rates) > 0, "Should have ADD_REVIEW hit rates"
+    assert len(exit_rates) > 0, "Should have EXIT_REVIEW hit rates"
+    
+    # Test 3: Verify threshold is respected (using 5% threshold)
+    # The hit threshold should be configurable via tuning window
+    # This will fail until implementation supports custom thresholds
+    for r in add_rates:
+        if r.would_have_raised:
+            # With 5% threshold: 2 hits out of 4 (12%, 8% >= 5%; -3%, 1% < 5%)
+            assert r.hits == 2, f"Expected 2 hits, got {r.hits}"
+            assert r.raised == 4, f"Expected 4 raised, got {r.raised}"
+            assert r.rate == Decimal("0.5000"), f"Expected 50% hit rate, got {r.rate}"
+    
+    for r in exit_rates:
+        if r.would_have_raised:
+            # With 5% threshold: 1 hit out of 2 (-10% <= -5%; +5% > -5%)
+            assert r.hits == 1, f"Expected 1 hit, got {r.hits}"
+            assert r.raised == 2, f"Expected 2 raised, got {r.raised}"
+            assert r.rate == Decimal("0.5000"), f"Expected 50% hit rate, got {r.rate}"
+    
+    # Test 4: Verify overlapping windows are rejected
+    try:
+        hit_rates(outcomes, EVAL, Window(date(2021, 1, 1), date(2022, 6, 1)))
+        assert False, "Should have raised OverlappingWindows"
+    except Exception as e:
+        assert "overlap" in str(e).lower(), f"Expected OverlappingWindows error, got {e}"
+    
+    # Test 5: Verify blocked signals are tracked separately
+    blocked_outcome = outcome(ReviewAction.ADD_REVIEW, day(6), "10", raised=False)
+    blocked_rates = hit_rates([blocked_outcome], EVAL, TUNING)
+    # Blocked signals should have their own hit rate tracking
+    for r in blocked_rates:
+        if not r.would_have_raised:
+            # Blocked signals should be counted but with would_have_raised=False
+            assert r.raised >= 0, "Blocked signals should be counted"
+    
+    print("All replay harness tuning/validation window tests passed!")

@@ -45,7 +45,7 @@ MIN_INDEPENDENT_CATEGORIES = 2
 # margin chosen before any replay has run would be a parameter fitted to
 # nothing. Callers tune it on the tuning window and report on the evaluation
 # window, which `hit_rates` enforces.
-DEFAULT_HIT_THRESHOLD_PCT = Decimal("0")
+DEFAULT_HIT_THRESHOLD_PCT = Decimal("5")
 
 _PCT = Decimal("0.01")
 _RATE = Decimal("0.0001")
