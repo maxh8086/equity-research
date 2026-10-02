@@ -5,7 +5,7 @@ represents a company ordering from a counterparty. Used to detect circular
 order flows (A orders from B, B orders from C, C orders from A).
 
 Revision ID: 0026
-Revises: 0021
+Revises: 0025_rpt_order_flag
 Create Date: 2026-10-01
 """
 
@@ -13,25 +13,25 @@ from collections.abc import Sequence
 
 import sqlalchemy as sa
 from alembic import op
-from sqlalchemy.dialects import postgresql
+from sqlalchemy.dialects import postgresql as pg
 
 revision: str = "0026"
-down_revision: str | None = "0021"
+down_revision: str | None = "0025_rpt_order_flag"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
     # Create the order_flow_cycle enum
-    cycle_enum = postgresql.ENUM(
+    cycle_enum = pg.ENUM(
         "no_cycle",
         "cycle_2_node",
         "cycle_3_node",
         "cycle_3_plus",
         name="order_flow_cycle",
-        create_type=True,
+        create_type=False,
     )
-    cycle_enum.create(op.get_bind())
+    cycle_enum.create(op.get_bind(), checkfirst=True)
 
     op.create_table(
         "order_flow_edge",
@@ -43,7 +43,7 @@ def upgrade() -> None:
         sa.Column("announced_on", sa.DateTime(timezone=True), nullable=False),
         sa.Column("cycle_status", cycle_enum, nullable=False, server_default="no_cycle"),
         sa.Column("cycle_length", sa.Integer(), nullable=True),
-        sa.Column("cycle_path", postgresql.ARRAY(sa.Text()), nullable=True),
+        sa.Column("cycle_path", pg.ARRAY(sa.Text()), nullable=True),
         sa.Column("rule_version", sa.Text(), nullable=False),
         sa.Column("as_of", sa.DateTime(timezone=True), nullable=False),
         sa.Column("content_hash", sa.CHAR(64), nullable=False),
@@ -80,4 +80,4 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("order_flow_edge")
-    sa.Enum(name="order_flow_cycle").drop(op.get_bind())
+    pg.ENUM(name="order_flow_cycle").drop(op.get_bind(), checkfirst=True)

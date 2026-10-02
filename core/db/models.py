@@ -1291,6 +1291,12 @@ class TechnicalSignalType(StrEnum):
     ATH_BREAKOUT = "ath_breakout"
 
 
+class WatchlistOpenedByKind(StrEnum):
+    TECHNICAL_SIGNAL = "technical_signal"
+    DRIFT = "drift"
+    ORDER_WIN = "order_win"
+
+
 class TechnicalSignal(ProvenanceMixin, Base):
     """Store ⑩: technical signals computed by code from adjusted daily closes.
 
@@ -1343,10 +1349,137 @@ class WatchlistEntryStatus(StrEnum):
     INVALIDATED = "invalidated"
 
 
-class WatchlistEntry(ProvenanceMixin, Base):
-    """Store ⑪: watchlist entries opened by technical signals.
+class NodeRunOutcome(StrEnum):
+    SUCCESS = "success"
+    NO_NEW_DATA = "no_new_data"
+    NO_DATA = "no_data"
+    DISABLED = "disabled"
+    BLOCKED = "blocked"
+    QUARANTINED = "quarantined"
+    GATE_BLOCKED = "gate_blocked"
+    LOOK_AHEAD_REFUSED = "look_ahead_refused"
+    RAISED_WATCH = "raised_watch"
+    RAISED_REVIEW = "raised_review"
+    FAILED = "failed"
 
-    A technical signal only opens an entry; promotion to ADD_REVIEW requires
+
+_NODE_RUN_OUTCOMES_SQL = ", ".join(f"'{o.value}'" for o in NodeRunOutcome)
+_NODE_RUN_REASON_REQUIRED_SQL = ", ".join(
+    f"'{o.value}'"
+    for o in (
+        NodeRunOutcome.NO_DATA,
+        NodeRunOutcome.DISABLED,
+        NodeRunOutcome.BLOCKED,
+        NodeRunOutcome.QUARANTINED,
+        NodeRunOutcome.GATE_BLOCKED,
+    )
+)
+
+
+class NodeRun(ProvenanceMixin, Base):
+    """One run of one pipeline node and how it ended, so a blocked or empty source is visible after exit.
+
+    `as_of` is the run clock `t`; `source_url` is `node://<node>`; `content_hash` is the
+    sha256 of the canonical run summary. `node` and `reason` are text validated in code
+    against the registry, so adding a node needs no migration. Only `extract_concall`
+    may set `model_version`. Replays never write here. Append-only, enforced by a DB trigger.
+    """
+
+    __tablename__ = "node_run"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    node: Mapped[str] = mapped_column(Text, nullable=False)
+    run_id: Mapped[str] = mapped_column(Text, nullable=False)
+    outcome: Mapped[NodeRunOutcome] = mapped_column(
+        Enum(
+            NodeRunOutcome,
+            native_enum=False,
+            create_constraint=False,
+            length=32,
+            values_callable=lambda e: [m.value for m in e],
+        ),
+        nullable=False,
+    )
+    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    detail: Mapped[str | None] = mapped_column(Text, nullable=True)
+    rows_in: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    rows_out: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    quarantined: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(f"outcome IN ({_NODE_RUN_OUTCOMES_SQL})", name="ck_node_run_outcome"),
+        CheckConstraint(
+            f"outcome NOT IN ({_NODE_RUN_REASON_REQUIRED_SQL}) OR reason IS NOT NULL",
+            name="ck_node_run_reason_required",
+        ),
+        CheckConstraint("node <> '' AND run_id <> ''", name="ck_node_run_ids_nonempty"),
+        CheckConstraint("source_url = 'node://' || node", name="ck_node_run_source_url_is_node"),
+        CheckConstraint(
+            "model_version IS NULL OR node = 'extract_concall'", name="ck_node_run_model_only_extract"
+        ),
+        CheckConstraint(
+            "coalesce(rows_in, 0) >= 0 AND coalesce(rows_out, 0) >= 0"
+            " AND coalesce(quarantined, 0) >= 0",
+            name="ck_node_run_counts_nonnegative",
+        ),
+        CheckConstraint("content_hash ~ '^[0-9a-f]{64}$'", name="ck_node_run_content_hash_sha256"),
+        UniqueConstraint("node", "run_id", name="uq_node_run_node_run_id"),
+        Index("ix_node_run_node_as_of", "node", "as_of"),
+        Index("ix_node_run_outcome_as_of", "outcome", "as_of"),
+    )
+
+
+class IngestRowQuarantine(ProvenanceMixin, Base):
+    """A row or file an adapter held back, for adapters with no quarantine table of their own.
+
+    `adapter` and `store` name the node and the store it would have written; `row_ref`
+    locates the row (or the whole file) in the source; `reason` is text checked in code
+    against the adapter's declared reason enum, so a new adapter needs no migration.
+    `raw_excerpt` is bounded, never a whole file. Append-only, enforced by a DB trigger.
+    """
+
+    __tablename__ = "ingest_row_quarantine"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    adapter: Mapped[str] = mapped_column(Text, nullable=False)
+    store: Mapped[str] = mapped_column(Text, nullable=False)
+    row_ref: Mapped[str] = mapped_column(Text, nullable=False)
+    reason: Mapped[str] = mapped_column(Text, nullable=False)
+    detail: Mapped[str | None] = mapped_column(Text, nullable=True)
+    raw_excerpt: Mapped[str | None] = mapped_column(Text, nullable=True)
+    rule_version: Mapped[str] = mapped_column(Text, nullable=False)
+
+    __table_args__ = (
+        CheckConstraint(
+            "adapter <> '' AND store <> '' AND row_ref <> '' AND reason <> ''",
+            name="ck_ingest_row_quarantine_keys_nonempty",
+        ),
+        CheckConstraint(
+            "raw_excerpt IS NULL OR char_length(raw_excerpt) <= 2000",
+            name="ck_ingest_row_quarantine_excerpt_bounded",
+        ),
+        CheckConstraint("model_version IS NULL", name="ck_ingest_row_quarantine_no_model"),
+        CheckConstraint(
+            "content_hash ~ '^[0-9a-f]{64}$'", name="ck_ingest_row_quarantine_content_hash_sha256"
+        ),
+        UniqueConstraint(
+            "adapter", "store", "row_ref", "reason", "rule_version",
+            name="uq_ingest_row_quarantine_row_reason_rule",
+        ),
+        Index("ix_ingest_row_quarantine_adapter_as_of", "adapter", "as_of"),
+        Index("ix_ingest_row_quarantine_pit", "as_of"),
+    )
+
+
+class WatchlistEntry(ProvenanceMixin, Base):
+    """Store ⑪: watchlist entries opened by a technical signal or another special situation.
+
+    `opened_by_kind` names the origin. A technical-signal entry carries
+    `opened_by_signal_id`; a drift or order-win entry carries `opened_by_ref` (a
+    code-built reference to the computed result) and no signal id. Rows that
+    predate the column are technical-signal entries by a constant default. An
+    entry only opens a watch; promotion to ADD_REVIEW requires
     the ADD_REVIEW gates (CLAUDE.md Decision support). No model writes to
     this table. Append-only, enforced by a DB trigger.
     """
@@ -1358,9 +1491,15 @@ class WatchlistEntry(ProvenanceMixin, Base):
     status: Mapped[WatchlistEntryStatus] = mapped_column(
         _pg_enum(WatchlistEntryStatus, "watchlist_entry_status"), nullable=False
     )
-    opened_by_signal_id: Mapped[int] = mapped_column(
-        BigInteger, ForeignKey("technical_signal.id"), nullable=False
+    opened_by_kind: Mapped[WatchlistOpenedByKind] = mapped_column(
+        _pg_enum(WatchlistOpenedByKind, "watchlist_opened_by_kind"),
+        nullable=False,
+        server_default=WatchlistOpenedByKind.TECHNICAL_SIGNAL.value,
     )
+    opened_by_signal_id: Mapped[int | None] = mapped_column(
+        BigInteger, ForeignKey("technical_signal.id"), nullable=True
+    )
+    opened_by_ref: Mapped[str | None] = mapped_column(Text, nullable=True)
     opened_date: Mapped[date] = mapped_column(Date, nullable=False)
     status_date: Mapped[date] = mapped_column(Date, nullable=False)
     invalidation_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -1371,6 +1510,14 @@ class WatchlistEntry(ProvenanceMixin, Base):
             "isin ~ '^IN[A-Z0-9]{9}[0-9]$'", name="ck_watchlist_entry_isin_format"
         ),
         CheckConstraint("model_version IS NULL", name="ck_watchlist_entry_no_model"),
+        CheckConstraint(
+            "(opened_by_kind = 'technical_signal') = (opened_by_signal_id IS NOT NULL)",
+            name="ck_watchlist_entry_signal_iff_kind",
+        ),
+        CheckConstraint(
+            "opened_by_kind = 'technical_signal' OR opened_by_ref IS NOT NULL",
+            name="ck_watchlist_entry_ref_for_special",
+        ),
         CheckConstraint(
             "content_hash ~ '^[0-9a-f]{64}$'", name="ck_watchlist_entry_content_hash_sha256"
         ),

@@ -40,22 +40,23 @@ Rules live in `CLAUDE.md`; this file records why the structure is the way it is.
   behind one small interface, keyed by `content_hash`.
 - Migrations are a separate one-shot step, never run on app startup.
 
-## ADR-004: Holdings and Screener data come through replaceable providers
+## ADR-004: Related-party order concentration flag
 
-- **Status:** implemented on branch `providers-module` (unmerged, based on `cfg-wave2`).
-- **Decision:** the file drop folder for holdings is removed. Data arrives as
-  typed in-memory objects from a separate `providers/` package with Protocol
-  interfaces (`HoldingsProvider`, `ScreenerProvider`) and concrete modules
-  (Kite, Screener). `providers/registry.py` selects one from `EQUITY_*` config,
-  so switching provider means config plus one module.
-- Kite access is read-only (holdings and profile, never orders). Credentials
-  come from the environment only. Scraping providers obey
-  `EQUITY_WEB_SCRAPING_ENABLED` and are refused in `commercial` mode.
-- `broker_holding` tables, migration 0021 and the point-in-time readers stay.
+- **Status:** Implemented (merged to main, commit 3bb7cfb).
+- **Decision:** detect concentrated order flows to related parties (RPT) as a
+  potential risk signal. The detector computes cumulative promoter order value
+  over a rolling window against their stated revenue.
+- **Implementation:** migration 0025, `core/compute/ownership_trends_v2.py` for
+  the computation, `core/resolve/ownership_flag.py` for flagging, full test
+  coverage. Flags promoter sales patterns and pledged share changes.
 
-## ADR-005: Control-flow graph of node outcomes
+## ADR-005: Circular order-flow detector
 
-- **Status:** implemented on branch `cfg-wave2` (unmerged); remaining items
-  are tracked in `docs/plans/control-flow-graph-pass.md`.
-- Every pipeline node declares its possible outcomes (`core/flow/`), and the
-  architecture tests fail on an undeclared outcome or a stale capability gap.
+- **Status:** Implemented (merged to main, commit 11faa01).
+- **Decision:** detect circular or self-dealing order patterns where companies
+  place orders with related entities in a cycle, creating the appearance of
+  market activity.
+- **Implementation:** migrations 0026 and 0027, `core/compute/order_flow_cycles.py`
+  for cycle detection, `core/resolve/order_flow_cycle_flag.py` for flagging
+  violations. Full test coverage includes graph traversal and cycle-breaking
+  heuristics. Order book data feeds the detector.

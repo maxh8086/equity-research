@@ -61,9 +61,15 @@ def quarantine(**overrides) -> BrokerHoldingQuarantine:
     return BrokerHoldingQuarantine(**fields)
 
 
-def test_0021_follows_0020_and_is_the_single_head():
+def test_migration_head_is_0027():
     script = ScriptDirectory.from_config(Config(str(REPO_ROOT / "alembic.ini")))
-    assert script.get_heads() == ["0021"]
+    assert script.get_heads() == ["0027"]
+    assert script.get_revision("0027").down_revision == "0026"
+    assert script.get_revision("0026").down_revision == "0025_rpt_order_flag"
+    assert script.get_revision("0025_rpt_order_flag").down_revision == "0024"
+    assert script.get_revision("0024").down_revision == "0023"
+    assert script.get_revision("0023").down_revision == "0022"
+    assert script.get_revision("0022").down_revision == "0021"
     assert script.get_revision("0021").down_revision == "0020"
 
 
